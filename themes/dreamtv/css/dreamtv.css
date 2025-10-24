@@ -1,0 +1,679 @@
+    /* Previne scroll - comportamento Netflix (100% fixo na tela) */
+    html{margin:0;padding:0;height:100vh;width:100vw;overflow:hidden}
+    body{margin:0;padding:0;height:100vh;width:100vw;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,system-ui,sans-serif}
+    .star-bg{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f1419 100%);position:relative;overflow:hidden}
+    .star-bg::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(2px 2px at 20px 30px,#fff,transparent),radial-gradient(2px 2px at 60px 70px,#fff,transparent),radial-gradient(1px 1px at 50px 50px,#fff,transparent),radial-gradient(1px 1px at 130px 80px,#fff,transparent),radial-gradient(2px 2px at 90px 10px,#fff,transparent);background-repeat:repeat;background-size:200px 200px;opacity:.3;animation:twinkle 3s infinite}
+    @keyframes twinkle{0%,100%{opacity:.3}50%{opacity:.5}}
+    .gradient-text{background:linear-gradient(90deg,#a855f7,#ec4899,#3b82f6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .frost{background:rgba(30,30,30,.72);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.08)}
+    .card{transition:transform .2s ease,background .2s ease}
+    .card:hover{transform:translateY(-2px)}
+    .no-tap-highlight{-webkit-tap-highlight-color:transparent}
+    .text-shadow{text-shadow:0 0 18px rgba(168,85,247,.35)}
+    .hint{font-size:11px}
+    .scrollbar-hide::-webkit-scrollbar{display:none}
+    .scrollbar-hide{-ms-overflow-style:none;scrollbar-width:none}
+    .line-clamp-3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .animate-spin{animation:spin 1s linear infinite}
+    @keyframes fade-in{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+    .animate-fade-in{animation:fade-in 0.3s ease-out}
+    @keyframes slideInRight{from{transform:translateX(100%)}to{transform:translateX(0)}}
+    .netflix-card-hover{transition:all 0.3s cubic-bezier(0.5, 0, 0.1, 1)}
+    .netflix-card-hover:hover{transform:scale(1.15) translateY(-8px);z-index:999}
+    *::-webkit-scrollbar{width:8px;height:8px}
+    *::-webkit-scrollbar-track{background:transparent}
+    *::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.2);border-radius:4px}
+    *::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.3)}
+
+    /* Previne qualquer elemento de estourar a viewport horizontalmente */
+    * {
+      box-sizing: border-box;
+    }
+
+    /* Container principal sempre limitado à viewport */
+    #root, .star-bg {
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+
+    /* ===== LAYOUT COM SIDEBAR FIXA ===== */
+    :root {
+      --sidebar-w: 80px;
+    }
+
+    .app-container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar fixa à esquerda */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+      gap: 8px;
+      z-index: 1000;
+      border-right: 1px solid rgba(168, 85, 247, 0.1);
+    }
+
+    /* Botões da sidebar */
+    .sidebar-btn {
+      position: relative;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.6);
+      background: transparent;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .sidebar-btn:hover {
+      color: #fff;
+      background: rgba(168, 85, 247, 0.1);
+      transform: scale(1.1);
+    }
+
+    .sidebar-btn.active {
+      color: #fff;
+      background: rgba(168, 85, 247, 0.2);
+    }
+
+    .sidebar-btn.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 30px;
+      background: #a855f7;
+      border-radius: 0 3px 3px 0;
+    }
+
+    /* Tooltips da sidebar */
+    .sidebar-btn::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: calc(100% + 12px);
+      background: rgba(0, 0, 0, 0.9);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 10000;
+    }
+
+    .sidebar-btn:hover::after {
+      opacity: 1;
+    }
+
+    /* Content area com margin */
+    .main-content {
+      margin-left: var(--sidebar-w);
+      width: calc(100vw - var(--sidebar-w));
+      height: 100vh;
+      overflow-y: hidden;
+      overflow-x: hidden;
+    }
+
+    /* Badge "L" para legendado */
+    .lang-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.7);
+      color: #a855f7;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      z-index: 10;
+      letter-spacing: 0.5px;
+    }
+
+    /* ===== MODO PREVIEW (janela do meio) ===== */
+
+    /* Container principal - ocupa tela toda */
+    #playerContainer{
+      position:fixed !important;
+      top:0 !important;
+      left:0 !important;
+      width:100vw !important;
+      height:100vh !important;
+      margin:0 !important;
+      padding:0 !important;
+      overflow:hidden !important;
+      background:#000 !important;
+      display:block !important;
+      user-select:none !important;
+      -webkit-user-select:none !important;
+    }
+
+    /* Viewport wrapper - GRID para centralização robusta sem conflitos */
+    .player-viewport{
+      position:relative !important;
+      width:100% !important;
+      height:100% !important;
+      background:#000 !important;
+      overflow:hidden !important;
+      padding:0 !important;
+      margin:0 !important;
+    }
+
+    /* Overlay do EPG - sobre o player */
+    #playerContainer > .absolute{
+      position:absolute !important;
+      z-index:10 !important;
+    }
+    .absolute{position:absolute !important}
+    .relative{position:relative !important}
+    .fixed{position:fixed !important}
+    .inset-0{top:0 !important;right:0 !important;bottom:0 !important;left:0 !important}
+    .pointer-events-none{pointer-events:none !important}
+    .pointer-events-auto{pointer-events:auto !important}
+    .flex{display:flex !important}
+    .flex-col{flex-direction:column !important}
+    .items-start{align-items:flex-start !important}
+    .items-center{align-items:center !important}
+    .items-end{align-items:flex-end !important}
+    .justify-start{justify-content:flex-start !important}
+    .justify-center{justify-content:center !important}
+    .justify-between{justify-content:space-between !important}
+    .gap-2{gap:0.5rem !important}
+    .gap-3{gap:0.75rem !important}
+    .gap-4{gap:1rem !important}
+    .gap-8{gap:2rem !important}
+    .space-y-3>*+*{margin-top:0.75rem !important}
+
+
+    /* ===== MODO FULLSCREEN (tela cheia - cobre 100%) ===== */
+
+    /* Container em fullscreen */
+    :fullscreen #playerContainer,
+    :-webkit-full-screen #playerContainer,
+    :-moz-full-screen #playerContainer,
+    :-ms-fullscreen #playerContainer {
+      width:100vw !important;
+      height:100vh !important;
+      background:#000 !important;
+    }
+
+    /* Viewport em fullscreen - mantém grid para centralizar */
+    :fullscreen .player-viewport,
+    :-webkit-full-screen .player-viewport,
+    :-moz-full-screen .player-viewport,
+    :-ms-fullscreen .player-viewport,
+    #playerContainer:fullscreen .player-viewport,
+    #playerContainer:-webkit-full-screen .player-viewport,
+    #playerContainer:-moz-full-screen .player-viewport,
+    #playerContainer:-ms-fullscreen .player-viewport {
+      width:100vw !important;
+      height:100vh !important;
+      display:grid !important;
+      place-items:center !important;
+    }
+
+    /* Overlay em FULLSCREEN - garantir que apareça sobre o vídeo */
+    :fullscreen > .absolute,
+    :-webkit-full-screen > .absolute,
+    :-moz-full-screen > .absolute,
+    :-ms-fullscreen > .absolute,
+    #playerContainer:fullscreen > .absolute,
+    #playerContainer:-webkit-full-screen > .absolute,
+    #playerContainer:-moz-full-screen > .absolute,
+    #playerContainer:-ms-fullscreen > .absolute {
+      z-index:9999 !important;
+      display:flex !important;
+    }
+
+    /* ===== SIDEBAR NAVIGATION ===== */
+    .sidebar {
+      width: 80px;
+      min-width: 80px;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      height: 100vh;
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo {
+      color: #a855f7;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .sidebar-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      align-items: center;
+    }
+
+    .sidebar-menu button, .sidebar-footer button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #888;
+      transition: all 0.3s;
+      position: relative;
+      padding: 8px;
+    }
+
+    .sidebar-menu button.active::before {
+      content: '';
+      position: absolute;
+      left: -15px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 20px;
+      background-color: #a855f7;
+      border-radius: 2px;
+    }
+
+    .sidebar-menu button:hover, .sidebar-footer button:hover {
+      color: #fff;
+      transform: scale(1.1);
+    }
+
+    .sidebar-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      align-items: center;
+    }
+
+    /* Main content com sidebar */
+    .main-with-sidebar {
+      flex: 1;
+      height: 100vh;
+      overflow-y: hidden;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ajustes para telas com sidebar - garantir que conteúdo não sobreponha */
+    .main-with-sidebar .star-bg {
+      min-height: 100vh;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    /* Forçar todos os containers dentro do main a respeitar a largura */
+    .main-with-sidebar > * {
+      max-width: 100% !important;
+      box-sizing: border-box;
+      overflow-x: hidden;
+    }
+
+    /* Container principal do app com sidebar */
+    .app-container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(135deg, #0b0d24 0%, #0e1530 50%, #0a0c1f 100%);
+    }
+
+    /* Fundo escuro com gradiente espacial */
+    body.with-sidebar {
+      background: linear-gradient(135deg, #0b0d24 0%, #0e1530 50%, #0a0c1f 100%);
+      overflow: hidden;
+    }
+
+    /* ===== SMART TV MODE - 10-FOOT INTERFACE ===== */
+
+    /* Estilos gerais para TV */
+    body.tv-mode {
+      font-size: 18px; /* Fontes maiores */
+      cursor: none; /* Esconder cursor do mouse */
+    }
+
+    body.tv-mode * {
+      cursor: none !important;
+    }
+
+    /* Remover hover states em modo TV (não há mouse) */
+    body.tv-mode .card:hover,
+    body.tv-mode .sidebar-btn:hover,
+    body.tv-mode button:hover {
+      transform: none !important;
+    }
+
+    /* Focus visível para navegação por controle remoto */
+    body.tv-mode *:focus {
+      outline: 4px solid #a855f7 !important;
+      outline-offset: 4px;
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.6) !important;
+    }
+
+    /* Indicador de foco customizado para botões */
+    body.tv-mode button:focus,
+    body.tv-mode [role="button"]:focus {
+      background: rgba(168, 85, 247, 0.3) !important;
+      border: 3px solid #a855f7 !important;
+      transform: scale(1.08) !important;
+      transition: all 0.15s ease !important;
+    }
+
+    /* Fontes maiores para legibilidade a 3 metros */
+    body.tv-mode .text-sm { font-size: 16px !important; }
+    body.tv-mode .text-base { font-size: 20px !important; }
+    body.tv-mode .text-lg { font-size: 24px !important; }
+    body.tv-mode .text-xl { font-size: 28px !important; }
+    body.tv-mode .text-2xl { font-size: 32px !important; }
+    body.tv-mode .text-3xl { font-size: 40px !important; }
+    body.tv-mode .text-4xl { font-size: 48px !important; }
+
+    /* Espaçamento maior entre elementos clicáveis */
+    body.tv-mode button,
+    body.tv-mode [role="button"] {
+      min-height: 60px !important;
+      min-width: 60px !important;
+      padding: 16px 24px !important;
+      margin: 8px !important;
+    }
+
+    /* Cards maiores e mais espaçados */
+    body.tv-mode .netflix-card-hover {
+      margin: 12px !important;
+    }
+
+    /* Sidebar maior para TV */
+    body.tv-mode .sidebar {
+      width: 100px !important;
+    }
+
+    body.tv-mode .sidebar-btn {
+      width: 70px !important;
+      height: 70px !important;
+    }
+
+    /* Contraste alto para texto */
+    body.tv-mode {
+      color: #ffffff !important;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Remover tooltip hover da sidebar (usar apenas foco) */
+    body.tv-mode .sidebar-btn::after {
+      opacity: 0 !important;
+    }
+
+    body.tv-mode .sidebar-btn:focus::after {
+      opacity: 1 !important;
+      font-size: 18px !important;
+    }
+
+    /* Indicador de navegação numérica (para digitação de canal) */
+    .tv-channel-input {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.95);
+      border: 4px solid #a855f7;
+      border-radius: 20px;
+      padding: 40px 60px;
+      font-size: 72px;
+      font-weight: bold;
+      color: #fff;
+      text-align: center;
+      z-index: 10000;
+      box-shadow: 0 10px 50px rgba(168, 85, 247, 0.5);
+      animation: fade-in 0.2s ease-out;
+      min-width: 300px;
+    }
+
+    /* Indicador de botão pressionado */
+    @keyframes button-press {
+      0% { transform: scale(1); }
+      50% { transform: scale(0.95); }
+      100% { transform: scale(1); }
+    }
+
+    body.tv-mode button:active,
+    body.tv-mode [role="button"]:active {
+      animation: button-press 0.2s ease !important;
+    }
+
+    /* Ajustes de scroll suave para navegação por foco */
+    body.tv-mode {
+      scroll-behavior: smooth;
+    }
+
+    /* Player em TV - controles maiores */
+    body.tv-mode video {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* ===== PÁGINA DE DETALHES DE SÉRIE ===== */
+    .serie-detail-page {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .serie-detail-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      z-index: 0;
+    }
+
+    .serie-detail-backdrop::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right,
+        rgba(0, 0, 0, 0.95) 0%,
+        rgba(0, 0, 0, 0.85) 40%,
+        rgba(0, 0, 0, 0.6) 70%,
+        rgba(0, 0, 0, 0.4) 100%
+      );
+    }
+
+    .serie-detail-content {
+      position: relative;
+      z-index: 1;
+      padding: 100px 60px 60px 60px;
+      max-width: 1400px;
+    }
+
+    .serie-detail-header h1 {
+      font-size: 64px;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 0 0 16px 0;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+    }
+
+    .serie-detail-metadata {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .serie-detail-metadata span {
+      font-size: 18px;
+      color: #cccccc;
+    }
+
+    .serie-detail-rating-badge {
+      background: #E85D04;
+      color: #ffffff;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .serie-detail-synopsis {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #e0e0e0;
+      margin-bottom: 32px;
+      max-width: 700px;
+    }
+
+    .serie-detail-actions {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .serie-detail-btn {
+      padding: 14px 32px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .serie-detail-btn:hover {
+      transform: scale(1.05);
+      filter: brightness(1.1);
+    }
+
+    .serie-detail-btn:active {
+      transform: scale(0.98);
+    }
+
+    .serie-detail-btn-watch {
+      background: #E85D04;
+      color: #ffffff;
+      font-size: 18px;
+      padding: 16px 40px;
+    }
+
+    .serie-detail-btn-trailer {
+      background: #0077B6;
+      color: #ffffff;
+    }
+
+    .serie-detail-btn-favorite {
+      background: #2D6A4F;
+      color: #ffffff;
+    }
+
+    .serie-detail-btn-episodes {
+      background: #B5179E;
+      color: #ffffff;
+      width: 100%;
+      max-width: 300px;
+      justify-content: center;
+    }
+
+    .serie-detail-cast-section {
+      margin-top: 48px;
+    }
+
+    .serie-detail-cast-section h2 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 24px;
+    }
+
+    .serie-detail-cast-carousel {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding-bottom: 16px;
+      scrollbar-width: thin;
+    }
+
+    .serie-detail-cast-card {
+      min-width: 140px;
+      max-width: 140px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .serie-detail-cast-card:hover {
+      transform: scale(1.05);
+      filter: brightness(1.2);
+    }
+
+    .serie-detail-cast-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .serie-detail-cast-card p {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #ffffff;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .serie-detail-content {
+        padding: 80px 24px 40px 24px;
+      }
+
+      .serie-detail-header h1 {
+        font-size: 36px;
+      }
+
+      .serie-detail-actions {
+        flex-direction: column;
+      }
+
+      .serie-detail-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .serie-detail-btn-episodes {
+        max-width: 100%;
+      }
+    }
+  </style>

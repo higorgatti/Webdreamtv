@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste do Sistema de Cache - DreamTV</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f1419 100%);
+            color: #fff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(90deg, #a855f7, #ec4899, #3b82f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .section {
+            background: rgba(30, 30, 30, 0.72);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            margin-bottom: 15px;
+            color: #a855f7;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 14px;
+        }
+        button {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .stat-card {
+            background: rgba(168, 85, 247, 0.1);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #a855f7;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+        }
+        .log {
+            background: #000;
+            border-radius: 8px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+        }
+        .log-success { color: #10b981; }
+        .log-error { color: #ef4444; }
+        .log-info { color: #3b82f6; }
+        .log-warning { color: #f59e0b; }
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #a855f7, #ec4899);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Teste do Sistema de Cache IndexedDB</h1>
+
+        <!-- Seção de Login -->
+        <div class="section">
+            <h2>1. Credenciais</h2>
+            <div class="input-group">
+                <input type="text" id="username" placeholder="Usuário" value="testetv22">
+                <input type="password" id="password" placeholder="Senha" value="Heloisa1202eqdeq">
+                <button onclick="saveCredentials()">Salvar Credenciais</button>
+            </div>
+        </div>
+
+        <!-- Seção de Sincronização -->
+        <div class="section">
+            <h2>2. Sincronização</h2>
+            <div class="input-group">
+                <button onclick="fullSync()" id="syncBtn">🔄 Sincronização Completa</button>
+                <button onclick="checkNewContent()">🔍 Verificar Novos Conteúdos</button>
+                <button onclick="clearCache()" style="background: linear-gradient(135deg, #ef4444, #dc2626);">🗑️ Limpar Cache</button>
+            </div>
+            <div class="progress-bar" id="progressBar" style="display: none;">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+            <div id="syncStatus" style="margin-top: 10px; font-size: 14px; color: #888;"></div>
+        </div>
+
+        <!-- Estatísticas -->
+        <div class="section">
+            <h2>3. Estatísticas do Cache</h2>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="moviesCount">-</div>
+                    <div class="stat-label">Filmes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="seriesCount">-</div>
+                    <div class="stat-label">Séries</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="liveCount">-</div>
+                    <div class="stat-label">Canais</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalCount">-</div>
+                    <div class="stat-label">Total</div>
+                </div>
+            </div>
+            <button onclick="updateStats()" style="margin-top: 15px; width: 100%;">🔄 Atualizar Estatísticas</button>
+        </div>
+
+        <!-- Log de Atividades -->
+        <div class="section">
+            <h2>4. Log de Atividades</h2>
+            <div class="log" id="log"></div>
+            <button onclick="clearLog()" style="margin-top: 10px; width: 100%;">🗑️ Limpar Log</button>
+        </div>
+
+        <!-- Sincronização Automática -->
+        <div class="section">
+            <h2>5. Sincronização Automática em Background</h2>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                <div>
+                    <div style="font-size: 14px; color: #888; margin-bottom: 5px;">
+                        Status: <span id="autoSyncStatus" style="color: #ef4444; font-weight: bold;">DESATIVADO</span>
+                    </div>
+                    <div style="font-size: 12px; color: #666;">
+                        Intervalo: <span id="autoSyncInterval">30 minutos</span>
+                    </div>
+                    <div style="font-size: 12px; color: #666;">
+                        Próxima verificação: <span id="nextCheck">-</span>
+                    </div>
+                </div>
+                <button id="toggleAutoSync" onclick="toggleAutoSync()" style="width: 200px;">
+                    ▶️ Ativar Auto-Sync
+                </button>
+            </div>
+            <div class="input-group">
+                <input type="number" id="syncIntervalMinutes" placeholder="Intervalo (minutos)" value="30" min="1" max="1440" style="width: 200px;">
+                <button onclick="updateSyncInterval()">⚙️ Atualizar Intervalo</button>
+                <button onclick="checkNow()">🔍 Verificar Agora</button>
+            </div>
+        </div>
+
+        <!-- Testes -->
+        <div class="section">
+            <h2>6. Testes Rápidos</h2>
+            <div class="input-group">
+                <button onclick="testSearch()">🔍 Testar Busca</button>
+                <button onclick="testCategoryFilter()">📂 Testar Filtro por Categoria</button>
+                <button onclick="testGetMovie()">🎬 Testar Buscar Filme</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Importar nossos gerenciadores -->
+    <script src="jquery/db-manager.js"></script>
+    <script src="jquery/sync-manager.js"></script>
+
+    <script>
+        // Log functions
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // Credentials
+        function saveCredentials() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (!username || !password) {
+                log('❌ Preencha usuário e senha', 'error');
+                return;
+            }
+
+            syncManager.saveCredentials(username, password);
+            log(`✅ Credenciais salvas: ${username}`, 'success');
+        }
+
+        // Full Sync
+        async function fullSync() {
+            const syncBtn = document.getElementById('syncBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            const syncStatus = document.getElementById('syncStatus');
+
+            syncBtn.disabled = true;
+            progressBar.style.display = 'block';
+
+            // Configurar callbacks
+            syncManager.onProgress((progress) => {
+                const percentage = Math.round(progress.percentage);
+                progressFill.style.width = `${percentage}%`;
+                progressFill.textContent = `${percentage}%`;
+                syncStatus.textContent = progress.message;
+                log(`📊 ${progress.message} (${progress.current}/${progress.total})`, 'info');
+            });
+
+            syncManager.onComplete((result) => {
+                if (result.success) {
+                    log(`✅ Sincronização concluída em ${result.duration}s`, 'success');
+                    log(`   Filmes: ${result.stats.movies}`, 'success');
+                    log(`   Séries: ${result.stats.series}`, 'success');
+                    log(`   Canais: ${result.stats.live}`, 'success');
+                    updateStats();
+                } else {
+                    log(`❌ Erro: ${result.error}`, 'error');
+                }
+                syncBtn.disabled = false;
+                setTimeout(() => {
+                    progressBar.style.display = 'none';
+                    syncStatus.textContent = '';
+                }, 2000);
+            });
+
+            try {
+                log('🚀 Iniciando sincronização completa...', 'info');
+                await syncManager.fullSync();
+            } catch (error) {
+                log(`❌ Erro: ${error.message}`, 'error');
+                syncBtn.disabled = false;
+                progressBar.style.display = 'none';
+            }
+        }
+
+        // Check for new content
+        async function checkNewContent() {
+            log('🔍 Verificando novos conteúdos...', 'info');
+            try {
+                await syncManager.checkForNewContent();
+                log('✅ Verificação concluída', 'success');
+                updateStats();
+            } catch (error) {
+                log(`❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
+        // Clear cache
+        async function clearCache() {
+            if (!confirm('Tem certeza que deseja limpar todo o cache?')) return;
+
+            log('🗑️ Limpando cache...', 'warning');
+            try {
+                await syncManager.clearCache();
+                log('✅ Cache limpo com sucesso', 'success');
+                updateStats();
+            } catch (error) {
+                log(`❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
+        // Update stats
+        async function updateStats() {
+            try {
+                const stats = await dbManager.getStats();
+
+                document.getElementById('moviesCount').textContent = stats.movies.toLocaleString();
+                document.getElementById('seriesCount').textContent = stats.series.toLocaleString();
+                document.getElementById('liveCount').textContent = stats.live.toLocaleString();
+                document.getElementById('totalCount').textContent = stats.total.toLocaleString();
+
+                if (stats.lastSync) {
+                    const lastSyncDate = new Date(stats.lastSync).toLocaleString();
+                    log(`📊 Última sincronização: ${lastSyncDate}`, 'info');
+                }
+            } catch (error) {
+                log(`❌ Erro ao obter estatísticas: ${error.message}`, 'error');
+            }
+        }
+
+        // Test search
+        async function testSearch() {
+            const query = prompt('Digite o nome do filme para buscar:', 'Matrix');
+            if (!query) return;
+
+            log(`🔍 Buscando "${query}"...`, 'info');
+            try {
+                const results = await dbManager.searchMovies(query);
+                log(`✅ Encontrados ${results.length} resultados`, 'success');
+                results.slice(0, 5).forEach(m => {
+                    log(`   📽️ ${m.name}`, 'info');
+                });
+            } catch (error) {
+                log(`❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
+        // Test category filter
+        async function testCategoryFilter() {
+            log('📂 Testando filtro por categoria...', 'info');
+            try {
+                const categories = await dbManager.getAll('categories');
+                if (categories.length === 0) {
+                    log('⚠️ Nenhuma categoria encontrada. Execute sincronização primeiro.', 'warning');
+                    return;
+                }
+
+                const vodCategory = categories.find(c => c.type === 'vod');
+                if (!vodCategory) {
+                    log('⚠️ Categoria VOD não encontrada', 'warning');
+                    return;
+                }
+
+                const movies = await dbManager.getByCategory('movies', vodCategory.category_id);
+                log(`✅ Categoria "${vodCategory.category_name}": ${movies.length} filmes`, 'success');
+            } catch (error) {
+                log(`❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
+        // Test get movie
+        async function testGetMovie() {
+            log('🎬 Buscando primeiro filme...', 'info');
+            try {
+                const movies = await dbManager.getAll('movies');
+                if (movies.length === 0) {
+                    log('⚠️ Nenhum filme encontrado. Execute sincronização primeiro.', 'warning');
+                    return;
+                }
+
+                const movie = movies[0];
+                log(`✅ Filme encontrado:`, 'success');
+                log(`   Nome: ${movie.name}`, 'info');
+                log(`   ID: ${movie.stream_id}`, 'info');
+                log(`   Categoria: ${movie.category_id}`, 'info');
+            } catch (error) {
+                log(`❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-sync variables
+        let autoSyncActive = false;
+        let nextCheckTimer = null;
+        let countdownTimer = null;
+
+        // Toggle auto-sync
+        function toggleAutoSync() {
+            const btn = document.getElementById('toggleAutoSync');
+            const statusEl = document.getElementById('autoSyncStatus');
+
+            if (autoSyncActive) {
+                // Desativar
+                syncManager.stopAutoSync();
+                autoSyncActive = false;
+                btn.textContent = '▶️ Ativar Auto-Sync';
+                btn.style.background = 'linear-gradient(135deg, #a855f7, #ec4899)';
+                statusEl.textContent = 'DESATIVADO';
+                statusEl.style.color = '#ef4444';
+                document.getElementById('nextCheck').textContent = '-';
+
+                if (countdownTimer) clearInterval(countdownTimer);
+
+                log('⏸️ Sincronização automática DESATIVADA', 'warning');
+            } else {
+                // Ativar
+                syncManager.startAutoSync();
+                autoSyncActive = true;
+                btn.textContent = '⏸️ Desativar Auto-Sync';
+                btn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+                statusEl.textContent = 'ATIVADO';
+                statusEl.style.color = '#10b981';
+
+                updateNextCheckTime();
+                startCountdown();
+
+                log('▶️ Sincronização automática ATIVADA', 'success');
+                log(`   Intervalo: ${syncManager.syncInterval / 60000} minutos`, 'info');
+            }
+        }
+
+        // Update sync interval
+        function updateSyncInterval() {
+            const minutes = parseInt(document.getElementById('syncIntervalMinutes').value);
+
+            if (isNaN(minutes) || minutes < 1 || minutes > 1440) {
+                log('⚠️ Intervalo inválido! Use entre 1 e 1440 minutos.', 'warning');
+                return;
+            }
+
+            const wasActive = autoSyncActive;
+
+            // Desativar se estiver ativo
+            if (wasActive) {
+                toggleAutoSync();
+            }
+
+            // Atualizar intervalo
+            syncManager.syncInterval = minutes * 60 * 1000;
+            document.getElementById('autoSyncInterval').textContent = `${minutes} minutos`;
+
+            log(`⚙️ Intervalo atualizado: ${minutes} minutos`, 'success');
+
+            // Reativar se estava ativo
+            if (wasActive) {
+                setTimeout(() => toggleAutoSync(), 500);
+            }
+        }
+
+        // Check now
+        async function checkNow() {
+            log('🔍 Verificação manual iniciada...', 'info');
+            await checkNewContent();
+
+            if (autoSyncActive) {
+                updateNextCheckTime();
+                startCountdown();
+            }
+        }
+
+        // Update next check time display
+        function updateNextCheckTime() {
+            const now = new Date();
+            const nextCheck = new Date(now.getTime() + syncManager.syncInterval);
+            document.getElementById('nextCheck').textContent = nextCheck.toLocaleTimeString();
+        }
+
+        // Countdown timer
+        function startCountdown() {
+            if (countdownTimer) clearInterval(countdownTimer);
+
+            let timeLeft = syncManager.syncInterval / 1000; // em segundos
+
+            countdownTimer = setInterval(() => {
+                timeLeft--;
+
+                if (timeLeft <= 0) {
+                    updateNextCheckTime();
+                    timeLeft = syncManager.syncInterval / 1000;
+                }
+
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = Math.floor(timeLeft % 60);
+                const display = `${minutes}m ${seconds}s`;
+
+                // Atualizar display
+                const nextCheckEl = document.getElementById('nextCheck');
+                if (nextCheckEl) {
+                    const baseTime = new Date(Date.now() + (timeLeft * 1000)).toLocaleTimeString();
+                    nextCheckEl.textContent = `${baseTime} (em ${display})`;
+                }
+            }, 1000);
+        }
+
+        // Initialize
+        window.addEventListener('load', async () => {
+            log('🎉 Sistema de cache carregado!', 'success');
+            log('📦 IndexedDB inicializado', 'info');
+
+            // Verificar se há credenciais salvas
+            const creds = syncManager.getCredentials();
+            if (creds) {
+                log(`✅ Credenciais encontradas: ${creds.username}`, 'success');
+            } else {
+                log('⚠️ Nenhuma credencial salva. Configure suas credenciais.', 'warning');
+            }
+
+            // Atualizar estatísticas
+            await updateStats();
+
+            // Pedir permissão para notificações
+            if ('Notification' in window && Notification.permission === 'default') {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    log('✅ Permissão para notificações concedida', 'success');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

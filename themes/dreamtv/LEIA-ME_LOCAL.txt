@@ -1,0 +1,136 @@
+╔═══════════════════════════════════════════════════════════════════╗
+║                                                                   ║
+║         DREAMTV - AMBIENTE DE DESENVOLVIMENTO LOCAL              ║
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+
+📍 LOCALIZAÇÃO DOS ARQUIVOS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   C:\xampp\htdocs\webplayer_dev\themes\dreamtv\
+
+
+📂 ARQUIVOS PRINCIPAIS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   index.php            → Arquivo principal do tema (edite este!)
+   ABRIR_LOCAL.bat      → Abre o tema no navegador local
+   UPLOAD_PRODUCAO.bat  → Envia mudanças para produção
+   LEIA-ME_LOCAL.txt    → Este arquivo
+
+
+🚀 COMO USAR (PASSO A PASSO):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1️⃣  INICIAR AMBIENTE LOCAL:
+
+   → Duplo clique em: ABRIR_LOCAL.bat
+
+   Isso vai:
+   - Verificar se Apache está rodando
+   - Iniciar XAMPP se necessário
+   - Abrir http://localhost/webplayer_dev/themes/dreamtv/ no navegador
+
+
+2️⃣  FAZER MUDANÇAS:
+
+   → Abra index.php no seu editor favorito:
+     - VSCode
+     - Notepad++
+     - Sublime Text
+     - Ou qualquer editor
+
+   → Faça as alterações que desejar
+
+   → Salve o arquivo
+
+   → No navegador: CTRL + F5 (força reload)
+
+   → Teste as mudanças
+
+   → Repita até ficar satisfeito
+
+
+3️⃣  ENVIAR PARA PRODUÇÃO:
+
+   → Quando estiver TUDO funcionando localmente
+
+   → Duplo clique em: UPLOAD_PRODUCAO.bat
+
+   → Confirme o upload digitando "S"
+
+   → Aguarde o upload completar
+
+   → Acesse: http://play.fivetv5.com/themes/dreamtv/
+
+   → Pressione CTRL + F5 para ver as mudanças
+
+
+⚠️  IMPORTANTE - FLUXO DE TRABALHO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   ✅ SEMPRE teste localmente primeiro
+   ✅ NUNCA edite direto no servidor
+   ✅ Use CTRL+F5 para forçar reload
+   ✅ Faça backup antes de mudanças grandes
+   ✅ Teste todas as funcionalidades antes de subir
+
+
+🔧 EDITANDO O CÓDIGO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+O arquivo index.php contém TODO o código do tema:
+
+   - HTML (linhas 1-100 aprox.)
+   - CSS inline (linhas 100-700 aprox.)
+   - JavaScript/React (linhas 700-9800 aprox.)
+
+
+Para encontrar algo específico, procure por:
+
+   Buscar:                     Para encontrar:
+   ────────────────────────   ─────────────────────────────────
+   "function Config"          → Tela de login
+   "function Player"          → Player de vídeo
+   "useRemoteControl"         → Controle remoto/teclado
+   "fetchAccountInfo"         → Função de login/API
+   "buildURL"                 → Construtor de URLs
+   "background:"              → Cores e gradientes
+   "http://infcsfortal.pro"   → DNS configurado
+
+
+💡 DICAS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+• F12 no navegador abre DevTools (Console, Network, etc)
+• Console mostra erros JavaScript em tempo real
+• Network mostra requisições HTTP (útil para debug de API)
+• Se algo der errado, restaure backup do servidor
+
+
+🌐 URLS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   🏠 Local (desenvolvimento):
+      http://localhost/webplayer_dev/themes/dreamtv/
+
+   🌍 Produção (após upload):
+      http://play.fivetv5.com/themes/dreamtv/
+
+
+📊 STATUS ATUAL:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   Versão:     v20251020-163000
+   DNS:        http://infcsfortal.pro (fixo)
+   Login:      Usuário + Senha (apenas)
+   Backspace:  ✅ Funcionando em inputs
+   API:        ✅ Usando cfg.server correto
+
+
+═══════════════════════════════════════════════════════════════════
+
+            COMECE AGORA: Duplo clique em ABRIR_LOCAL.bat
+
+═══════════════════════════════════════════════════════════════════

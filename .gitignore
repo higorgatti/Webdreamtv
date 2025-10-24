@@ -1,0 +1,45 @@
+# Arquivos temporários
+nul
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+
+# Arquivos de desenvolvimento local
+.claude/
+.vscode/
+.idea/
+
+# Node modules
+node_modules/
+npm-debug.log*
+
+# Arquivos de configuração sensíveis
+config-local.php
+*.env
+credentials.json
+
+# Arquivos de teste temporários
+header-temp.php
+header-protected.php
+header-final.php
+header-fixed.php
+header-vps-current.php
+
+# Scripts de teste
+add-advanced-protection.ps1
+console-protection.js
+edit-header.ps1
+fix-protection2.ps1
+
+# Arquivos de coleções gerados
+themes/dreamtv/collections/
+
+# Cache do PHP
+*.cache
+cache/
+
+# Logs
+LOG_ALTERACOES.txt
