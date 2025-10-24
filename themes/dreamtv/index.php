@@ -1675,37 +1675,37 @@
       { id: 'home', icon: '🏠', title: 'Home', action: () => setView('home') },
       { id: 'channels', icon: '📺', title: 'Canais', action: () => setView('live-categories') },
       { id: 'movies', icon: '🎬', title: 'Filmes', action: () => {
-        // Resetar modo coleções ao voltar para filmes
-        if (window.resetNetflixMovies) {
-          window.resetNetflixMovies()
-        }
+        // Desativar modo coleções ao voltar para filmes
         if (window.updateNetflixMoviesState) {
           window.updateNetflixMoviesState({ showCollectionsView: false })
         }
         setView('netflix-movies')
       }},
       { id: 'series', icon: '🎭', title: 'Séries', action: () => {
-        // Resetar estado e abrir tela de séries estilo Netflix
-        if (window.resetNetflixMovies) {
-          window.resetNetflixMovies()
+        // Desativar modo coleções
+        if (window.updateNetflixMoviesState) {
+          window.updateNetflixMoviesState({ showCollectionsView: false })
         }
         setView('netflix-series')
       }},
       { id: 'novelas', icon: '📖', title: 'Novelas', action: () => {
-        if (window.resetNetflixMovies) {
-          window.resetNetflixMovies()
+        // Desativar modo coleções
+        if (window.updateNetflixMoviesState) {
+          window.updateNetflixMoviesState({ showCollectionsView: false })
         }
         setView('netflix-novelas')
       }},
       { id: 'animes', icon: '⭐', title: 'Animes', action: () => {
-        if (window.resetNetflixMovies) {
-          window.resetNetflixMovies()
+        // Desativar modo coleções
+        if (window.updateNetflixMoviesState) {
+          window.updateNetflixMoviesState({ showCollectionsView: false })
         }
         setView('netflix-animes')
       }},
       { id: 'desenhos', icon: '🎨', title: 'Desenhos', action: () => {
-        if (window.resetNetflixMovies) {
-          window.resetNetflixMovies()
+        // Desativar modo coleções
+        if (window.updateNetflixMoviesState) {
+          window.updateNetflixMoviesState({ showCollectionsView: false })
         }
         setView('netflix-desenhos')
       }},
@@ -1720,8 +1720,9 @@
         }
       }},
       { id: 'show', icon: '🎤', title: 'Show', action: () => {
-        if (window.resetNetflixMovies) {
-          window.resetNetflixMovies()
+        // Desativar modo coleções
+        if (window.updateNetflixMoviesState) {
+          window.updateNetflixMoviesState({ showCollectionsView: false })
         }
         setView('netflix-show')
       }}
@@ -1893,7 +1894,14 @@
   }
 
   function App(){
-    const [view,setView] = useState('config')
+    const [view,setViewRaw] = useState('config')
+
+    // Wrapper para logar todas as mudanças de view
+    const setView = (newView) => {
+      console.log(`🔄 [setView] Mudando view: "${view}" → "${newView}"`)
+      console.trace('[setView] Stack trace:')
+      setViewRaw(newView)
+    }
     const [account,setAccount] = useState(null)
     const [loading,setLoading] = useState(false)
     const [error,setError] = useState('')
@@ -5625,7 +5633,9 @@ window.resetNetflixMovies = () => {
 
       // Navegação por teclado
       useEffect(() => {
-        if(view !== 'netflix-movies' || globalState.sectionsMovies.length === 0) return
+        // Verificar se está em qualquer view do NetflixMovies (filmes, séries, novelas, etc)
+        const isNetflixView = ['netflix-movies', 'netflix-series', 'netflix-novelas', 'netflix-animes', 'netflix-desenhos', 'netflix-show'].includes(view)
+        if(!isNetflixView || globalState.sectionsMovies.length === 0) return
 
         const handleKeyDown = (e) => {
           const currentSection = globalState.sectionsMovies[currentCategoryIndex]
@@ -5730,7 +5740,8 @@ window.resetNetflixMovies = () => {
 
       // Auto-scroll para o item focado
       useEffect(() => {
-        if(view === 'netflix-movies' && globalState.sectionsMovies.length > 0){
+        const isNetflixView = ['netflix-movies', 'netflix-series', 'netflix-novelas', 'netflix-animes', 'netflix-desenhos', 'netflix-show'].includes(view)
+        if(isNetflixView && globalState.sectionsMovies.length > 0){
           const currentSection = globalState.sectionsMovies[currentCategoryIndex]
           if(currentSection && currentSection.movies && currentSection.movies.length > focusedMovieIdx){
             const movie = currentSection.movies[focusedMovieIdx]
