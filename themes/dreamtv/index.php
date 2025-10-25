@@ -8377,9 +8377,13 @@ window.resetNetflixMovies = () => {
                 height: '100%',
                 // ===== FIX: Background sólido antes da imagem carregar =====
                 backgroundColor: '#0a0a0a',
-                backgroundImage: globalState.heroBackdrop.backdrop_path
+                backgroundImage: globalState.heroBackdrop.backdrop
+                  ? `url(${globalState.heroBackdrop.backdrop})`
+                  : globalState.heroBackdrop.poster
+                  ? `url(${globalState.heroBackdrop.poster})`
+                  : globalState.heroBackdrop.backdrop_path
                   ? `url(https://image.tmdb.org/t/p/w1280${globalState.heroBackdrop.backdrop_path})`
-                  : 'none',
+                  : 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f1419 100%)',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 zIndex: 1,
