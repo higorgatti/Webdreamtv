@@ -791,8 +791,8 @@
     const serverPoster = server.stream_icon || server.cover;
     const poster = serverPoster || (tmdb?.poster_path ? `${TMDB_IMG}/w500${tmdb.poster_path}` : null);
 
-    // Backdrop: TMDB primeiro (melhor qualidade), depois servidor
-    const backdrop = (tmdb?.backdrop_path ? `${TMDB_IMG}/w1280${tmdb.backdrop_path}` : null) ||
+    // Backdrop: TMDB primeiro (melhor qualidade - original), depois servidor
+    const backdrop = (tmdb?.backdrop_path ? `${TMDB_IMG}/original${tmdb.backdrop_path}` : null) ||
                      (server.backdrop_path?.includes('http') ? server.backdrop_path : null) ||
                      (server.backdrop?.includes('http') ? server.backdrop : null);
 
@@ -1795,7 +1795,12 @@
         }, 'Show'),
 
         e('a', {
-          onClick: () => setView('collections'),
+          onClick: () => {
+            setView('collections')
+            if (window.updateNetflixMoviesState) {
+              window.updateNetflixMoviesState({ showCollectionsView: true })
+            }
+          },
           style: {
             color: activeMenu === 'collections' ? '#fff' : '#b3b3b3',
             cursor: 'pointer',
@@ -2420,7 +2425,7 @@
             title: data.results[0].title || data.results[0].name,
             overview: data.results[0].overview,
             poster: data.results[0].poster_path ? `https://image.tmdb.org/t/p/w500${data.results[0].poster_path}` : null,
-            backdrop: data.results[0].backdrop_path ? `https://image.tmdb.org/t/p/w1280${data.results[0].backdrop_path}` : null,
+            backdrop: data.results[0].backdrop_path ? `https://image.tmdb.org/t/p/original${data.results[0].backdrop_path}` : null,
             rating: data.results[0].vote_average,
             year: (data.results[0].release_date || data.results[0].first_air_date || '').substring(0, 4),
             tmdb_id: data.results[0].id
@@ -2665,7 +2670,7 @@
             title: data.title || data.name,
             overview: data.overview || data.description,
             poster: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : null,
-            backdrop: data.backdrop_path ? `https://image.tmdb.org/t/p/w1280${data.backdrop_path}` : null,
+            backdrop: data.backdrop_path ? `https://image.tmdb.org/t/p/original${data.backdrop_path}` : null,
             rating: data.vote_average,
             vote_count: data.vote_count || 0, // ===== NOVO: Quantidade de votos =====
             year: (data.release_date || data.first_air_date || '').substring(0, 4),
@@ -2784,7 +2789,7 @@
               poster: movie.tmdb_collection.poster_path ?
                 `https://image.tmdb.org/t/p/w500${movie.tmdb_collection.poster_path}` : null,
               backdrop: movie.tmdb_collection.backdrop_path ?
-                `https://image.tmdb.org/t/p/w1280${movie.tmdb_collection.backdrop_path}` : null,
+                `https://image.tmdb.org/t/p/original${movie.tmdb_collection.backdrop_path}` : null,
               movies: []
             })
           }
@@ -5859,7 +5864,7 @@ window.resetNetflixMovies = () => {
             id: col.id,
             name: col.name,
             poster: col.poster_path ? `https://image.tmdb.org/t/p/w500${col.poster_path}` : null,
-            backdrop: col.backdrop_path ? `https://image.tmdb.org/t/p/w1280${col.backdrop_path}` : null,
+            backdrop: col.backdrop_path ? `https://image.tmdb.org/t/p/original${col.backdrop_path}` : null,
             overview: '', // Será enriquecido a seguir
             movies: col.movies.map(m => ({
               stream_id: m.stream_id,
@@ -6554,6 +6559,8 @@ window.resetNetflixMovies = () => {
         const [movie, setMovie] = useState(null)
         const [previousMovie, setPreviousMovie] = useState(null)
         const [showPrevious, setShowPrevious] = useState(false)
+        // State para controlar se a imagem falhou ao carregar
+        const [imageError, setImageError] = useState(false)
         const transitionTimeoutRef = useRef(null)
         const lastProcessedIdRef = useRef(null) // ===== NOVO: Evitar reprocessamento =====
 
@@ -6658,14 +6665,67 @@ window.resetNetflixMovies = () => {
                 enrichedMovie = await enrichMovieWithTMDB(foundMovie, detectedType)
               }
 
+              // Helper: validar se URL de imagem é válida
+              const isValidImageUrl = (url) => {
+                if (!url || typeof url !== 'string') return false
+                // Verificar se começa com http/https
+                if (!url.startsWith('http://') && !url.startsWith('https://')) return false
+                // Verificar se tem extensão de imagem ou é do TMDB
+                return url.includes('image.tmdb.org') || /\.(jpg|jpeg|png|webp|gif)$/i.test(url)
+              }
+
+              // Helper: verificar se é backdrop (horizontal) ou poster (vertical)
+              const isBackdropUrl = (url) => {
+                if (!url) return false
+                // Backdrops do TMDB sempre tem /w1280/ ou /original/ e não tem 'poster' no path
+                return url.includes('/w1280/') || url.includes('/original/') ||
+                       (url.includes('image.tmdb.org') && !url.includes('/w500/'))
+              }
+
+              // Prioridade: backdrops TMDB → stream_icon (se válido) → poster TMDB
+              const getValidBackdrop = () => {
+                // 1. Tentar backdrops do TMDB (melhor qualidade)
+                const tmdbBackdrops = [
+                  enrichedMovie.tmdb_backdrop,
+                  enrichedMovie.backdrop_path
+                ]
+
+                for (const url of tmdbBackdrops) {
+                  if (isValidImageUrl(url) && isBackdropUrl(url)) {
+                    return url
+                  }
+                }
+
+                // 2. Tentar stream_icon do servidor (geralmente funciona)
+                if (enrichedMovie.stream_icon && isValidImageUrl(enrichedMovie.stream_icon)) {
+                  // Evitar apenas se for claramente um poster pequeno
+                  if (!enrichedMovie.stream_icon.includes('/w500/')) {
+                    return enrichedMovie.stream_icon
+                  }
+                }
+
+                // 3. Tentar cover do servidor
+                if (enrichedMovie.cover && isValidImageUrl(enrichedMovie.cover)) {
+                  if (!enrichedMovie.cover.includes('/w500/')) {
+                    return enrichedMovie.cover
+                  }
+                }
+
+                // 4. Como último recurso, usar poster do TMDB
+                if (enrichedMovie.tmdb_poster && isValidImageUrl(enrichedMovie.tmdb_poster)) {
+                  return enrichedMovie.tmdb_poster
+                }
+
+                // 5. Se nada funcionar, retornar null (vai usar gradiente)
+                return null
+              }
+
+              const backdropUrl = getValidBackdrop()
+
               const movieData = {
                 id: enrichedMovie.series_id || enrichedMovie.stream_id,
                 name: enrichedMovie.name || enrichedMovie.title,
-                // Prioridade: backdrop TMDB → poster servidor → backdrop servidor → poster TMDB
-                imageUrl: enrichedMovie.tmdb_backdrop ||
-                          enrichedMovie.stream_icon || enrichedMovie.cover ||
-                          enrichedMovie.backdrop_path || enrichedMovie.backdrop ||
-                          enrichedMovie.tmdb_poster,
+                imageUrl: backdropUrl,
                 rating: enrichedMovie.tmdb_rating ? (enrichedMovie.tmdb_rating * 10).toFixed(0) : '85',
                 releaseDate: enrichedMovie.tmdb_year || enrichedMovie.year || '2024',
                 runtime: enrichedMovie.tmdb_runtime || enrichedMovie.duration || '',
@@ -6706,9 +6766,29 @@ window.resetNetflixMovies = () => {
           }
         }, [featuredMovieId])
 
+        // Preload image e detectar erro
+        useEffect(() => {
+          if (!movie?.imageUrl) {
+            setImageError(false)
+            return
+          }
+
+          setImageError(false)
+          const img = new Image()
+          img.onload = () => setImageError(false)
+          img.onerror = () => {
+            console.warn('[FeaturedMovie] Imagem falhou ao carregar:', movie.imageUrl)
+            setImageError(true)
+          }
+          img.src = movie.imageUrl
+        }, [movie?.imageUrl])
+
         // IMPORTANTE: Sempre mostrar algo, nunca retornar null
         const displayMovie = movie || previousMovie
         if(!displayMovie || !displayMovie.id) return null
+
+        const gradientBg = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f1419 100%)'
+        const shouldUseGradient = !movie?.imageUrl || imageError || movie.imageUrl === 'null' || movie.imageUrl === 'undefined'
 
         return e('div', {
           style: {
@@ -6729,7 +6809,9 @@ window.resetNetflixMovies = () => {
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundImage: previousMovie.imageUrl ? `url(${previousMovie.imageUrl})` : 'linear-gradient(to bottom, #111, #000)',
+              backgroundImage: previousMovie.imageUrl && previousMovie.imageUrl !== 'null' && previousMovie.imageUrl !== 'undefined'
+                ? `url(${previousMovie.imageUrl})`
+                : gradientBg,
               backgroundSize: 'cover',
               backgroundPosition: '50% 0%',
               opacity: showPrevious ? 1 : 0,
@@ -6747,9 +6829,13 @@ window.resetNetflixMovies = () => {
               bottom: 0,
               // ===== FIX: Background sólido escuro para evitar piscar branco =====
               backgroundColor: '#0a0a0a',
-              backgroundImage: movie.imageUrl ? `url(${movie.imageUrl})` : 'linear-gradient(to bottom, #111, #000)',
+              backgroundImage: shouldUseGradient ? gradientBg : `url(${movie.imageUrl})`,
               backgroundSize: 'cover',
               backgroundPosition: '50% 0%',
+              imageRendering: 'crisp-edges',
+              WebkitBackfaceVisibility: 'hidden',
+              backfaceVisibility: 'hidden',
+              transform: 'translateZ(0)',
               opacity: showPrevious ? 0 : 1,
               transition: 'opacity 0.8s ease-in-out',
               zIndex: 2
@@ -8382,7 +8468,7 @@ window.resetNetflixMovies = () => {
                   : globalState.heroBackdrop.poster
                   ? `url(${globalState.heroBackdrop.poster})`
                   : globalState.heroBackdrop.backdrop_path
-                  ? `url(https://image.tmdb.org/t/p/w1280${globalState.heroBackdrop.backdrop_path})`
+                  ? `url(https://image.tmdb.org/t/p/original${globalState.heroBackdrop.backdrop_path})`
                   : 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f1419 100%)',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
