@@ -3580,11 +3580,11 @@ function Home(){
       e('h2', {
         style: {
           color: '#fff',
-          fontSize: '24px',
+          fontSize: '28px',
           fontWeight: 'bold',
-          marginBottom: '20px'
+          marginBottom: '25px'
         }
-      }, 'Brasil: top 10 em filmes hoje'),
+      }, 'Top 10 filmes hoje'),
 
       // Container do carrossel com botões
       e('div', {
@@ -3620,12 +3620,12 @@ function Home(){
               // Número grande à esquerda
               e('div', {
                 style: {
-                  fontSize: '240px',
+                  fontSize: '280px',
                   fontWeight: '900',
                   color: '#000',
                   WebkitTextStroke: '3px #464646',
-                  lineHeight: '0.8',
-                  marginRight: '-35px',
+                  lineHeight: '0.75',
+                  marginRight: '-45px',
                   zIndex: 1,
                   fontFamily: 'Arial, sans-serif'
                 }
@@ -3641,12 +3641,12 @@ function Home(){
                 // Poster do filme
                 e('img', {
                   src: movie.poster_path
-                    ? `https://image.tmdb.org/t/p/w300${movie.poster_path}`
-                    : 'https://via.placeholder.com/150x225/333/fff?text=Sem+Imagem',
+                    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                    : 'https://via.placeholder.com/200x300/333/fff?text=Sem+Imagem',
                   alt: movie.title,
                   style: {
-                    width: '150px',
-                    height: '225px',
+                    width: '200px',
+                    height: '300px',
                     objectFit: 'cover',
                     borderRadius: '4px',
                     transition: 'transform 0.2s'
@@ -3743,11 +3743,11 @@ function Home(){
       e('h2', {
         style: {
           color: '#fff',
-          fontSize: '24px',
+          fontSize: '28px',
           fontWeight: 'bold',
-          marginBottom: '20px'
+          marginBottom: '25px'
         }
-      }, 'Brasil: top 10 em séries hoje'),
+      }, 'Top 10 séries hoje'),
 
       // Container do carrossel com botões
       e('div', {
@@ -3783,12 +3783,12 @@ function Home(){
               // Número grande à esquerda
               e('div', {
                 style: {
-                  fontSize: '240px',
+                  fontSize: '280px',
                   fontWeight: '900',
                   color: '#000',
                   WebkitTextStroke: '3px #464646',
-                  lineHeight: '0.8',
-                  marginRight: '-35px',
+                  lineHeight: '0.75',
+                  marginRight: '-45px',
                   zIndex: 1,
                   fontFamily: 'Arial, sans-serif'
                 }
@@ -3804,12 +3804,12 @@ function Home(){
                 // Poster da série
                 e('img', {
                   src: serie.poster_path
-                    ? `https://image.tmdb.org/t/p/w300${serie.poster_path}`
-                    : 'https://via.placeholder.com/150x225/333/fff?text=Sem+Imagem',
+                    ? `https://image.tmdb.org/t/p/w500${serie.poster_path}`
+                    : 'https://via.placeholder.com/200x300/333/fff?text=Sem+Imagem',
                   alt: serie.name,
                   style: {
-                    width: '150px',
-                    height: '225px',
+                    width: '200px',
+                    height: '300px',
                     objectFit: 'cover',
                     borderRadius: '4px',
                     transition: 'transform 0.2s'
