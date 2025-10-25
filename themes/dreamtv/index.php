@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DreamTV Streaming — v20251020-LOCAL-010-PLAYBACK-COMPLETO</title>
+  <title>DreamTV TESTE SEM BARRA AZUL</title>
   <!-- Cache Bust: Force reload on changes -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
@@ -57,6 +57,8 @@
       max-width: 100vw;
       overflow-x: hidden;
     }
+
+    /* Header agora está visível - CSS removido */
 
     /* ===== LAYOUT COM SIDEBAR FIXA ===== */
     :root {
@@ -1651,7 +1653,209 @@
            prevProps.className === nextProps.className
   })
 
-  // ===== SIDEBAR COMPONENT =====
+  // ===== HEADER GLOBAL NETFLIX-STYLE =====
+  function Header({ view, setView, globalSearchQuery, setGlobalSearchQuery }) {
+    // Determinar qual menu está ativo
+    const getActiveMenu = () => {
+      if (view === 'home') return 'home'
+      if (view === 'live-categories' || view === 'channels') return 'channels'
+      if (view === 'netflix-movies' || view === 'vod-categories') return 'movies'
+      if (view === 'netflix-series' || view === 'series-categories') return 'series'
+      if (view === 'netflix-novelas' || view === 'novelas-categories') return 'novelas'
+      if (view === 'netflix-animes' || view === 'animes-categories') return 'animes'
+      if (view === 'netflix-desenhos' || view === 'desenhos-categories') return 'desenhos'
+      if (view === 'netflix-show' || view === 'show-categories') return 'show'
+      if (view === 'collections') return 'collections'
+      return 'home'
+    }
+
+    const activeMenu = getActiveMenu()
+
+    return e('header', {
+      style: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '60px',
+        background: '#141414',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 40px',
+        zIndex: 1000,
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+      }
+    },
+      // Logo DREAMTV
+      e('div', {
+        onClick: () => setView('home'),
+        style: {
+          fontSize: '24px',
+          fontWeight: 'bold',
+          cursor: 'pointer',
+          letterSpacing: '2px',
+          display: 'flex'
+        }
+      },
+        e('span', { style: { color: '#e50914' } }, 'DREAM'),
+        e('span', { style: { color: '#fff' } }, 'TV')
+      ),
+
+      // Menu de navegação
+      e('nav', {
+        style: {
+          display: 'flex',
+          gap: '30px',
+          alignItems: 'center'
+        }
+      },
+        e('a', {
+          onClick: () => setView('home'),
+          style: {
+            color: activeMenu === 'home' ? '#fff' : '#b3b3b3',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: activeMenu === 'home' ? '600' : '400',
+            transition: 'color 0.2s',
+            textDecoration: 'none'
+          }
+        }, 'Início'),
+
+        e('a', {
+          onClick: () => setView('netflix-movies'),
+          style: {
+            color: activeMenu === 'movies' ? '#fff' : '#b3b3b3',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: activeMenu === 'movies' ? '600' : '400',
+            transition: 'color 0.2s',
+            textDecoration: 'none'
+          }
+        }, 'Filmes'),
+
+        e('a', {
+          onClick: () => setView('netflix-series'),
+          style: {
+            color: activeMenu === 'series' ? '#fff' : '#b3b3b3',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: activeMenu === 'series' ? '600' : '400',
+            transition: 'color 0.2s',
+            textDecoration: 'none'
+          }
+        }, 'Séries'),
+
+        e('a', {
+          onClick: () => setView('netflix-novelas'),
+          style: {
+            color: activeMenu === 'novelas' ? '#fff' : '#b3b3b3',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: activeMenu === 'novelas' ? '600' : '400',
+            transition: 'color 0.2s',
+            textDecoration: 'none'
+          }
+        }, 'Novelas'),
+
+        e('a', {
+          onClick: () => setView('netflix-animes'),
+          style: {
+            color: activeMenu === 'animes' ? '#fff' : '#b3b3b3',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: activeMenu === 'animes' ? '600' : '400',
+            transition: 'color 0.2s',
+            textDecoration: 'none'
+          }
+        }, 'Animes'),
+
+        e('a', {
+          onClick: () => setView('netflix-desenhos'),
+          style: {
+            color: activeMenu === 'desenhos' ? '#fff' : '#b3b3b3',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: activeMenu === 'desenhos' ? '600' : '400',
+            transition: 'color 0.2s',
+            textDecoration: 'none'
+          }
+        }, 'Desenhos'),
+
+        e('a', {
+          onClick: () => setView('netflix-show'),
+          style: {
+            color: activeMenu === 'show' ? '#fff' : '#b3b3b3',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: activeMenu === 'show' ? '600' : '400',
+            transition: 'color 0.2s',
+            textDecoration: 'none'
+          }
+        }, 'Show'),
+
+        e('a', {
+          onClick: () => setView('collections'),
+          style: {
+            color: activeMenu === 'collections' ? '#fff' : '#b3b3b3',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: activeMenu === 'collections' ? '600' : '400',
+            transition: 'color 0.2s',
+            textDecoration: 'none'
+          }
+        }, 'Coletâneas'),
+
+        e('a', {
+          onClick: () => setView('live-categories'),
+          style: {
+            color: activeMenu === 'channels' ? '#fff' : '#b3b3b3',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: activeMenu === 'channels' ? '600' : '400',
+            transition: 'color 0.2s',
+            textDecoration: 'none'
+          }
+        }, 'Canais')
+      ),
+
+      // Área direita - Campo de busca
+      e('div', {
+        style: {
+          display: 'flex',
+          alignItems: 'center',
+          gap: '15px'
+        }
+      },
+        // Campo de busca
+        e('input', {
+          type: 'text',
+          placeholder: 'Buscar...',
+          value: globalSearchQuery || '',
+          onChange: (e) => setGlobalSearchQuery(e.target.value),
+          style: {
+            background: 'transparent',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            borderRadius: '4px',
+            padding: '8px 16px',
+            color: '#fff',
+            fontSize: '14px',
+            outline: 'none',
+            width: '200px',
+            transition: 'border-color 0.2s'
+          },
+          onFocus: (e) => {
+            e.target.style.borderColor = 'rgba(255, 255, 255, 0.6)'
+          },
+          onBlur: (e) => {
+            e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)'
+          }
+        })
+      )
+    )
+  }
+
+  // ===== SIDEBAR COMPONENT (DEPRECATED - Mantido para compatibilidade) =====
   function Sidebar({ view, setView }) {
     const [activeMenu, setActiveMenu] = useState('home')
 
@@ -1906,6 +2110,7 @@
     const [loading,setLoading] = useState(false)
     const [error,setError] = useState('')
     const [debug,setDebug] = useState(null)
+    const [globalSearchQuery,setGlobalSearchQuery] = useState('')
 
     const [cfg,setCfg] = useLocalStorage('xtream_config', { server:'', username:'', password:'' })
     const [tmdbKey,setTmdbKey] = useLocalStorage('tmdb_api_key', '7e61dfdf698b31e14082e80a0ca9f9fa')
@@ -3309,60 +3514,391 @@
       return null // Retorna null para ocultar completamente a barra superior
     }
 
-    function Home(){
-      const [homeFocused, setHomeFocused] = useState(0)
-      const homeOptions = ['live-categories', 'netflix-movies', 'netflix-series']
+// ===== NOVA HOME MODERNA ESTILO NETFLIX =====
+// Esta é a nova versão da função Home() para substituir a atual no index.php
 
-      useEffect(()=>{
-        if(view!=='home') return
+function Home(){
+  const [topMovies, setTopMovies] = useState([])
+  const [topSeries, setTopSeries] = useState([])
+  const [loading, setLoading] = useState(true)
 
-        const handleKeyDown = (e)=>{
-          if(e.key==='ArrowRight' || e.key==='ArrowDown'){
-            e.preventDefault()
-            setHomeFocused(prev=> Math.min(prev + 1, 2))
-          }else if(e.key==='ArrowLeft' || e.key==='ArrowUp'){
-            e.preventDefault()
-            setHomeFocused(prev=> Math.max(prev - 1, 0))
-          }else if(e.key==='Enter'){
-            e.preventDefault()
-            setView(homeOptions[homeFocused])
-          }
+  // Buscar Top 10 Filmes e Séries do TMDB
+  useEffect(() => {
+    const fetchTopContent = async () => {
+      try {
+        const tmdbKey = '7e61dfdf698b31e14082e80a0ca9f9fa'
+
+        // Buscar filmes populares
+        const moviesRes = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${tmdbKey}&language=pt-BR&page=1`)
+        const moviesData = await moviesRes.json()
+        setTopMovies(moviesData.results.slice(0, 10))
+
+        // Buscar séries populares
+        const seriesRes = await fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${tmdbKey}&language=pt-BR&page=1`)
+        const seriesData = await seriesRes.json()
+        setTopSeries(seriesData.results.slice(0, 10))
+
+        setLoading(false)
+      } catch(err) {
+        console.error('Erro ao buscar Top 10:', err)
+        setLoading(false)
+      }
+    }
+
+    fetchTopContent()
+  }, [])
+
+  if(loading) {
+    return e('div', {
+      style: {
+        minHeight: '100vh',
+        background: '#141414',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#fff'
+      }
+    }, 'Carregando...')
+  }
+
+  return e('div', {
+    style: {
+      minHeight: '100vh',
+      background: '#141414',
+      width: '100%',
+      paddingTop: '40px',
+      paddingBottom: '40px'
+    }
+  },
+    // Top 10 Filmes
+    e('div', {
+      style: {
+        marginBottom: '60px',
+        paddingLeft: '40px'
+      }
+    },
+      e('h2', {
+        style: {
+          color: '#fff',
+          fontSize: '24px',
+          fontWeight: 'bold',
+          marginBottom: '20px'
         }
-        window.addEventListener('keydown', handleKeyDown)
-        return ()=> window.removeEventListener('keydown', handleKeyDown)
-      }, [view, homeFocused])
+      }, 'Brasil: top 10 em filmes hoje'),
 
-      return e('div', { className:'star-bg min-h-screen flex flex-col items-center justify-center p-8' },
-        e('div', { className:'mb-16 text-center' },
-          e('h1', { className:'text-6xl font-extrabold gradient-text text-shadow mb-2' }, 'DREAMTV'),
-          e('p', { className:'text-gray-400 tracking-widest' }, 'STREAMING')
-        ),
-        e('div', { className:'flex flex-wrap justify-center gap-12 mb-16' },
-          e('div', { onClick:()=>setView('live-categories'), className:'flex flex-col items-center cursor-pointer transition-all card ' + (homeFocused===0 ? 'opacity-100 scale-110' : 'opacity-80'), role:'button', tabIndex:0 },
-            e('div', { className:'w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg transition-all ' + (homeFocused===0 ? 'shadow-purple-500/80 ring-4 ring-purple-400' : 'shadow-purple-500/50') }, e('span', { className:'text-4xl' }, '📺')),
-            e('span',{className:'text-white mt-3 text-sm font-medium'}, 'TV ao vivo')
-          ),
-          e('div', { onClick:()=>setView('netflix-movies'), className:'flex flex-col items-center cursor-pointer transition-all card ' + (homeFocused===1 ? 'opacity-100 scale-110' : 'opacity-80') },
-            e('div', { className:'w-24 h-24 rounded-full bg-zinc-700/60 flex items-center justify-center transition-all ' + (homeFocused===1 ? 'ring-4 ring-purple-400 bg-zinc-600' : '') }, e('span', { className:'text-4xl' }, '🎬')),
-            e('span',{className:'text-white mt-3 text-sm font-medium'}, 'Filmes')
-          ),
-          e('div', { onClick:()=>setView('netflix-series'), className:'flex flex-col items-center cursor-pointer transition-all card ' + (homeFocused===2 ? 'opacity-100 scale-110' : 'opacity-80') },
-            e('div', { className:'w-24 h-24 rounded-full bg-zinc-700/60 flex items-center justify-center transition-all ' + (homeFocused===2 ? 'ring-4 ring-purple-400 bg-zinc-600' : '') }, e('span', { className:'text-4xl' }, '🎭')),
-            e('span',{className:'text-white mt-3 text-sm font-medium'}, 'Séries')
+      // Container do carrossel com botões
+      e('div', {
+        style: {
+          position: 'relative',
+          paddingRight: '40px'
+        }
+      },
+        // Carrossel de filmes
+        e('div', {
+          id: 'movies-carousel',
+          style: {
+            display: 'flex',
+            gap: '4px',
+            overflowX: 'scroll',
+            scrollBehavior: 'smooth',
+            paddingBottom: '10px',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none'
+          }
+        },
+          ...topMovies.map((movie, index) =>
+            e('div', {
+              key: movie.id,
+              style: {
+                display: 'flex',
+                alignItems: 'flex-end',
+                flexShrink: 0,
+                cursor: 'pointer',
+                position: 'relative'
+              }
+            },
+              // Número grande à esquerda
+              e('div', {
+                style: {
+                  fontSize: '240px',
+                  fontWeight: '900',
+                  color: '#000',
+                  WebkitTextStroke: '3px #464646',
+                  lineHeight: '0.8',
+                  marginRight: '-35px',
+                  zIndex: 1,
+                  fontFamily: 'Arial, sans-serif'
+                }
+              }, (index + 1).toString()),
+
+              // Container do poster
+              e('div', {
+                style: {
+                  position: 'relative',
+                  zIndex: 2
+                }
+              },
+                // Poster do filme
+                e('img', {
+                  src: movie.poster_path
+                    ? `https://image.tmdb.org/t/p/w300${movie.poster_path}`
+                    : 'https://via.placeholder.com/150x225/333/fff?text=Sem+Imagem',
+                  alt: movie.title,
+                  style: {
+                    width: '150px',
+                    height: '225px',
+                    objectFit: 'cover',
+                    borderRadius: '4px',
+                    transition: 'transform 0.2s'
+                  },
+                  onMouseEnter: (e) => e.target.style.transform = 'scale(1.05)',
+                  onMouseLeave: (e) => e.target.style.transform = 'scale(1)'
+                }),
+
+                // Badge "Novidade" (nos primeiros 3)
+                index < 3 && e('div', {
+                  style: {
+                    position: 'absolute',
+                    top: '8px',
+                    left: '0',
+                    right: '0',
+                    margin: '0 auto',
+                    background: '#e50914',
+                    color: '#fff',
+                    padding: '3px 8px',
+                    borderRadius: '3px',
+                    fontSize: '11px',
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    width: 'fit-content'
+                  }
+                }, 'Novidade')
+              )
+            )
           )
         ),
-        e('div', { className:'text-center text-xs text-gray-400 mb-4' }, '← → Navegar | Enter Selecionar'),
-        e('div', { className:'flex flex-col md:flex-row items-center gap-3' },
-          error && e('button', { onClick: ()=>{ setError(''); setDebug(null) }, className:'bg-zinc-700/70 border border-zinc-600 text-white px-6 py-3 rounded-full hover:bg-zinc-600 transition-all' }, '🔄 Limpar aviso'),
-          !account && e('button', { onClick:()=>setView('config'), className:'bg-purple-600 text-white px-6 py-3 rounded-full hover:bg-purple-500 transition-all' }, 'Configurar')
-        ),
-        error && e('div', { className:'mt-6 text-red-300 text-sm' }, 'Erro: ', error, debug? e('div', {className:'hint text-gray-400 mt-1'}, 'URL: ', maskUrlCredentials(debug.url||'')) : null),
-        e('div', { className:'absolute bottom-6 left-6 text-gray-400 text-xs' },
-          e('div', null, 'Versão: 3.1.0 (Netflix Smart TV UI)'),
-          account && e('div', null, 'Usuário: ' + (account.username||''))
-        )
+
+        // Botão anterior
+        e('button', {
+          onClick: () => {
+            const carousel = document.getElementById('movies-carousel')
+            carousel.scrollLeft -= 400
+          },
+          style: {
+            position: 'absolute',
+            left: '0',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: 'rgba(0, 0, 0, 0.7)',
+            border: 'none',
+            color: '#fff',
+            fontSize: '30px',
+            width: '50px',
+            height: '100px',
+            cursor: 'pointer',
+            zIndex: 10,
+            borderRadius: '0 4px 4px 0',
+            opacity: 0.8,
+            transition: 'opacity 0.2s'
+          },
+          onMouseEnter: (e) => e.target.style.opacity = '1',
+          onMouseLeave: (e) => e.target.style.opacity = '0.8'
+        }, '‹'),
+
+        // Botão próximo
+        e('button', {
+          onClick: () => {
+            const carousel = document.getElementById('movies-carousel')
+            carousel.scrollLeft += 400
+          },
+          style: {
+            position: 'absolute',
+            right: '40px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: 'rgba(0, 0, 0, 0.7)',
+            border: 'none',
+            color: '#fff',
+            fontSize: '30px',
+            width: '50px',
+            height: '100px',
+            cursor: 'pointer',
+            zIndex: 10,
+            borderRadius: '4px 0 0 4px',
+            opacity: 0.8,
+            transition: 'opacity 0.2s'
+          },
+          onMouseEnter: (e) => e.target.style.opacity = '1',
+          onMouseLeave: (e) => e.target.style.opacity = '0.8'
+        }, '›')
       )
-    }
+    ),
+
+    // Top 10 Séries
+    e('div', {
+      style: {
+        paddingLeft: '40px'
+      }
+    },
+      e('h2', {
+        style: {
+          color: '#fff',
+          fontSize: '24px',
+          fontWeight: 'bold',
+          marginBottom: '20px'
+        }
+      }, 'Brasil: top 10 em séries hoje'),
+
+      // Container do carrossel com botões
+      e('div', {
+        style: {
+          position: 'relative',
+          paddingRight: '40px'
+        }
+      },
+        // Carrossel de séries
+        e('div', {
+          id: 'series-carousel',
+          style: {
+            display: 'flex',
+            gap: '4px',
+            overflowX: 'scroll',
+            scrollBehavior: 'smooth',
+            paddingBottom: '10px',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none'
+          }
+        },
+          ...topSeries.map((serie, index) =>
+            e('div', {
+              key: serie.id,
+              style: {
+                display: 'flex',
+                alignItems: 'flex-end',
+                flexShrink: 0,
+                cursor: 'pointer',
+                position: 'relative'
+              }
+            },
+              // Número grande à esquerda
+              e('div', {
+                style: {
+                  fontSize: '240px',
+                  fontWeight: '900',
+                  color: '#000',
+                  WebkitTextStroke: '3px #464646',
+                  lineHeight: '0.8',
+                  marginRight: '-35px',
+                  zIndex: 1,
+                  fontFamily: 'Arial, sans-serif'
+                }
+              }, (index + 1).toString()),
+
+              // Container do poster
+              e('div', {
+                style: {
+                  position: 'relative',
+                  zIndex: 2
+                }
+              },
+                // Poster da série
+                e('img', {
+                  src: serie.poster_path
+                    ? `https://image.tmdb.org/t/p/w300${serie.poster_path}`
+                    : 'https://via.placeholder.com/150x225/333/fff?text=Sem+Imagem',
+                  alt: serie.name,
+                  style: {
+                    width: '150px',
+                    height: '225px',
+                    objectFit: 'cover',
+                    borderRadius: '4px',
+                    transition: 'transform 0.2s'
+                  },
+                  onMouseEnter: (e) => e.target.style.transform = 'scale(1.05)',
+                  onMouseLeave: (e) => e.target.style.transform = 'scale(1)'
+                }),
+
+                // Badge "Novidade" (nos primeiros 3)
+                index < 3 && e('div', {
+                  style: {
+                    position: 'absolute',
+                    top: '8px',
+                    left: '0',
+                    right: '0',
+                    margin: '0 auto',
+                    background: '#e50914',
+                    color: '#fff',
+                    padding: '3px 8px',
+                    borderRadius: '3px',
+                    fontSize: '11px',
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    width: 'fit-content'
+                  }
+                }, 'Novidade')
+              )
+            )
+          )
+        ),
+
+        // Botão anterior
+        e('button', {
+          onClick: () => {
+            const carousel = document.getElementById('series-carousel')
+            carousel.scrollLeft -= 400
+          },
+          style: {
+            position: 'absolute',
+            left: '0',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: 'rgba(0, 0, 0, 0.7)',
+            border: 'none',
+            color: '#fff',
+            fontSize: '30px',
+            width: '50px',
+            height: '100px',
+            cursor: 'pointer',
+            zIndex: 10,
+            borderRadius: '0 4px 4px 0',
+            opacity: 0.8,
+            transition: 'opacity 0.2s'
+          },
+          onMouseEnter: (e) => e.target.style.opacity = '1',
+          onMouseLeave: (e) => e.target.style.opacity = '0.8'
+        }, '‹'),
+
+        // Botão próximo
+        e('button', {
+          onClick: () => {
+            const carousel = document.getElementById('series-carousel')
+            carousel.scrollLeft += 400
+          },
+          style: {
+            position: 'absolute',
+            right: '40px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: 'rgba(0, 0, 0, 0.7)',
+            border: 'none',
+            color: '#fff',
+            fontSize: '30px',
+            width: '50px',
+            height: '100px',
+            cursor: 'pointer',
+            zIndex: 10,
+            borderRadius: '4px 0 0 4px',
+            opacity: 0.8,
+            transition: 'opacity 0.2s'
+          },
+          onMouseEnter: (e) => e.target.style.opacity = '1',
+          onMouseLeave: (e) => e.target.style.opacity = '0.8'
+        }, '›')
+      )
+    )
+  )
+}
+
 
     function Categories(){
       const isLive = view==='live-categories'
@@ -7451,7 +7987,7 @@ window.resetNetflixMovies = () => {
               padding: '8px 0',
               marginLeft: '-40px',
               marginRight: '-40px',
-              paddingLeft: '40px',
+              paddingLeft: '30px',
               paddingRight: '40px'
             }
           },
@@ -7811,7 +8347,6 @@ window.resetNetflixMovies = () => {
 
       return e('div', {
         style: {
-          background: '#111',
           height: '100vh',
           width: '100%',
           overflow: 'hidden',
@@ -7871,7 +8406,7 @@ window.resetNetflixMovies = () => {
             e('div', {
               style: {
                 position: 'absolute',
-                top: '20px',
+                top: '120px',
                 left: '40px',
                 zIndex: 3,
                 maxWidth: '650px'
@@ -8709,7 +9244,7 @@ window.resetNetflixMovies = () => {
           // COLUNA ESQUERDA: Temporadas
           e('div', {
             style: {
-              overflowY: 'auto',
+              overflowY: 'hidden',
               paddingRight: '16px'
             }
           },
@@ -8749,7 +9284,7 @@ window.resetNetflixMovies = () => {
                 e('div', {
                   style: {
                     width: '120px',
-                    height: '180px',
+                    height: '160px',
                     background: '#333',
                     borderRadius: '8px',
                     flexShrink: 0,
@@ -8804,7 +9339,7 @@ window.resetNetflixMovies = () => {
           // COLUNA DIREITA: Episódios
           e('div', {
             style: {
-              overflowY: 'auto',
+              overflowY: 'hidden',
               paddingRight: '16px'
             }
           },
@@ -9594,28 +10129,24 @@ window.resetNetflixMovies = () => {
     else if(view==='player' && current) content = e(Player)
     else content = e('div', { className:'star-bg min-h-screen grid place-items-center text-white' }, 'Carregando...')
 
-    // Se não estiver na tela de config (login), mostrar sidebar
-    const showSidebar = view !== 'config'
-
-    // Adicionar classe ao body quando sidebar estiver visível
-    useEffect(() => {
-      if (showSidebar) {
-        document.body.classList.add('with-sidebar')
-      } else {
-        document.body.classList.remove('with-sidebar')
-      }
-    }, [showSidebar])
+    // Não mostrar header apenas na config (login) e no player
+    const showHeader = view !== 'config' && view !== 'player'
 
     return e('div', { className: 'app-container' },
-      showSidebar && e(Sidebar, { view, setView }),
+      // Header global Netflix-style (substitui sidebar)
+      showHeader && e(Header, { view, setView, globalSearchQuery, setGlobalSearchQuery }),
+
       e('div', {
-        className: showSidebar ? 'main-content' : 'main-content',
-        style: showSidebar ? {} : { marginLeft: 0, width: '100vw' }
+        className: 'main-content',
+        style: {
+          marginLeft: 0,
+          width: '100vw',
+          paddingTop: showHeader ? '60px' : '0'
+        }
       },
         content,
         e(TrailerModal),
         e(Toast),
-        e(FullscreenButton),
         // Indicador de navegação numérica (canal digitado)
         channelInput && e('div', { className: 'tv-channel-input' },
           e('div', { style: { fontSize: '24px', color: '#a855f7', marginBottom: '10px' } }, 'Canal'),
@@ -9627,6 +10158,8 @@ window.resetNetflixMovies = () => {
 
   const root = ReactDOM.createRoot(document.getElementById('app'))
   root.render(e(App))
+
+  // Header agora está visível - código de remoção removido
 
   // ===== Pequenos testes =====
   ;(function runTests(){
