@@ -5963,6 +5963,24 @@ window.resetNetflixMovies = () => {
         }
       }, [globalState.sectionsMovies.length]) // Disparar quando novas seções forem adicionadas
 
+      // ===== NOVO: Setar heroBackdrop da primeira coleção quando abrir Coletâneas =====
+      useEffect(() => {
+        if (showCollectionsView && collections.length > 0 && !viewingCollectionMovies) {
+          const firstCollection = collections[0]
+          if (firstCollection && window.updateNetflixMoviesState) {
+            window.updateNetflixMoviesState({
+              heroBackdrop: {
+                name: firstCollection.name,
+                overview: firstCollection.overview || `Coleção com ${firstCollection.movies?.length || 0} filmes`,
+                backdrop: firstCollection.backdrop,
+                poster: firstCollection.poster,
+                backdrop_path: null
+              }
+            })
+          }
+        }
+      }, [showCollectionsView, collections.length, viewingCollectionMovies])
+
       // IMPORTANTE: Usar estado global para persistir categoria entre re-renders
       const currentCategoryIndex = globalState.currentCategoryIndex || 0
       const setCurrentCategoryIndex = (value) => {
@@ -7054,11 +7072,19 @@ window.resetNetflixMovies = () => {
           }
         }, [isHovered, collection.id])
 
-        // Função DESABILITADA para evitar flickering
-        // (A atualização do backdrop causava forceUpdate que re-renderizava tudo)
-        const updateHeroBackdropFromCollection = async (coll) => {
-          // Desabilitado - não faz nada
-          return
+        // Atualizar backdrop do hero ao passar o mouse
+        const updateHeroBackdropFromCollection = (coll) => {
+          if (!coll || !window.updateNetflixMoviesState) return
+
+          window.updateNetflixMoviesState({
+            heroBackdrop: {
+              name: coll.name,
+              overview: coll.overview || `Coleção com ${collection.movies?.length || 0} filmes`,
+              backdrop: coll.backdrop,
+              poster: coll.poster,
+              backdrop_path: null // Já temos a URL completa em backdrop
+            }
+          })
         }
 
         const displayCollection = fullCollection || collection
@@ -7083,6 +7109,7 @@ window.resetNetflixMovies = () => {
           onMouseEnter: () => {
             isHoveredRef.current = true
             setIsHovered(true)
+            updateHeroBackdropFromCollection(displayCollection)
           },
           onMouseLeave: () => {
             isHoveredRef.current = false
