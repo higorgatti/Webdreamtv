@@ -22,7 +22,7 @@
     /* Previne scroll - comportamento Netflix (100% fixo na tela) */
     html{margin:0;padding:0;height:100vh;width:100vw;overflow:hidden}
     body{margin:0;padding:0;height:100vh;width:100vw;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,system-ui,sans-serif}
-    .star-bg{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f1419 100%);position:relative;overflow:hidden}
+    .star-bg{background:#000;position:relative;overflow:hidden}
     .star-bg::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(2px 2px at 20px 30px,#fff,transparent),radial-gradient(2px 2px at 60px 70px,#fff,transparent),radial-gradient(1px 1px at 50px 50px,#fff,transparent),radial-gradient(1px 1px at 130px 80px,#fff,transparent),radial-gradient(2px 2px at 90px 10px,#fff,transparent);background-repeat:repeat;background-size:200px 200px;opacity:.3;animation:twinkle 3s infinite}
     @keyframes twinkle{0%,100%{opacity:.3}50%{opacity:.5}}
     .gradient-text{background:linear-gradient(90deg,#a855f7,#ec4899,#3b82f6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
@@ -361,12 +361,12 @@
       width: 100vw;
       height: 100vh;
       overflow: hidden;
-      background: linear-gradient(135deg, #0b0d24 0%, #0e1530 50%, #0a0c1f 100%);
+      background: #000;
     }
 
-    /* Fundo escuro com gradiente espacial */
+    /* Fundo escuro */
     body.with-sidebar {
-      background: linear-gradient(135deg, #0b0d24 0%, #0e1530 50%, #0a0c1f 100%);
+      background: #000;
       overflow: hidden;
     }
 
@@ -6805,7 +6805,7 @@ window.resetNetflixMovies = () => {
         const displayMovie = movie || previousMovie
         if(!displayMovie || !displayMovie.id) return null
 
-        const gradientBg = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f1419 100%)'
+        const gradientBg = '#000'
         const shouldUseGradient = !movie?.imageUrl || imageError || movie.imageUrl === 'null' || movie.imageUrl === 'undefined'
 
         return e('div', {
@@ -7410,7 +7410,7 @@ window.resetNetflixMovies = () => {
                 style: {
                   width: '100%',
                   height: '100%',
-                  background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+                  background: '#000',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -8496,7 +8496,7 @@ window.resetNetflixMovies = () => {
                   ? `url(${globalState.heroBackdrop.poster})`
                   : globalState.heroBackdrop.backdrop_path
                   ? `url(https://image.tmdb.org/t/p/original${globalState.heroBackdrop.backdrop_path})`
-                  : 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f1419 100%)',
+                  : '#000',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 zIndex: 1,
