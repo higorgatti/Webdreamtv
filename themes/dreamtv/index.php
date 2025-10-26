@@ -1,4 +1,10 @@
-﻿<!DOCTYPE html>
+﻿<?php
+// Desabilitar TODO cache do PHP/Apache
+header("Cache-Control: no-cache, no-store, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: 0");
+?>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -8,7 +14,12 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <!-- VERSÃO ATUALIZADA: Limpeza de títulos TMDB implementada -->
+  <!-- VERSÃO: Favoritos v2.1 - CACHE BUSTED 2025-10-26 11:10:50 -->
+  <script>
+    // Limpar cache ao carregar
+    console.log('🚀 DreamTV carregando - Versão: Favoritos v2.1 - TIMESTAMP: 2025-10-26 11:10:50');
+    console.log('⚠️ SE VOCÊ NÃO VER ESTA MENSAGEM, O CACHE ESTÁ ATIVO!');
+  </script>
   <!-- React UMD -->
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -1919,7 +1930,7 @@
         }
         setView('netflix-novelas')
       }},
-      { id: 'animes', icon: '⭐', title: 'Animes', action: () => {
+      { id: 'animes', icon: '🌟', title: 'Animes', action: () => {
         // Desativar modo coleções
         if (window.updateNetflixMoviesState) {
           window.updateNetflixMoviesState({ showCollectionsView: false })
@@ -3935,6 +3946,54 @@ function Home(){
       const isLive = view==='live-categories'
       const [focusedCatIdx, setFocusedCatIdx] = useState(0)
       const [focusedChannelIdx, setFocusedChannelIdx] = useState(0)
+      const [isFavorite, setIsFavorite] = useState(false)
+
+      // Verificar se canal selecionado está nos favoritos
+      useEffect(() => {
+        if (!selectedChannel?.stream_id && !selectedChannel?.id) {
+          setIsFavorite(false)
+          return
+        }
+        const channelId = selectedChannel.stream_id || selectedChannel.id
+        const favorites = JSON.parse(localStorage.getItem('dreamtv_favorites') || '{}')
+        const isFav = !!favorites[channelId]
+        setIsFavorite(isFav)
+      }, [selectedChannel?.stream_id, selectedChannel?.id])
+
+      // Toggle favorito
+      const toggleFavorite = () => {
+        if (!selectedChannel?.stream_id && !selectedChannel?.id) return
+
+        const channelId = selectedChannel.stream_id || selectedChannel.id
+        const newState = !isFavorite
+        setIsFavorite(newState)
+
+        // Salvar/remover do localStorage
+        const favorites = JSON.parse(localStorage.getItem('dreamtv_favorites') || '{}')
+
+        if (newState) {
+          // Adicionar aos favoritos
+          favorites[channelId] = {
+            stream_id: channelId,
+            num: selectedChannel.num,
+            name: selectedChannel.name,
+            stream_icon: selectedChannel.stream_icon,
+            stream_url: selectedChannel.stream_url || selectedChannel.url,
+            category_id: selectedChannel.category_id,
+            addedAt: Date.now()
+          }
+          console.log('⭐ Canal adicionado aos favoritos:', selectedChannel.name)
+        } else {
+          // Remover dos favoritos
+          delete favorites[channelId]
+          console.log('☆ Canal removido dos favoritos:', selectedChannel.name)
+        }
+
+        localStorage.setItem('dreamtv_favorites', JSON.stringify(favorites))
+
+        // Notificar sistema para atualizar lista se estiver na categoria favoritos
+        window.dispatchEvent(new CustomEvent('favorites-updated'))
+      }
 
       // Helper: Decodificar Base64 se necessário (títulos EPG podem vir codificados)
       const decodeMaybeBase64 = (str) => {
@@ -4189,6 +4248,42 @@ function Home(){
               error && e('div', { className:'text-red-300 text-xs mb-3' }, 'Live: ', error),
               liveLeftMode==='categories' ?
                 e('div', { className:'overflow-y-auto flex-1 space-y-3 pr-2 pb-4' },
+                  // Categoria Favoritos (sempre primeiro)
+                  (() => {
+                    const favorites = JSON.parse(localStorage.getItem('dreamtv_favorites') || '{}')
+                    const favCount = Object.keys(favorites).length
+                    const isFavSelected = selectedLiveCat?.category_id === 'favoritos'
+
+                    return e('button', {
+                      key:'favoritos',
+                      id: 'cat-favoritos',
+                      onClick:()=> {
+                        setFocusedCatIdx(-1)
+                        setFocusedChannelIdx(0)
+                        // Criar uma categoria virtual "Favoritos"
+                        const favoriteChannels = Object.values(favorites)
+                        setSelectedLiveCat({ category_id: 'favoritos', category_name: '⭐ Favoritos', total: favCount })
+                        setLiveStreams(favoriteChannels)
+                        setLiveLeftMode('channels')
+                        if(favoriteChannels.length > 0) {
+                          setSelectedChannel(favoriteChannels[0])
+                          loadEpg(favoriteChannels[0].stream_id || favoriteChannels[0].id, selectedDay)
+                        }
+                      },
+                      className:'w-full rounded-lg px-4 py-3 text-left frost hover:border-purple-400/40 transition-all cursor-pointer ' + (isFavSelected ? 'border-2 border-white/80 bg-white/10 text-white' : 'text-white/90')
+                    },
+                      e('div', {
+                        className:'flex items-center justify-between',
+                        style: { pointerEvents: 'none' }
+                      },
+                        e('div', { className:'flex items-center gap-2' },
+                          e('span', { className:'text-lg' }, '⭐'),
+                          e('span', { className:'truncate font-semibold' }, 'Favoritos')
+                        ),
+                        e('span', { className:'opacity-80 ml-3' }, String(favCount))
+                      )
+                    )
+                  })(),
                   toArray(liveCats).map((cat, idx)=> {
                     const catId = getCatId(cat)
                     const count = (liveCounts && liveCounts[String(catId)]) ?? cat.total ?? 0
@@ -4295,7 +4390,7 @@ function Home(){
             // Centro: player + info + EPG
             e('div', { className:'col-span-12 md:col-span-6 space-y-3' },
               e('div', { className:'relative rounded-lg overflow-hidden bg-black aspect-video frost' },
-                e(LiveVideo, { channel:selectedChannel, epg:epg, onDbl:()=>toggleFullscreen('#liveVideo'), type: 'live' })
+                e(LiveVideo, { channel:selectedChannel, epg:epg, onDbl:()=>toggleFullscreen('#liveVideo'), type: 'live', isFavorite: isFavorite, toggleFavorite: toggleFavorite })
               ),
               e('div', { className:'space-y-2 max-h-[500px] overflow-y-auto scrollbar-hide pr-2 pb-4' },
                 (epg && epg.length>0 ? epg : Array.from({length:4}).map((_,i)=>({ id:'empty'+i, title:'Programa não encontrado', start:'--:--', end:'--:--' }))).map((pg,i)=>{
@@ -4623,7 +4718,7 @@ function Home(){
       )
     }
 
-    function LiveVideo({ channel, epg, onDbl, type = 'live' }){
+    function LiveVideo({ channel, epg, onDbl, type = 'live', isFavorite, toggleFavorite }){
       const vref = useRef(null)
       const hlsRef = useRef(null)
       const [showOverlay, setShowOverlay] = useState(true)
@@ -5379,13 +5474,13 @@ function Home(){
                 }
               }, '→'),
 
-              // Favorito (⭐)
+              // Favorito (⭐/☆)
               e('button', {
-                onClick: () => console.log('Toggle favorite'),
+                onClick: toggleFavorite,
                 style: {
-                  background: 'rgba(255,255,255,0.15)',
-                  color: '#FFFFFF',
-                  border: '1px solid rgba(255,255,255,0.2)',
+                  background: isFavorite ? '#FFD700' : 'rgba(255,255,255,0.15)',
+                  color: isFavorite ? '#000' : '#FFFFFF',
+                  border: isFavorite ? '1px solid #FFD700' : '1px solid rgba(255,255,255,0.2)',
                   padding: 'clamp(6px,0.8vw,8px) clamp(10px,1.2vw,14px)',
                   borderRadius: '9999px',
                   fontSize: 'clamp(14px,1.4vw,16px)',
@@ -5394,7 +5489,7 @@ function Home(){
                   outline: 'none',
                   transition: 'all 0.2s'
                 }
-              }, '⭐'),
+              }, isFavorite ? '★' : '☆'),
 
               // EPG/Info (📋)
               e('button', {
@@ -8804,6 +8899,149 @@ window.resetNetflixMovies = () => {
         ) // End FeaturedMovie container
       ) // End main container
     }
+
+    // ===== FAVORITES VIEW =====
+    function FavoritesView() {
+      const [favoriteChannels, setFavoriteChannels] = useState([])
+      const [focusedItemIdx, setFocusedItemIdx] = useState(0)
+
+      // Decodificar Base64 se necessário
+      const decodeMaybeBase64 = (str) => {
+        if(!str || typeof str !== 'string') return 'Sem título'
+        // Se já parece texto normal, retorna direto
+        if(/[\s\u00C0-\u00FF]/.test(str) || !/[A-Za-z0-9+/=]/.test(str)){
+          return str
+        }
+        try {
+          const decoded = atob(str)
+          if(decoded && /^[\x20-\x7E\u00C0-\u00FF]+$/.test(decoded)){
+            return decoded
+          }
+          try {
+            const utf8Decoded = decodeURIComponent(escape(decoded))
+            if(utf8Decoded && utf8Decoded.length > 0 && !/[\x00-\x1F]/.test(utf8Decoded)){
+              return utf8Decoded
+            }
+          } catch(e2) {}
+          return decoded
+        } catch(e) {
+          return str
+        }
+      }
+
+      // Carregar favoritos do localStorage
+      const loadFavorites = () => {
+        const favorites = JSON.parse(localStorage.getItem('dreamtv_favorites') || '{}')
+        const channels = Object.values(favorites).sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0))
+        setFavoriteChannels(channels)
+      }
+
+      useEffect(() => {
+        loadFavorites()
+
+        // Escutar atualizações de favoritos
+        const handleFavoritesUpdate = () => loadFavorites()
+        window.addEventListener('favorites-updated', handleFavoritesUpdate)
+        return () => window.removeEventListener('favorites-updated', handleFavoritesUpdate)
+      }, [])
+
+      // Navegação por teclado
+      useEffect(() => {
+        if (view !== 'favorites' || favoriteChannels.length === 0) return
+
+        const handleKeyDown = (e) => {
+          if (e.key === 'ArrowRight') {
+            e.preventDefault()
+            setFocusedItemIdx(prev => Math.min(prev + 1, favoriteChannels.length - 1))
+          } else if (e.key === 'ArrowLeft') {
+            e.preventDefault()
+            setFocusedItemIdx(prev => Math.max(prev - 1, 0))
+          } else if (e.key === 'ArrowDown') {
+            e.preventDefault()
+            setFocusedItemIdx(prev => Math.min(prev + 6, favoriteChannels.length - 1))
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault()
+            setFocusedItemIdx(prev => Math.max(prev - 6, 0))
+          } else if (e.key === 'Enter') {
+            e.preventDefault()
+            const channel = favoriteChannels[focusedItemIdx]
+            if (channel) {
+              playLiveChannel(channel)
+            }
+          } else if (e.key === 'Escape') {
+            e.preventDefault()
+            setView('home')
+          }
+        }
+
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+      }, [view, favoriteChannels, focusedItemIdx])
+
+      // Auto-scroll para item focado
+      useEffect(() => {
+        const el = document.getElementById('fav-' + focusedItemIdx)
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }, [focusedItemIdx])
+
+      if (favoriteChannels.length === 0) {
+        return e('div', { className: 'star-bg min-h-screen flex flex-col items-center justify-center p-6' },
+          e('div', { className: 'text-center' },
+            e('div', { className: 'text-6xl mb-4' }, '⭐'),
+            e('h2', { className: 'text-2xl font-bold text-white mb-2' }, 'Nenhum Favorito'),
+            e('p', { className: 'text-gray-400 mb-6' }, 'Adicione canais aos favoritos clicando na estrela durante a reprodução'),
+            e('button', {
+              onClick: () => setView('live-categories'),
+              className: 'px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors'
+            }, 'Explorar Canais')
+          )
+        )
+      }
+
+      return e('div', { className: 'star-bg min-h-screen p-6 overflow-y-auto' },
+        e('div', { className: 'max-w-7xl mx-auto' },
+          // Header
+          e('div', { className: 'mb-8' },
+            e('h1', { className: 'text-3xl font-bold text-white mb-2' }, '⭐ Meus Favoritos'),
+            e('p', { className: 'text-gray-400' }, `${favoriteChannels.length} ${favoriteChannels.length === 1 ? 'canal' : 'canais'}`)
+          ),
+
+          // Grid de canais
+          e('div', { className: 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4' },
+            ...favoriteChannels.map((channel, idx) => {
+              const isFocused = idx === focusedItemIdx
+              return e('div', {
+                key: channel.stream_id,
+                id: 'fav-' + idx,
+                onClick: () => {
+                  setFocusedItemIdx(idx)
+                  playLiveChannel(channel)
+                },
+                className: `frost rounded-lg p-4 cursor-pointer transition-all ${
+                  isFocused ? 'border-2 border-purple-500 bg-purple-500/20 scale-105' : 'border border-white/10 hover:border-purple-400/40'
+                }`
+              },
+                // Logo do canal
+                channel.stream_icon && e('div', { className: 'aspect-video rounded-lg overflow-hidden mb-3 bg-black/30' },
+                  e('img', {
+                    src: channel.stream_icon,
+                    alt: channel.name,
+                    className: 'w-full h-full object-contain',
+                    onError: (ev) => { ev.target.style.display = 'none' }
+                  })
+                ),
+                // Nome do canal
+                e('div', { className: 'text-center' },
+                  channel.num && e('div', { className: 'text-purple-400 font-bold text-sm mb-1' }, channel.num),
+                  e('div', { className: 'text-white text-sm font-medium truncate' }, decodeMaybeBase64(channel.name))
+                )
+              )
+            })
+          )
+        )
+      )
+    }
+
     function Channels(){
       const [focusedItemIdx, setFocusedItemIdx] = useState(0)
       const gridCols = 6 // lg:grid-cols-6
@@ -8893,6 +9131,13 @@ window.resetNetflixMovies = () => {
       const [isAuto, setIsAuto] = useState(true)
       const [isFavorite, setIsFavorite] = useState(false)
       const hideTimerRef = useRef(null)
+
+      // Verificar se canal está nos favoritos ao carregar
+      useEffect(() => {
+        if (!channelInfo?.stream_id) return
+        const favorites = JSON.parse(localStorage.getItem('dreamtv_favorites') || '{}')
+        setIsFavorite(!!favorites[channelInfo.stream_id])
+      }, [channelInfo?.stream_id])
 
       // Atualizar hora atual a cada segundo
       useEffect(() => {
@@ -9008,8 +9253,36 @@ window.resetNetflixMovies = () => {
 
       // Toggle favorito
       const toggleFavorite = () => {
-        setIsFavorite(prev => !prev)
-        // TODO: Salvar em localStorage ou backend
+        if (!channelInfo?.stream_id) return
+
+        const newState = !isFavorite
+        setIsFavorite(newState)
+
+        // Salvar/remover do localStorage
+        const favorites = JSON.parse(localStorage.getItem('dreamtv_favorites') || '{}')
+
+        if (newState) {
+          // Adicionar aos favoritos
+          favorites[channelInfo.stream_id] = {
+            stream_id: channelInfo.stream_id,
+            num: channelInfo.num,
+            name: channelInfo.name,
+            stream_icon: channelInfo.stream_icon,
+            stream_url: channelInfo.stream_url,
+            category_id: channelInfo.category_id,
+            addedAt: Date.now()
+          }
+          console.log('⭐ Canal adicionado aos favoritos:', channelInfo.name)
+        } else {
+          // Remover dos favoritos
+          delete favorites[channelInfo.stream_id]
+          console.log('☆ Canal removido dos favoritos:', channelInfo.name)
+        }
+
+        localStorage.setItem('dreamtv_favorites', JSON.stringify(favorites))
+
+        // Notificar sistema para atualizar lista se estiver na categoria favoritos
+        window.dispatchEvent(new CustomEvent('favorites-updated'))
       }
 
       // Fullscreen
@@ -9903,8 +10176,50 @@ window.resetNetflixMovies = () => {
       const containerRef = useRef(null)
       const [showHUD, setShowHUD] = useState(true) // HUD visível por padrão
       const [channelEPG, setChannelEPG] = useState(null)
+      const [isFavorite, setIsFavorite] = useState(false)
 
       useEffect(()=>{ return ()=>{ if(hlsObj){ try{ hlsObj.destroy() }catch{} } } },[hlsObj])
+
+      // Verificar se canal atual está nos favoritos
+      useEffect(() => {
+        if (!current?.stream_id) return
+        const favorites = JSON.parse(localStorage.getItem('dreamtv_favorites') || '{}')
+        setIsFavorite(!!favorites[current.stream_id])
+      }, [current?.stream_id])
+
+      // Toggle favorito
+      const toggleFavorite = () => {
+        if (!current?.stream_id) return
+
+        const newState = !isFavorite
+        setIsFavorite(newState)
+
+        // Salvar/remover do localStorage
+        const favorites = JSON.parse(localStorage.getItem('dreamtv_favorites') || '{}')
+
+        if (newState) {
+          // Adicionar aos favoritos
+          favorites[current.stream_id] = {
+            stream_id: current.stream_id,
+            num: current.num,
+            name: current.name,
+            stream_icon: current.stream_icon,
+            stream_url: current.url,
+            category_id: current.category_id,
+            addedAt: Date.now()
+          }
+          console.log('⭐ Canal adicionado aos favoritos:', current.name)
+        } else {
+          // Remover dos favoritos
+          delete favorites[current.stream_id]
+          console.log('☆ Canal removido dos favoritos:', current.name)
+        }
+
+        localStorage.setItem('dreamtv_favorites', JSON.stringify(favorites))
+
+        // Notificar sistema para atualizar lista se estiver na categoria favoritos
+        window.dispatchEvent(new CustomEvent('favorites-updated'))
+      }
 
       // ⚠️ FULLSCREEN AUTOMÁTICO DESABILITADO
       // Agora o usuário controla quando quer fullscreen (botão F ou duplo clique)
