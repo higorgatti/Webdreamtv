@@ -1161,7 +1161,21 @@
 
   function formatEPGTime(v){
     if(v==null) return '--:--'
+
+    // Se já está no formato HH:mm, retornar direto
     if(typeof v==='string' && /^\d{1,2}:\d{2}$/.test(v)) return v
+
+    // Se é string de data completa (YYYY-MM-DD HH:mm:ss)
+    if(typeof v==='string' && /^\d{4}-\d{2}-\d{2}/.test(v)){
+      const d = new Date(v)
+      if(!isNaN(d.getTime())){
+        const hh = String(d.getHours()).padStart(2,'0')
+        const mm = String(d.getMinutes()).padStart(2,'0')
+        return `${hh}:${mm}`
+      }
+    }
+
+    // Se é timestamp numérico
     const n = Number(v)
     if(!isNaN(n)){
       // Timestamp em segundos ou milissegundos
@@ -1177,6 +1191,7 @@
 
       return `${hh}:${mm}`
     }
+
     return '--:--'
   }
 
@@ -3439,6 +3454,17 @@
           const startTime = it.start || it.start_time || it.start_timestamp
           const endTime = it.end || it.end_time || it.stop_timestamp || it.end_timestamp || it.stop
 
+          // DEBUG: Log para ver o que está vindo
+          if(idx === 0){
+            console.log('[EPG DEBUG] Primeiro item:', {
+              raw: it,
+              startTime,
+              endTime,
+              formatted_start: formatEPGTime(startTime),
+              formatted_end: formatEPGTime(endTime)
+            })
+          }
+
           return {
             id: it.id || it.event_id || idx,
             title: decodedTitle || 'Sem programação disponível',
@@ -4613,6 +4639,15 @@ function Home(){
       const hideTimeoutRef = useRef(null)
       const [availableQualities, setAvailableQualities] = useState([])
 
+      // Mapeamento de qualidade para resolução
+      const getResolutionFromQuality = (quality) => {
+        const qualityUpper = (quality || '').toUpperCase()
+        if(qualityUpper.includes('FHD')) return '1920×1080'
+        if(qualityUpper.includes('HD')) return '1280×720'
+        if(qualityUpper.includes('SD')) return '854×480'
+        return '1920×1080' // Default
+      }
+
       // ========== FUNÇÕES HELPER ==========
 
       // Formatar título da pílula evitando redundância (ex: "GLOBO SP HD HD" -> "GLOBO SP HD")
@@ -4673,6 +4708,7 @@ function Home(){
       useEffect(()=>{
         if(channel && channel.quality){
           setSelectedQuality(channel.quality)
+          setVideoResolution(getResolutionFromQuality(channel.quality))
         }
       }, [channel?.stream_id, channel?.id])
 
@@ -4712,10 +4748,6 @@ function Home(){
           hlsRef.current = h
           h.loadSource(url)
           h.attachMedia(v)
-          h.on(window.Hls.Events.MANIFEST_PARSED, ()=>{
-            const level = h.levels[h.currentLevel]
-            if(level) setVideoResolution(`${level.width}×${level.height}`)
-          })
           h.on(window.Hls.Events.ERROR, (event, data)=>{
             if(data.fatal){
               // Fallback automático para próxima qualidade
@@ -4766,6 +4798,9 @@ function Home(){
         if(!v) return
 
         const url = buildURL(cfg.server, ['live', cfg.username, cfg.password, (variant.stream_id||variant.id)+'.m3u8'])
+
+        // Atualizar resolução baseada na qualidade selecionada
+        setVideoResolution(getResolutionFromQuality(quality))
 
         if(hlsRef.current){
           // Se já tem HLS rodando, apenas trocar a source
@@ -5192,7 +5227,7 @@ function Home(){
                       fontSize: 'clamp(12px,1.2vw,14px)',
                       color: '#C7D2FE'
                     }
-                  }, currentProg ? `${currentProg.start || '00:00'} – ${currentProg.end || '00:00'}` : ''),
+                  }, currentProg && currentProg.start && currentProg.end ? `${currentProg.start} – ${currentProg.end}` : ''),
                   e('div', {
                     style: {
                       background: channel?.playback_mode ? '#F59E0B' : '#E11D48',
