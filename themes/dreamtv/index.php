@@ -4375,12 +4375,20 @@ function Home(){
                         // ID removido - mostrar apenas logo e nome
                         item.stream_icon ? e('img', { src:item.stream_icon, className:'w-8 h-8 object-contain rounded', alt:'' }) : e('div', { className:'w-8 h-8 rounded bg-zinc-600 grid place-items-center text-xs' }, 'TV'),
                         e('div', { className:'flex-1 truncate font-semibold' }, item.baseName || item.name || 'Sem título'),
+                        // Badge FAV dourada se canal está nos favoritos
+                        (() => {
+                          const favorites = JSON.parse(localStorage.getItem('dreamtv_favorites') || '{}')
+                          const channelId = item.stream_id || item.id
+                          return favorites[channelId] && e('div', {
+                            className: 'px-2 py-[2px] rounded text-[11px] font-bold',
+                            style: { backgroundColor: '#FFD700', color: '#000000' }
+                          }, '★')
+                        })(),
                         // Badge REC vermelho se canal tem playback
                         item.hasPlayback && e('div', {
                           className: 'px-2 py-[2px] rounded text-[11px] font-bold',
                           style: { backgroundColor: '#DC2626', color: '#FFFFFF' }
                         }, 'REC')
-                        // Badge HD verde removida
                       )
                     )
                   }),
