@@ -4188,7 +4188,7 @@ function Home(){
               ),
               error && e('div', { className:'text-red-300 text-xs mb-3' }, 'Live: ', error),
               liveLeftMode==='categories' ?
-                e('div', { className:'overflow-y-auto flex-1 space-y-3 pr-2' },
+                e('div', { className:'overflow-y-auto flex-1 space-y-3 pr-2 pb-4' },
                   toArray(liveCats).map((cat, idx)=> {
                     const catId = getCatId(cat)
                     const count = (liveCounts && liveCounts[String(catId)]) ?? cat.total ?? 0
@@ -4212,7 +4212,7 @@ function Home(){
                   e('div', { className:'text-center text-xs text-gray-400 mt-3 py-2' }, '↑↓ Navegar | → Enter Abrir | ← ESC Voltar')
                 )
               :
-                e('div', { className:'overflow-y-auto flex-1 space-y-3 pr-2' },
+                e('div', { className:'overflow-y-auto flex-1 space-y-3 pr-2 pb-4' },
                   toArray(liveStreams).map((item, idx)=> {
                       const key = item.stream_id || item.id || item.name
                       const isFocused = idx === focusedChannelIdx
@@ -4297,7 +4297,7 @@ function Home(){
               e('div', { className:'relative rounded-lg overflow-hidden bg-black aspect-video frost' },
                 e(LiveVideo, { channel:selectedChannel, epg:epg, onDbl:()=>toggleFullscreen('#liveVideo'), type: 'live' })
               ),
-              e('div', { className:'space-y-2 max-h-[500px] overflow-y-auto scrollbar-hide pr-2' },
+              e('div', { className:'space-y-2 max-h-[500px] overflow-y-auto scrollbar-hide pr-2 pb-4' },
                 (epg && epg.length>0 ? epg : Array.from({length:4}).map((_,i)=>({ id:'empty'+i, title:'Programa não encontrado', start:'--:--', end:'--:--' }))).map((pg,i)=>{
                   // Determinar se é passado, atual ou futuro usando TIMESTAMPS (mais preciso)
                   const now = new Date()
@@ -4433,12 +4433,8 @@ function Home(){
                 })
               )
             ),
-            // Direita: hora atual + trilho de dias (pixel-perfect)
-            e('div', { className:'col-span-12 md:col-span-3 space-y-3' },
-              // Hora atual no topo (como no print)
-              e('div', { className:'text-right text-white/80 text-lg font-semibold px-2' },
-                new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-              ),
+            // Direita: trilho de dias (pixel-perfect)
+            e('div', { className:'col-span-12 md:col-span-3 space-y-3 overflow-y-auto pb-4' },
               // Trilho de dias
               (()=>{
                 const channelId = selectedChannel?.stream_id || selectedChannel?.id
