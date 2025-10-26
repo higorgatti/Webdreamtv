@@ -5042,26 +5042,26 @@ function Home(){
             style: isFullscreen ? {
               width: '100%',
               height: '100%',
-              objectFit: 'cover',
+              objectFit: 'contain',
               objectPosition: 'center',
               position: 'absolute',
               top: 0,
               left: 0,
               transform: 'none',
               margin: 0,
-              padding: 0
+              padding: 0,
+              backgroundColor: '#000'
             } : {
-              width: '67%',
-              height: '79%',
+              width: '927px',
+              height: '521px',
               objectFit: 'fill',
               objectPosition: 'center',
-              position: 'relative',
-              top: '-12%',
-              left: '-10.5%',
-              transform: 'scale(0.70)',
-              transformOrigin: 'center',
+              position: 'absolute',
+              top: 0,
+              left: 0,
               margin: 0,
-              padding: 0
+              padding: 0,
+              backgroundColor: '#000'
             }
           }),
 
