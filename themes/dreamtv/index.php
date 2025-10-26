@@ -4080,19 +4080,53 @@ function Home(){
         return ()=> window.removeEventListener('keydown', handleKeyDown)
       }, [isLive, liveLeftMode, liveCats, liveStreams, focusedCatIdx, focusedChannelIdx])
 
-      // Scroll automático para item focado
+      // Scroll automático para item focado (APENAS dentro do container, sem afetar a página)
       useEffect(()=>{
         if(liveLeftMode==='categories' && liveCats.length>0){
           const cat = liveCats[focusedCatIdx]
           if(cat){
             const el = document.getElementById('cat-' + getCatId(cat))
-            if(el) el.scrollIntoView({ behavior:'smooth', block:'nearest' })
+            if(el && el.parentElement){
+              const container = el.parentElement
+
+              // Calcular posições relativas ao container
+              const elOffsetTop = el.offsetTop
+              const elOffsetBottom = elOffsetTop + el.offsetHeight
+              const containerScrollTop = container.scrollTop
+              const containerHeight = container.clientHeight
+
+              // Rolar apenas se necessário
+              if(elOffsetBottom > containerScrollTop + containerHeight){
+                // Elemento está abaixo da área visível
+                container.scrollTo({ top: elOffsetBottom - containerHeight, behavior:'smooth' })
+              }else if(elOffsetTop < containerScrollTop){
+                // Elemento está acima da área visível
+                container.scrollTo({ top: elOffsetTop, behavior:'smooth' })
+              }
+            }
           }
         }else if(liveLeftMode==='channels' && liveStreams.length>0){
           const ch = liveStreams[focusedChannelIdx]
           if(ch){
             const el = document.getElementById('channel-' + (ch.stream_id||ch.id))
-            if(el) el.scrollIntoView({ behavior:'smooth', block:'nearest' })
+            if(el && el.parentElement){
+              const container = el.parentElement
+
+              // Calcular posições relativas ao container
+              const elOffsetTop = el.offsetTop
+              const elOffsetBottom = elOffsetTop + el.offsetHeight
+              const containerScrollTop = container.scrollTop
+              const containerHeight = container.clientHeight
+
+              // Rolar apenas se necessário
+              if(elOffsetBottom > containerScrollTop + containerHeight){
+                // Elemento está abaixo da área visível
+                container.scrollTo({ top: elOffsetBottom - containerHeight, behavior:'smooth' })
+              }else if(elOffsetTop < containerScrollTop){
+                // Elemento está acima da área visível
+                container.scrollTo({ top: elOffsetTop, behavior:'smooth' })
+              }
+            }
           }
         }
       }, [focusedCatIdx, focusedChannelIdx, liveLeftMode])
@@ -4105,13 +4139,13 @@ function Home(){
 
       if(isLive){
         const totalAll = liveAllCount || (liveCats||[]).reduce((acc,c)=> acc + (Number(c.total)||0), 0)
-        return e('div', { className:'star-bg h-screen p-4 md:p-6 relative overflow-hidden' },
+        return e('div', { className:'star-bg h-screen p-4 md:p-6 relative overflow-hidden flex flex-col' },
           e(TopBar),
-          e('div', { className:'grid grid-cols-12 gap-4' },
+          e('div', { className:'grid grid-cols-12 gap-4 flex-1 overflow-hidden' },
             // Esquerda: categorias ou canais
-            e('div', { className:'col-span-12 md:col-span-3 space-y-3' },
+            e('div', { className:'col-span-12 md:col-span-3 flex flex-col h-full overflow-hidden' },
               e('button', {
-                className:'w-full frost rounded-lg px-4 py-3 flex items-center justify-between cursor-pointer transition-all hover:border-purple-400/40',
+                className:'w-full frost rounded-lg px-4 py-3 flex items-center justify-between cursor-pointer transition-all hover:border-purple-400/40 mb-3 sticky top-0 z-10',
                 onClick:()=> setLiveLeftMode('categories')
               },
                 e('div', {
@@ -4126,9 +4160,9 @@ function Home(){
                   style: { pointerEvents: 'none' }
                 }, String(liveLeftMode==='categories' ? totalAll : (liveStreams?.length||0)))
               ),
-              error && e('div', { className:'text-red-300 text-xs' }, 'Live: ', error),
+              error && e('div', { className:'text-red-300 text-xs mb-3' }, 'Live: ', error),
               liveLeftMode==='categories' ?
-                e('div', null,
+                e('div', { className:'overflow-y-auto flex-1 space-y-3' },
                   toArray(liveCats).map((cat, idx)=> {
                     const catId = getCatId(cat)
                     const count = (liveCounts && liveCounts[String(catId)]) ?? cat.total ?? 0
@@ -4152,7 +4186,7 @@ function Home(){
                   e('div', { className:'text-center text-xs text-gray-400 mt-3 py-2' }, '↑↓ Navegar | → Enter Abrir | ← ESC Voltar')
                 )
               :
-                e('div', null,
+                e('div', { className:'overflow-y-auto flex-1 space-y-3' },
                   toArray(liveStreams).map((item, idx)=> {
                       const key = item.stream_id || item.id || item.name
                       const isFocused = idx === focusedChannelIdx
@@ -8780,12 +8814,12 @@ window.resetNetflixMovies = () => {
           const item = filtered[focusedItemIdx]
           if(item){
             const el = document.getElementById('item-' + (item.stream_id||item.series_id||item.id))
-            if(el) el.scrollIntoView({ behavior:'smooth', block:'nearest' })
+            if(el) el.scrollIntoView({ behavior:'smooth', block:'center', inline:'nearest' })
           }
         }
       }, [focusedItemIdx, view, filtered])
 
-      return e('div', { className:'star-bg h-screen p-6 overflow-hidden' },
+      return e('div', { className:'star-bg h-screen p-6 overflow-hidden flex flex-col' },
         e(TopBar),
         e('div', { className:'flex flex-wrap items-center gap-3 mb-4' },
           e('button', { onClick:()=> setView(selectedCat.type==='live'?'live-categories': selectedCat.type==='vod'?'movie-categories':'series-categories'), className:'text-white text-xl hover:text-purple-400' }, '←'),
@@ -8794,7 +8828,7 @@ window.resetNetflixMovies = () => {
           e('input', { value:query, onChange:(ev)=>setQuery(ev.target.value), placeholder:'Pesquisar...', className:'w-full md:w-72 frost rounded-lg px-4 py-2 text-white placeholder:text-gray-400' })
         ),
         error && e('div', { className:'text-red-300 mb-3' }, 'Erro: ', error),
-        e('div', { className:'grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4' },
+        e('div', { className:'grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 overflow-y-auto flex-1' },
           filtered && filtered.length>0 ?
             [
               ...filtered.map((item, idx)=> {
