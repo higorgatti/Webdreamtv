@@ -4188,7 +4188,7 @@ function Home(){
               ),
               error && e('div', { className:'text-red-300 text-xs mb-3' }, 'Live: ', error),
               liveLeftMode==='categories' ?
-                e('div', { className:'overflow-y-auto flex-1 space-y-3' },
+                e('div', { className:'overflow-y-auto flex-1 space-y-3 pr-2' },
                   toArray(liveCats).map((cat, idx)=> {
                     const catId = getCatId(cat)
                     const count = (liveCounts && liveCounts[String(catId)]) ?? cat.total ?? 0
@@ -4198,7 +4198,7 @@ function Home(){
                       key:catId||cat.category_name,
                       id: 'cat-' + catId,
                       onClick:()=>{ setFocusedCatIdx(idx); setFocusedChannelIdx(0); openLiveCategory(cat, true) },
-                      className:'w-full rounded-lg px-4 py-3 text-left frost hover:border-purple-400/40 transition-all cursor-pointer ' + (isFocused ? ' ring-2 ring-purple-400 bg-purple-500/20 text-white' : isSelected ? ' ring-2 ring-white/70 bg-white/10 text-white':' text-white/90')
+                      className:'w-full rounded-lg px-4 py-3 text-left frost hover:border-purple-400/40 transition-all cursor-pointer ' + (isSelected || isFocused ? ' border-2 border-white/80 bg-white/10 text-white' : ' text-white/90')
                     },
                       e('div', {
                         className:'flex items-center justify-between',
@@ -4212,7 +4212,7 @@ function Home(){
                   e('div', { className:'text-center text-xs text-gray-400 mt-3 py-2' }, '↑↓ Navegar | → Enter Abrir | ← ESC Voltar')
                 )
               :
-                e('div', { className:'overflow-y-auto flex-1 space-y-3' },
+                e('div', { className:'overflow-y-auto flex-1 space-y-3 pr-2' },
                   toArray(liveStreams).map((item, idx)=> {
                       const key = item.stream_id || item.id || item.name
                       const isFocused = idx === focusedChannelIdx
@@ -4274,7 +4274,7 @@ function Home(){
                       onClick: handleChannelClick,
                       onDoubleClick: handleChannelDoubleClick,
                       // ✅ CORRIGIDO: Apenas isSel para destaque de seleção
-                      className:'w-full rounded-lg px-3 py-3 text-left frost hover:border-purple-400/40 transition-all ' + (isSel ? ' ring-2 ring-purple-400 bg-purple-500/20 text-white' : isFocused ? ' ring-2 ring-white/50 bg-white/10 text-white' : ' text-white/90')
+                      className:'w-full rounded-lg px-3 py-3 text-left frost hover:border-purple-400/40 transition-all ' + (isSel || isFocused ? ' border-2 border-white/80 bg-white/10 text-white' : ' text-white/90')
                     },
                       e('div', { className:'flex items-center gap-3' },
                         // ID removido - mostrar apenas logo e nome
