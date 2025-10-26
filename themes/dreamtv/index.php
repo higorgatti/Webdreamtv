@@ -3393,12 +3393,16 @@ header("Expires: 0");
           const firstChannel = uniqueListWithPlayback[0] // Usar lista COM hasPlayback
           const baseName = firstChannel.baseName
 
+          console.log('📺 [openLiveCategory] Carregando primeiro canal:', firstChannel.name, 'ID:', firstChannel.stream_id)
+
           // Buscar última qualidade preferida para este canal
           const preferredQuality = channelVariants[baseName]
           const variants = getVariantsForChannel(fullList, baseName)
 
           // Tentar encontrar a qualidade preferida, senão usar o primeiro
           let channelToPlay = variants.find(v => v.quality === preferredQuality) || variants[0] || firstChannel
+
+          console.log('🎬 [openLiveCategory] Canal selecionado para play:', channelToPlay.name, 'URL:', channelToPlay.stream_url ? 'OK' : '❌ SEM URL')
 
           // Preservar hasPlayback E tv_archive do firstChannel
           const channelWithArchive = {
@@ -3414,8 +3418,12 @@ header("Expires: 0");
           }
 
           setSelectedChannel(channelWithArchive)
+          console.log('✅ [openLiveCategory] Canal setado:', channelWithArchive.name)
           await loadEpg(channelToPlay.stream_id || channelToPlay.id, 0) // 0 = hoje ao abrir categoria
-        }else{ setSelectedChannel(null); setEpg([]) }
+        }else{
+          console.warn('⚠️ [openLiveCategory] Nenhum canal disponível na categoria')
+          setSelectedChannel(null); setEpg([])
+        }
         if(switchLeft) setLiveLeftMode('channels')
       }catch(err){ setError(err.message); setLiveStreams([]) }
       finally{ setLoading(false) }
@@ -4737,6 +4745,8 @@ function Home(){
       const [videoResolution, setVideoResolution] = useState('1920×1080')
       const hideTimeoutRef = useRef(null)
       const [availableQualities, setAvailableQualities] = useState([])
+      const [loadError, setLoadError] = useState(null) // Estado para erro de carregamento
+      const retryCountRef = useRef(0) // Contador de tentativas
 
       // Mapeamento de qualidade para resolução
       const getResolutionFromQuality = (quality) => {
@@ -4820,43 +4830,135 @@ function Home(){
 
       useEffect(()=>{
         const v = vref.current
-        if(!v) return
+        if(!v) {
+          console.warn('⚠️ [LiveVideo] Elemento de vídeo não encontrado')
+          return
+        }
+
+        // Flag para evitar race conditions
+        let cancelled = false
+        let loadTimeout = null
 
         // Cleanup anterior
         if(hlsRef.current){
+          console.log('🧹 [LiveVideo] Limpando HLS anterior')
           try{ hlsRef.current.destroy() }catch{}
           hlsRef.current = null
         }
 
-        if(!channel){ v.removeAttribute('src'); v.load(); return }
+        if(!channel){
+          console.log('⏸️ [LiveVideo] Sem canal, limpando vídeo')
+          v.removeAttribute('src'); v.load()
+          setLoadError(null)
+          retryCountRef.current = 0
+          return
+        }
 
-        // Usar playback_url se disponível (modo playback de programa gravado)
-        const url = channel.playback_url || buildURL(cfg.server, ['live', cfg.username, cfg.password, (channel.stream_id||channel.id)+'.m3u8'])
-        const canNative = v.canPlayType('application/vnd.apple.mpegURL')
+        console.log('🎥 [LiveVideo] Carregando canal:', channel.name, 'ID:', channel.stream_id || channel.id)
 
-        if(window.Hls && window.Hls.isSupported() && !canNative){
-          // ⚡ Configuração otimizada para início RÁPIDO
-          const h = new Hls({
-            maxBufferLength: 10,        // Reduzido: 30s → 10s (inicia 3x mais rápido!)
-            maxMaxBufferLength: 20,      // Buffer máximo: 20s
-            startPosition: -1,           // Começar do início
-            autoStartLoad: true,         // Carregar imediatamente
-            enableWorker: true,          // Usar Web Worker (performance)
-            lowLatencyMode: false        // Desabilitar baixa latência (mais rápido para VOD)
-          })
-          hlsRef.current = h
-          h.loadSource(url)
-          h.attachMedia(v)
-          h.on(window.Hls.Events.ERROR, (event, data)=>{
-            if(data.fatal){
-              // Fallback automático para próxima qualidade
-              handleQualityFallback()
+        // Limpar erro anterior ao trocar de canal
+        setLoadError(null)
+
+        // Debounce: aguardar 200ms antes de iniciar o vídeo
+        // Isso evita múltiplas inicializações quando o estado muda rapidamente
+        loadTimeout = setTimeout(()=>{
+          if(cancelled) return
+
+          // Usar playback_url se disponível (modo playback de programa gravado)
+          const url = channel.playback_url || buildURL(cfg.server, ['live', cfg.username, cfg.password, (channel.stream_id||channel.id)+'.m3u8'])
+          console.log('🔗 [LiveVideo] URL construída:', url ? 'OK' : '❌ FALHOU')
+
+          const canNative = v.canPlayType('application/vnd.apple.mpegURL')
+
+          if(window.Hls && window.Hls.isSupported() && !canNative){
+            console.log('▶️ [LiveVideo] Usando HLS.js para playback')
+            // ⚡ Configuração otimizada para início RÁPIDO
+            const h = new Hls({
+              maxBufferLength: 10,        // Reduzido: 30s → 10s (inicia 3x mais rápido!)
+              maxMaxBufferLength: 20,      // Buffer máximo: 20s
+              startPosition: -1,           // Começar do início
+              autoStartLoad: true,         // Carregar imediatamente
+              enableWorker: true,          // Usar Web Worker (performance)
+              lowLatencyMode: false        // Desabilitar baixa latência (mais rápido para VOD)
+            })
+            hlsRef.current = h
+            h.loadSource(url)
+            h.attachMedia(v)
+            h.on(window.Hls.Events.MANIFEST_PARSED, ()=>{
+              if(cancelled) return
+              console.log('✅ [LiveVideo] Manifest carregado com sucesso')
+              setLoadError(null)
+              retryCountRef.current = 0
+            })
+            h.on(window.Hls.Events.ERROR, (event, data)=>{
+              console.error('❌ [LiveVideo] Erro HLS:', data.type, data.details, data.fatal ? '(FATAL)' : '')
+              if(data.fatal && !cancelled){
+                // Tentar retry automático (máximo 2 tentativas)
+                if(retryCountRef.current < 2){
+                  retryCountRef.current++
+                  console.log('🔄 [LiveVideo] Tentando novamente... (tentativa', retryCountRef.current, 'de 2)')
+                  setTimeout(()=>{
+                    if(!cancelled && hlsRef.current){
+                      hlsRef.current.destroy()
+                      const newHls = new Hls({
+                        maxBufferLength: 10,
+                        maxMaxBufferLength: 20,
+                        startPosition: -1,
+                        autoStartLoad: true,
+                        enableWorker: true,
+                        lowLatencyMode: false
+                      })
+                      hlsRef.current = newHls
+                      newHls.loadSource(url)
+                      newHls.attachMedia(v)
+                      newHls.on(window.Hls.Events.MANIFEST_PARSED, ()=>{
+                        if(!cancelled){
+                          setLoadError(null)
+                          v.play().catch(()=>{})
+                        }
+                      })
+                      newHls.on(window.Hls.Events.ERROR, (e, d)=>{
+                        if(d.fatal && !cancelled){
+                          setLoadError('Stream indisponível. Tente outro canal.')
+                        }
+                      })
+                    }
+                  }, 1000)
+                }else{
+                  // Após 2 tentativas, mostrar erro
+                  setLoadError('Stream indisponível. Tente outro canal.')
+                }
+              }
+            })
+          }else{
+            console.log('▶️ [LiveVideo] Usando playback nativo')
+            v.src = url
+            v.onerror = ()=>{
+              if(!cancelled) setLoadError('Stream indisponível. Tente outro canal.')
             }
-          })
-        }else{ v.src = url }
-        v.play().catch(()=>{})
+          }
+
+          if(!cancelled){
+            v.play().then(()=>{
+              if(!cancelled){
+                console.log('▶️ [LiveVideo] Vídeo iniciado com sucesso')
+                setLoadError(null)
+              }
+            }).catch((err)=>{
+              if(!cancelled){
+                console.error('❌ [LiveVideo] Erro ao iniciar vídeo:', err.message)
+                // Não mostrar erro se for "interrupted" (normal durante navegação rápida)
+                if(!err.message.includes('interrupted')){
+                  setLoadError('Erro ao iniciar reprodução')
+                }
+              }
+            })
+          }
+        }, 200) // Aguardar 200ms antes de iniciar
 
         return ()=>{
+          cancelled = true
+          if(loadTimeout) clearTimeout(loadTimeout)
           if(hlsRef.current){
             try{ hlsRef.current.destroy() }catch{}
             hlsRef.current = null
@@ -5199,6 +5301,36 @@ function Home(){
             toggleFullscreen()
           }
         },
+          // Mensagem de erro (se houver)
+          loadError && e('div', {
+            style: {
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              background: 'rgba(220, 38, 38, 0.95)',
+              color: '#FFFFFF',
+              padding: '20px 40px',
+              borderRadius: '12px',
+              fontSize: '18px',
+              fontWeight: '600',
+              textAlign: 'center',
+              zIndex: 10000,
+              filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.5))',
+              maxWidth: '80%',
+              lineHeight: '1.5'
+            }
+          },
+            e('div', { style: { fontSize: '32px', marginBottom: '10px' } }, '⚠️'),
+            loadError,
+            e('div', {
+              style: {
+                fontSize: '14px',
+                marginTop: '10px',
+                opacity: 0.9
+              }
+            }, 'Selecione outro canal para continuar')
+          ),
           e('video', {
             id:'liveVideo',
             autoPlay:true,
