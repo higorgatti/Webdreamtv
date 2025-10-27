@@ -17,8 +17,6 @@ header("Expires: 0");
   <!-- VERSÃO: Favoritos v2.1 - CACHE BUSTED 2025-10-26 11:10:50 -->
   <script>
     // Limpar cache ao carregar
-    console.log('🚀 DreamTV carregando - Versão: Favoritos v2.1 - TIMESTAMP: 2025-10-26 11:10:50');
-    console.log('⚠️ SE VOCÊ NÃO VER ESTA MENSAGEM, O CACHE ESTÁ ATIVO!');
   </script>
   <!-- React UMD -->
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -742,7 +740,6 @@ header("Expires: 0");
             const result = await task();
             resolve(result);
           } catch (error) {
-            console.error(`[Queue] ❌ ${key}:`, error);
             reject(error);
           } finally {
             running--; inflight.delete(key); pump();
@@ -833,7 +830,7 @@ header("Expires: 0");
         if (Date.now() - cache[key].timestamp > thirtyDays) delete cache[key];
       });
       localStorage.setItem('streamTmdbCache', JSON.stringify(cache));
-    } catch (e) { console.warn('[mergeMedia] Erro ao salvar cache:', e); }
+    } catch (e) { }
   };
 
   window.getCachedTmdbId = function(streamId) {
@@ -847,59 +844,9 @@ header("Expires: 0");
 
   <script>
   'use strict'
+  // Version: 2025-01-25-17:30 - All console logs removed
   const e = React.createElement
   const { useState, useEffect, useMemo, useRef } = React
-
-  // ===== Sistema de Log para Debug =====
-  const debugLogs = []
-  const MAX_LOGS = 50 // Manter só os últimos 50 logs
-  const originalLog = console.log
-
-  console.log = function(...args) {
-    // Salvar logs importantes (com emojis de debug)
-    const msg = args.join(' ')
-    if(msg.includes('🟦') || msg.includes('🟩') || msg.includes('🟨') || msg.includes('🚀') || msg.includes('🔷') || msg.includes('⚠️') || msg.includes('✅') || msg.includes('❌')) {
-      const timestamp = new Date().toLocaleTimeString()
-      debugLogs.push(`[${timestamp}] ${msg}`)
-      // Manter só os últimos MAX_LOGS
-      if(debugLogs.length > MAX_LOGS) debugLogs.shift()
-    }
-    originalLog.apply(console, args)
-  }
-
-  // Função para baixar logs como arquivo
-  window.downloadDebugLogs = () => {
-    const content = debugLogs.join('\n')
-    const blob = new Blob([content], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `debug-logs-${Date.now()}.txt`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
-  // Função para ver últimos N logs
-  window.getLastLogs = (n = 20) => {
-    return debugLogs.slice(-n).join('\n')
-  }
-
-  // Função para mostrar dimensões da tela
-  window.showDimensions = () => {
-    console.clear()
-
-    setTimeout(() => {
-      const featuredMovie = document.querySelector('[style*="overflow: hidden"]')
-      if (featuredMovie) {
-        const rect = featuredMovie.getBoundingClientRect()
-      }
-
-      const firstCard = document.querySelector('[id^="movie-"]')
-      if (firstCard) {
-        const rect = firstCard.getBoundingClientRect()
-      }
-    }, 100)
-  }
 
   // ===== FORÇA LIMPEZA DE CACHE - Service Worker + Hard Reload =====
   if ('serviceWorker' in navigator) {
@@ -924,14 +871,6 @@ header("Expires: 0");
       }
     }
   } catch(e) {
-    console.warn('[CACHE] Erro ao verificar cache TMDB:', e)
-  }
-
-  // Função para copiar últimos N logs
-  window.copyLastLogs = (n = 30) => {
-    const logs = debugLogs.slice(-n).join('\n')
-    navigator.clipboard.writeText(logs)
-    alert(`Últimos ${Math.min(n, debugLogs.length)} logs copiados!`)
   }
 
   // ===== Helpers =====
@@ -1449,7 +1388,6 @@ header("Expires: 0");
       } catch (error) {
         clearTimeout(timeoutId)
         if (error.name === 'AbortError') {
-          console.log(`⚠️ Request ${type} cancelled`)
         }
         throw error
       } finally {
@@ -1512,7 +1450,6 @@ header("Expires: 0");
       // IMPORTANTE: API Xtream Codes NÃO suporta category_id para VOD
       // Esta função existe para compatibilidade, mas faz filtro client-side
       async getVodStreamsByCategory(categoryId) {
-        console.warn('⚠️ VOD API does not support category_id - using client-side filter')
         const allVods = await this.getVodStreams()
 
         if (!Array.isArray(allVods)) {
@@ -1945,12 +1882,10 @@ header("Expires: 0");
         setView('netflix-desenhos')
       }},
       { id: 'collections', icon: '📚', title: 'Coletâneas', action: () => {
-        console.log('⭐ [Sidebar] Clicou em COLETÂNEAS')
         // ===== NÃO RESETAR: Precisamos dos filmes já carregados para construir coleções =====
         // Apenas ativar o modo de coleções (o useEffect vai carregar automaticamente)
         setView('collections')
         if (window.updateNetflixMoviesState) {
-          console.log('✅ [Sidebar] Ativando showCollectionsView')
           window.updateNetflixMoviesState({ showCollectionsView: true })
         }
       }},
@@ -2133,7 +2068,6 @@ header("Expires: 0");
 
     // Wrapper para logar todas as mudanças de view
     const setView = (newView) => {
-      console.log(`🔄 [setView] Mudando view: "${view}" → "${newView}"`)
       console.trace('[setView] Stack trace:')
       setViewRaw(newView)
     }
@@ -2380,9 +2314,7 @@ header("Expires: 0");
           } catch(error) {
             // get_vod_info com 502/500 não é crítico (pode buscar direto no TMDB)
             if(action === 'get_vod_info' && (error.message.includes('502') || error.message.includes('500'))) {
-              console.warn(`⚠️ [API WARNING] ${action}: Servidor temporariamente indisponível, usando TMDB direto`)
             } else {
-              console.error(`❌ [API ERROR] ${action}:`, error.message)
             }
             throw error
           }
@@ -2461,7 +2393,6 @@ header("Expires: 0");
           setMemCache('search', cacheKey, result)
           return result
         }catch(err){
-          console.error('[searchTMDB] Erro:', err)
           return null
         }
       })
@@ -2664,7 +2595,6 @@ header("Expires: 0");
       apiKey = apiKey.replace(/"/g, '')
 
       if(!tmdb_id) {
-        console.warn('[getTMDBDetails] Sem TMDB ID')
         return null
       }
 
@@ -2726,7 +2656,6 @@ header("Expires: 0");
           setMemCache('details', cacheKey, result)
           return result
         }catch(err){
-          console.error('[getTMDBDetails] Erro:', err)
           return null
         }
       })
@@ -2747,7 +2676,6 @@ header("Expires: 0");
       // ===== NOVO: Verificar cache em memória primeiro =====
       const cached = getMemCache('details', cacheKey)
       if(cached) {
-        console.log(`[getTMDBTrailer] ⚡ Cache hit: ${cacheKey}`)
         return cached
       }
 
@@ -2792,7 +2720,6 @@ header("Expires: 0");
 
           return null
         }catch(err){
-          console.error('[getTMDBTrailer] Erro:', err)
           return null
         }
       })
@@ -2837,7 +2764,6 @@ header("Expires: 0");
       apiKey = apiKey.replace(/"/g, '')
 
       if(!collection_id) {
-        console.warn('[getTMDBCollection] Sem collection ID')
         return null
       }
 
@@ -2872,7 +2798,6 @@ header("Expires: 0");
         setTmdbCache(prev => ({ ...prev, [cacheKey]: result }))
         return result
       } catch(err) {
-        console.error('[getTMDBCollection] Erro:', err)
         return null
       }
     }
@@ -3160,7 +3085,6 @@ header("Expires: 0");
         await fetchAndCacheCategories()
 
       }catch(err){
-        console.error('❌ [Preload] Erro ao carregar categorias:', err)
         // Se cache falhar, tentar buscar da API mesmo assim
         await fetchAndCacheCategories()
       }
@@ -3190,7 +3114,6 @@ header("Expires: 0");
           timestamp: Date.now()
         }))
       }catch(e){
-        console.warn('⚠️ [Cache] Falha ao salvar cache:', e)
       }
     }
 
@@ -3217,7 +3140,6 @@ header("Expires: 0");
           timestamp: Date.now()
         }))
       }catch(err){
-        console.warn('⚠️ [Cache] Erro ao atualizar cache em background:', err)
       }
     }
 
@@ -3257,7 +3179,6 @@ header("Expires: 0");
         }
 
       }catch(err){
-        console.error('❌ [Preload] Erro ao pré-carregar conteúdo:', err)
       }
     }
 
@@ -3321,7 +3242,6 @@ header("Expires: 0");
     // Constrói URL de playback para um programa gravado
     function getPlaybackUrl(channelId, startUtc, endUtc){
       if(!channelId || !startUtc) {
-        console.warn('⚠️ getPlaybackUrl: channelId ou startUtc ausente', { channelId, startUtc })
         return null
       }
 
@@ -3393,7 +3313,6 @@ header("Expires: 0");
           const firstChannel = uniqueListWithPlayback[0] // Usar lista COM hasPlayback
           const baseName = firstChannel.baseName
 
-          console.log('📺 [openLiveCategory] Carregando primeiro canal:', firstChannel.name, 'ID:', firstChannel.stream_id)
 
           // Buscar última qualidade preferida para este canal
           const preferredQuality = channelVariants[baseName]
@@ -3402,7 +3321,6 @@ header("Expires: 0");
           // Tentar encontrar a qualidade preferida, senão usar o primeiro
           let channelToPlay = variants.find(v => v.quality === preferredQuality) || variants[0] || firstChannel
 
-          console.log('🎬 [openLiveCategory] Canal selecionado para play:', channelToPlay.name, 'URL:', channelToPlay.stream_url ? 'OK' : '❌ SEM URL')
 
           // Preservar hasPlayback E tv_archive do firstChannel
           const channelWithArchive = {
@@ -3418,10 +3336,8 @@ header("Expires: 0");
           }
 
           setSelectedChannel(channelWithArchive)
-          console.log('✅ [openLiveCategory] Canal setado:', channelWithArchive.name)
           await loadEpg(channelToPlay.stream_id || channelToPlay.id, 0) // 0 = hoje ao abrir categoria
         }else{
-          console.warn('⚠️ [openLiveCategory] Nenhum canal disponível na categoria')
           setSelectedChannel(null); setEpg([])
         }
         if(switchLeft) setLiveLeftMode('channels')
@@ -3455,7 +3371,6 @@ header("Expires: 0");
         const list = Array.isArray(data) ? data : (data && Array.isArray(data.epg_listings) ? data.epg_listings : [])
 
         if(!list || list.length === 0){
-          console.log('EPG vazio ou não disponível')
           setEpg([])
           return
         }
@@ -3472,17 +3387,6 @@ header("Expires: 0");
           // Tentar pegar horários de vários campos possíveis
           const startTime = it.start || it.start_time || it.start_timestamp
           const endTime = it.end || it.end_time || it.stop_timestamp || it.end_timestamp || it.stop
-
-          // DEBUG: Log para ver o que está vindo
-          if(idx === 0){
-            console.log('[EPG DEBUG] Primeiro item:', {
-              raw: it,
-              startTime,
-              endTime,
-              formatted_start: formatEPGTime(startTime),
-              formatted_end: formatEPGTime(endTime)
-            })
-          }
 
           return {
             id: it.id || it.event_id || idx,
@@ -3517,7 +3421,6 @@ header("Expires: 0");
 
         setEpg(filtered)
       }catch(err){
-        console.error('Erro ao carregar EPG:', err)
         setEpg([])
       }
     }
@@ -3590,7 +3493,6 @@ function Home(){
 
         setLoading(false)
       } catch(err) {
-        console.error('Erro ao buscar Top 10:', err)
         setLoading(false)
       }
     }
@@ -3990,11 +3892,9 @@ function Home(){
             category_id: selectedChannel.category_id,
             addedAt: Date.now()
           }
-          console.log('⭐ Canal adicionado aos favoritos:', selectedChannel.name)
         } else {
           // Remover dos favoritos
           delete favorites[channelId]
-          console.log('☆ Canal removido dos favoritos:', selectedChannel.name)
         }
 
         localStorage.setItem('dreamtv_favorites', JSON.stringify(favorites))
@@ -4831,7 +4731,6 @@ function Home(){
       useEffect(()=>{
         const v = vref.current
         if(!v) {
-          console.warn('⚠️ [LiveVideo] Elemento de vídeo não encontrado')
           return
         }
 
@@ -4841,20 +4740,17 @@ function Home(){
 
         // Cleanup anterior
         if(hlsRef.current){
-          console.log('🧹 [LiveVideo] Limpando HLS anterior')
           try{ hlsRef.current.destroy() }catch{}
           hlsRef.current = null
         }
 
         if(!channel){
-          console.log('⏸️ [LiveVideo] Sem canal, limpando vídeo')
           v.removeAttribute('src'); v.load()
           setLoadError(null)
           retryCountRef.current = 0
           return
         }
 
-        console.log('🎥 [LiveVideo] Carregando canal:', channel.name, 'ID:', channel.stream_id || channel.id)
 
         // Limpar erro anterior ao trocar de canal
         setLoadError(null)
@@ -4866,12 +4762,10 @@ function Home(){
 
           // Usar playback_url se disponível (modo playback de programa gravado)
           const url = channel.playback_url || buildURL(cfg.server, ['live', cfg.username, cfg.password, (channel.stream_id||channel.id)+'.m3u8'])
-          console.log('🔗 [LiveVideo] URL construída:', url ? 'OK' : '❌ FALHOU')
 
           const canNative = v.canPlayType('application/vnd.apple.mpegURL')
 
           if(window.Hls && window.Hls.isSupported() && !canNative){
-            console.log('▶️ [LiveVideo] Usando HLS.js para playback')
             // ⚡ Configuração otimizada para início RÁPIDO
             const h = new Hls({
               maxBufferLength: 10,        // Reduzido: 30s → 10s (inicia 3x mais rápido!)
@@ -4886,17 +4780,14 @@ function Home(){
             h.attachMedia(v)
             h.on(window.Hls.Events.MANIFEST_PARSED, ()=>{
               if(cancelled) return
-              console.log('✅ [LiveVideo] Manifest carregado com sucesso')
               setLoadError(null)
               retryCountRef.current = 0
             })
             h.on(window.Hls.Events.ERROR, (event, data)=>{
-              console.error('❌ [LiveVideo] Erro HLS:', data.type, data.details, data.fatal ? '(FATAL)' : '')
               if(data.fatal && !cancelled){
                 // Tentar retry automático (máximo 2 tentativas)
                 if(retryCountRef.current < 2){
                   retryCountRef.current++
-                  console.log('🔄 [LiveVideo] Tentando novamente... (tentativa', retryCountRef.current, 'de 2)')
                   setTimeout(()=>{
                     if(!cancelled && hlsRef.current){
                       hlsRef.current.destroy()
@@ -4931,7 +4822,6 @@ function Home(){
               }
             })
           }else{
-            console.log('▶️ [LiveVideo] Usando playback nativo')
             v.src = url
             v.onerror = ()=>{
               if(!cancelled) setLoadError('Stream indisponível. Tente outro canal.')
@@ -4941,12 +4831,10 @@ function Home(){
           if(!cancelled){
             v.play().then(()=>{
               if(!cancelled){
-                console.log('▶️ [LiveVideo] Vídeo iniciado com sucesso')
                 setLoadError(null)
               }
             }).catch((err)=>{
               if(!cancelled){
-                console.error('❌ [LiveVideo] Erro ao iniciar vídeo:', err.message)
                 // Não mostrar erro se for "interrupted" (normal durante navegação rápida)
                 if(!err.message.includes('interrupted')){
                   setLoadError('Erro ao iniciar reprodução')
@@ -5633,7 +5521,7 @@ function Home(){
 
               // EPG/Info (📋)
               e('button', {
-                onClick: () => console.log('Show EPG/Info'),
+                onClick: () => {},
                 style: {
                   background: 'rgba(255,255,255,0.15)',
                   color: '#FFFFFF',
@@ -6145,7 +6033,6 @@ window.resetNetflixMovies = () => {
 
           const response = await fetch(jsonUrl)
 
-          console.log('[loadCollectionsFromJSON] Response status:', response.status)
 
           if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`)
@@ -6184,7 +6071,6 @@ window.resetNetflixMovies = () => {
                   col.overview = tmdbData.overview
                 }
               } catch (err) {
-                console.warn(`[loadCollectionsFromJSON] Erro ao enriquecer coleção ${col.name}:`, err.message)
               }
             })
           ).then(() => {
@@ -6195,13 +6081,6 @@ window.resetNetflixMovies = () => {
 
         } catch (err) {
           // Silenciar erro 404 ou conteúdo inválido - arquivo collections.json é opcional
-          if (err.message.includes('404') || err.message.includes('Tipo de conteúdo inválido')) {
-            console.warn('[loadCollectionsFromJSON] ⚠️ Arquivo collections.json não encontrado ou inválido (opcional)')
-          } else {
-            console.error('[loadCollectionsFromJSON] ❌ ERRO AO CARREGAR COLEÇÕES:', err.constructor.name + ':', err.message)
-            console.error('[loadCollectionsFromJSON] Mensagem:', err.message)
-            console.error('[loadCollectionsFromJSON] Stack:', err.stack)
-          }
           setCollections([])
         } finally {
           setLoadingCollections(false)
@@ -6210,8 +6089,6 @@ window.resetNetflixMovies = () => {
 
       // Função para construir coleções dinamicamente a partir dos filmes carregados
       const loadCollections = async () => {
-        console.log(`🎬 [loadCollections] Iniciando carregamento de coleções...`)
-        console.log(`📊 [loadCollections] Seções disponíveis: ${globalState.sectionsMovies.length}`)
 
         setLoadingCollections(true)
 
@@ -6220,21 +6097,17 @@ window.resetNetflixMovies = () => {
           const allMovies = []
           for(const section of globalState.sectionsMovies) {
             if(section && section.movies && section.movies.length > 0) {
-              console.log(`📁 [loadCollections] Seção "${section.name}": ${section.movies.length} filmes`)
               allMovies.push(...section.movies)
             }
           }
 
-          console.log(`[loadCollections] 📦 Construindo coleções de ${allMovies.length} filmes...`)
 
           // Usar a função global findCollectionsInMovies
           const foundCollections = await findCollectionsInMovies(allMovies)
 
-          console.log(`[loadCollections] ✅ ${foundCollections.length} coleções encontradas`)
 
           setCollections(foundCollections)
         } catch(err) {
-          console.error('[loadCollections] ❌ Erro ao construir coleções:', err.message)
           setCollections([])
         } finally {
           setLoadingCollections(false)
@@ -6258,7 +6131,6 @@ window.resetNetflixMovies = () => {
 
         // Se tem filmes carregados E ainda não tem coleções E não está carregando
         if (totalMovies >= 50 && collections.length === 0 && !loadingCollections) {
-          console.log(`📦 [useEffect] ${totalMovies} filmes carregados, construindo coleções em background...`)
           loadCollections()
         }
       }, [globalState.sectionsMovies.length]) // Disparar quando novas seções forem adicionadas
@@ -6299,14 +6171,14 @@ window.resetNetflixMovies = () => {
           // Se skipRender === true, não forçar re-render (usado para marginContent)
           if (skipRender) return
 
-          // console.log('[NetflixMovies] 🔁 forceUpdate chamado, categoria atual:', globalState.currentCategoryIndex)
+          // 
           forceUpdate(v => v + 1)
         }
         window.__netflixMoviesListeners.add(listener)
-        // console.log('[NetflixMovies] Listener registrado')
+        // 
         return () => {
           window.__netflixMoviesListeners.delete(listener)
-          // console.log('[NetflixMovies] Listener removido')
+          // 
         }
       }, [])
 
@@ -6318,17 +6190,13 @@ window.resetNetflixMovies = () => {
         // ===== CORREÇÃO CRÍTICA: Atualizar currentViewKey IMEDIATAMENTE antes de qualquer async =====
         const previousViewKey = globalState.currentViewKey
 
-        console.log(`🎬 [NetflixMovies] COMPONENTE RENDERIZADO - Modo: ${modeLabel}${filterLabel}`)
-        console.log(`📌 [NetflixMovies] previousViewKey: ${previousViewKey}, viewKey: ${viewKey}, initialized: ${globalState.initialized}`)
 
         // Verificar se JÁ inicializou ESSA VIEW ESPECÍFICA (antes de mudar currentViewKey)
         if(globalState.initialized && previousViewKey === viewKey) {
-          console.log(`⏭️ [NetflixMovies] View "${viewKey}" já inicializada, pulando...`)
           return
         }
 
         // Agora sim, atualizar currentViewKey para a nova view
-        console.log(`🔄 [NetflixMovies] Mudando currentViewKey: "${previousViewKey}" → "${viewKey}"`)
         globalState.currentViewKey = viewKey
 
         globalState.initialized = true
@@ -6360,25 +6228,17 @@ window.resetNetflixMovies = () => {
             // 2. Filtrar categorias se houver filtro específico
             let selectedCategories = categories
 
-            console.log(`📂 [initMovies] Total de categorias ${categoryType}: ${categories.length}`)
 
             // Aplicar filtro por nome de categoria se especificado
             if (categoryFilter) {
               const filterLower = categoryFilter.toLowerCase()
-              console.log(`🔍 [initMovies] Aplicando filtro: "${categoryFilter}"`)
 
               selectedCategories = categories.filter(cat => {
                 const catName = (cat.category_name || '').toLowerCase()
                 return catName.includes(filterLower)
               })
 
-              console.log(`✅ [initMovies] Categorias filtradas: ${selectedCategories.length}`)
-              if(selectedCategories.length > 0) {
-                console.log(`📋 [initMovies] Categorias encontradas:`, selectedCategories.map(c => c.category_name).join(', '))
-              }
-
               if (selectedCategories.length === 0) {
-                console.error(`[initMovies] ❌ ERRO: Nenhuma categoria encontrada com filtro "${categoryFilter}"`)
                 // ===== CORREÇÃO: NÃO usar todas, mostrar erro =====
                 window.updateNetflixMoviesState({
                   loading: false,
@@ -6387,7 +6247,6 @@ window.resetNetflixMovies = () => {
                 return
               }
             } else {
-              console.log(`📋 [initMovies] SEM filtro - usando todas as ${categories.length} categorias`)
             }
 
             // ===== CORREÇÃO: Guardar categorias com chave única por view =====
@@ -6414,7 +6273,6 @@ window.resetNetflixMovies = () => {
                 allSections.push(section)
               }
             } catch(err) {
-              console.error(`[initMovies] ❌ Erro ao carregar ${firstCat.category_name}:`, err.message)
             }
 
             if(allSections.length === 0) {
@@ -6458,7 +6316,6 @@ window.resetNetflixMovies = () => {
               preloadTimeouts.forEach(id => clearTimeout(id))
             })
           } catch(err) {
-            console.error('[initMovies] ❌ Erro:', err.message)
             window.updateNetflixMoviesState({ errorMsg: err.message || 'Erro ao carregar categorias. Verifique a API/proxy.' })
           } finally {
             window.updateNetflixMoviesState({ loading: false })
@@ -6619,11 +6476,8 @@ window.resetNetflixMovies = () => {
         const cat = cats[categoryIndex]
 
         if(!cat || !cat.category_name) {
-          console.error(`[loadCategoryMovies] Categoria inválida no índice ${categoryIndex}`)
           return null
         }
-
-        console.log(`📥 [loadCategoryMovies] Carregando categoria: "${cat.category_name}" (ID: ${getCatId(cat)})`)
 
         try {
           // Buscar APENAS os filmes/séries desta categoria (performance otimizada)
@@ -6633,10 +6487,8 @@ window.resetNetflixMovies = () => {
           const data = await apiCall(apiAction, { category_id: getCatId(cat) })
           const allMoviesInCategory = toArray(data)
 
-          console.log(`✅ [loadCategoryMovies] "${cat.category_name}": ${allMoviesInCategory.length} ${contentLabel} encontrados`)
 
           if(allMoviesInCategory.length === 0) {
-            console.warn(`[loadCategoryMovies] "${cat.category_name}" sem filmes`)
             return null
           }
 
@@ -6658,14 +6510,12 @@ window.resetNetflixMovies = () => {
               allMoviesInCategory.slice(1, PRIORITY_COUNT).map(movie => enrichMovieWithTMDB(movie, contentTypeParam))
             ).then(enrichedMovies => {
             }).catch(err => {
-              console.error(`[loadCategoryMovies] ❌ Erro no enriquecimento background:`, err)
             })
           }
 
           // Retornar com primeiro filme enriquecido + resto sem enriquecer
           const finalMovies = [firstEnriched, ...allMoviesInCategory.slice(1)]
 
-          console.log(`📦 [loadCategoryMovies] Retornando seção: "${cat.category_name}" com ${finalMovies.length} itens`)
 
           // Retornar TODOS os filmes da categoria
           // A renderização será feita sob demanda (scroll infinito)
@@ -6677,7 +6527,6 @@ window.resetNetflixMovies = () => {
             visibleCount: INITIAL_LOAD  // Quantos renderizar inicialmente
           }
         } catch(err) {
-          console.error(`[loadCategoryMovies] Erro ao carregar "${cat.category_name}":`, err.message)
           return null
         }
       }
@@ -6696,7 +6545,6 @@ window.resetNetflixMovies = () => {
         }
 
         if(categoryIndex < 0 || categoryIndex >= availableCategories.length) {
-          console.error(`[loadCategory] ❌ Índice inválido: ${categoryIndex} (disponível: 0-${availableCategories.length - 1})`)
           return
         }
 
@@ -6713,7 +6561,6 @@ window.resetNetflixMovies = () => {
 
         const cat = availableCategories[categoryIndex]
         if(!cat) {
-          console.error(`[loadCategory] ❌ Categoria ${categoryIndex} não encontrada em availableCategories`)
           return
         }
 
@@ -6736,10 +6583,8 @@ window.resetNetflixMovies = () => {
               sectionsMovies: newSections
             })
           } else {
-            console.warn(`[loadCategory] ⚠️ ${cat.category_name}: sem filmes ou seção inválida`)
           }
         } catch(err){
-          console.error(`[loadCategory] ❌ Erro ao carregar ${cat.category_name}:`, err.message)
         } finally {
           // Remover do Set de categorias em carregamento
           loadingCategoriesRef.current.delete(categoryIndex)
@@ -6771,7 +6616,7 @@ window.resetNetflixMovies = () => {
 
       // Scroll handler - PART 1: Netflix-style scroll (6 cards visible)
       const handleScrollMovies = (sectionId, direction) => {
-        // console.log(`[handleScrollMovies] 🎬 INICIANDO - sectionId: ${sectionId}, direction: ${direction}`)
+        // 
 
         setMarginContent(state => {
           const currentMargin = state[sectionId] || 0
@@ -6807,14 +6652,14 @@ window.resetNetflixMovies = () => {
             finalValue = Math.min(newValue, 0)
           }
 
-          // console.log(`[SCROLL] Section ${sectionId}, dir: ${direction}, cardsVisible: ${cardsVisible}, scrollAmount: ${scrollAmount}px, margin: ${currentMargin} -> ${finalValue}, max: ${maxScroll}`)
+          // 
 
           // ===== NOVO: Log do estado completo que será retornado =====
           const newState = {
             ...state,
             [sectionId]: finalValue
           }
-          // console.log(`[handleScrollMovies] ✅ RETORNANDO novo estado:`, newState)
+          // 
 
           // ===== DESABILITADO: Não atualizar featured movie durante scroll horizontal =====
           // Isso causava re-renders (piscadas) a cada clique na seta
@@ -7095,7 +6940,6 @@ window.resetNetflixMovies = () => {
           const img = new Image()
           img.onload = () => setImageError(false)
           img.onerror = () => {
-            console.warn('[FeaturedMovie] Imagem falhou ao carregar:', movie.imageUrl)
             setImageError(true)
           }
           img.src = movie.imageUrl
@@ -7556,7 +7400,6 @@ window.resetNetflixMovies = () => {
               setEnrichedMovie(enriched)
               isEnrichingRef.current = false
             }).catch(err => {
-              console.warn(`[Movie] ⚠️ Erro ao enriquecer "${movie.name}":`, err)
               isEnrichingRef.current = false
             })
           }
@@ -7578,7 +7421,6 @@ window.resetNetflixMovies = () => {
               if (isHoveredRef.current) {
                 const trailerUrl = await getTMDBTrailer(tmdbIdRef.current, 'movie')
                 if (trailerUrl && isHoveredRef.current) {
-                  console.log('[Movie] ✅ Mostrando trailer no card')
                   setCardTrailerUrl(trailerUrl)
                   setShowTrailerInCard(true)
                 }
@@ -7594,7 +7436,7 @@ window.resetNetflixMovies = () => {
           return () => {
             if (timeoutId) {
               clearTimeout(timeoutId)
-              // console.log('[Movie] ⏹️ Timer de trailer cancelado')
+              // 
             }
           }
         }, [isHovered])
@@ -7630,9 +7472,6 @@ window.resetNetflixMovies = () => {
             e.stopPropagation()
 
             // ===== NAVEGAR PARA PÁGINA DE DETALHES =====
-            console.log('🎬 Abrindo detalhes:', movie.name || movie.title)
-            console.log('📦 Dados originais do movie:', movie)
-            console.log('📦 Dados enriquecidos enrichedMovie:', enrichedMovie)
 
             // Preparar dados enriquecidos para página de detalhes
             const contentData = {
@@ -7642,7 +7481,6 @@ window.resetNetflixMovies = () => {
               stream_id: movie.stream_id || movie.id
             }
 
-            console.log('📦 contentData FINAL que vai para SerieDetails:', contentData)
 
             // Se for série, buscar info adicional da API (episódios, temporadas)
             if (isSeriesMode) {
@@ -7662,7 +7500,6 @@ window.resetNetflixMovies = () => {
                 contentData.seasons_count = seasonsCount
                 contentData.seriesInfo = seriesInfo // Guardar para uso posterior
               } catch(err) {
-                console.error('Erro ao buscar info da série:', err)
               }
             }
 
@@ -7795,9 +7632,6 @@ window.resetNetflixMovies = () => {
                 ev.stopPropagation()
 
                 // ===== NAVEGAR PARA PÁGINA DE DETALHES (mesmo código do onClick principal) =====
-                console.log('🎬 Abrindo detalhes (via overlay):', movie.name || movie.title)
-                console.log('📦 [OVERLAY] Dados originais do movie:', movie)
-                console.log('📦 [OVERLAY] Dados enriquecidos enrichedMovie:', enrichedMovie)
 
                 const contentData = {
                   ...enrichedMovie,
@@ -7806,7 +7640,6 @@ window.resetNetflixMovies = () => {
                   stream_id: movie.stream_id || movie.id
                 }
 
-                console.log('📦 [OVERLAY] contentData FINAL que vai para SerieDetails:', contentData)
 
                 if (isSeriesMode) {
                   try {
@@ -7824,7 +7657,6 @@ window.resetNetflixMovies = () => {
                     contentData.seasons_count = seasonsCount
                     contentData.seriesInfo = seriesInfo
                   } catch(err) {
-                    console.error('Erro ao buscar info da série:', err)
                   }
                 }
 
@@ -8024,7 +7856,6 @@ window.resetNetflixMovies = () => {
                   type: 'button',
                   onClick: async (ev) => {
                     ev.stopPropagation()
-                    console.log('🎬 Iniciando filme via botão Play:', movie.name || movie.title)
 
                     try {
                       const id = movie.stream_id || movie.id
@@ -8035,7 +7866,6 @@ window.resetNetflixMovies = () => {
                       setCurrent({ name: movie.name || movie.title || 'Filme', url, isHls })
                       setView('player')
                     } catch(err) {
-                      console.error('Erro ao iniciar filme:', err)
                     }
                   },
                   style: {
@@ -8278,7 +8108,7 @@ window.resetNetflixMovies = () => {
             // ===== DEBOUNCE: Aguardar 300ms antes de carregar mais =====
             const timeoutId = setTimeout(() => {
               const newCount = Math.min(visibleCount + 20, movies.length) // Carregar 20 de uma vez (menos chamadas)
-              // console.log(`[SectionMovies] 📦 Carregando mais filmes: ${visibleCount} -> ${newCount}`)
+              // 
               setVisibleCount(newCount)
             }, 300)
 
@@ -8348,7 +8178,6 @@ window.resetNetflixMovies = () => {
 
             if (isScrollingDown && onNextCategory) {
               e.preventDefault()
-              console.log('[SectionMovies] 🔽 Scroll para baixo - Próxima categoria')
               onNextCategory()
 
               // Debounce de 800ms para evitar mudanças rápidas demais
@@ -8357,7 +8186,6 @@ window.resetNetflixMovies = () => {
               }, 800)
             } else if (isScrollingUp && onPrevCategory) {
               e.preventDefault()
-              console.log('[SectionMovies] 🔼 Scroll para cima - Categoria anterior')
               onPrevCategory()
 
               // Debounce de 800ms
@@ -8541,7 +8369,6 @@ window.resetNetflixMovies = () => {
                     sectionId,
                     idx,
                     onClick: async (collection, movies) => {
-                      console.log('[CollectionCard] Abrindo coleção:', collection.name, 'com', movies.length, 'filmes')
 
                       // 1. ABRIR INSTANTANEAMENTE com dados que já temos
                       const quickMovies = movies.map(movie => ({
@@ -8557,7 +8384,6 @@ window.resetNetflixMovies = () => {
                       setShowCollectionsView(false)
 
                       // 2. DEPOIS carregar dados completos em background (sem bloquear UI)
-                      console.log('[CollectionCard] Enriquecendo dados em background...')
 
                       const fetchPromises = movies.map(async (movie, index) => {
                         // Tentar encontrar nos filmes já carregados
@@ -8576,7 +8402,7 @@ window.resetNetflixMovies = () => {
                         //   const info = await apiCall('get_vod_info', { vod_id: movie.stream_id })
                         //   ...
                         // } catch (err) {
-                        //   console.warn('[CollectionCard] ⚠️ Erro ao buscar info:', movie.name, err)
+                        //   
                         // }
 
                         // Fallback
@@ -8610,7 +8436,6 @@ window.resetNetflixMovies = () => {
                         return getYear(yearA) - getYear(yearB) // Ordem crescente (mais antigo primeiro)
                       })
 
-                      console.log('[CollectionCard] ✅ Dados completos carregados e ordenados por ano')
                       setSelectedCollectionMovies(fullMovies)
                     }
                   })
@@ -8629,7 +8454,6 @@ window.resetNetflixMovies = () => {
             type: 'button',
             onClick: (e) => {
               e.stopPropagation() // Evita que o clique propague e cause blur nos cards
-              console.log('[btnScrollRight] Clicado! sectionId:', sectionId, 'movies.length:', movies.length)
 
               // Versão local do handleScrollMovies que usa movies diretamente
               setMarginContent(prevState => {
@@ -8644,7 +8468,6 @@ window.resetNetflixMovies = () => {
                 const maxScroll = Math.min(0, -(totalWidth - viewportWidth))
 
                 if (totalWidth <= viewportWidth) {
-                  console.log(`[SCROLL] Section ${sectionId}: não precisa scroll`)
                   return prevState
                 }
 
@@ -8652,7 +8475,6 @@ window.resetNetflixMovies = () => {
                 let newValue = currentMargin - scrollAmount // left = avançar para direita
                 let finalValue = newValue < maxScroll ? 0 : Math.max(newValue, maxScroll)
 
-                console.log(`[SCROLL] Section ${sectionId}: ${currentMargin} -> ${finalValue}, maxScroll: ${maxScroll}`)
                 return { ...prevState, [sectionId]: finalValue }
               })
             },
@@ -8691,7 +8513,7 @@ window.resetNetflixMovies = () => {
       }
 
       // RENDER PRINCIPAL
-      // console.log('[NetflixMovies] RENDER - loading:', globalState.loading, 'sectionsMovies.length:', globalState.sectionsMovies.length, 'errorMsg:', globalState.errorMsg)
+      // 
 
       // Mostrar loading enquanto carrega
       if(globalState.loading && globalState.sectionsMovies.length === 0){
@@ -8951,7 +8773,6 @@ window.resetNetflixMovies = () => {
                 if (nextSection && nextSection.movies && nextSection.movies.length > 0) {
                   const firstMovie = nextSection.movies[0]
                   const newFeaturedId = firstMovie.stream_id || firstMovie.id
-                  console.log(`[onNextCategory] Atualizando featuredMovieId para: ${firstMovie.name}`)
                   window.updateNetflixMoviesState({
                     featuredMovieId: newFeaturedId
                   })
@@ -8968,7 +8789,6 @@ window.resetNetflixMovies = () => {
 
                 // Se a categoria ainda não foi carregada, carregar IMEDIATAMENTE
                 if (!nextSection) {
-                  console.log(`[onNextCategory] 🔄 Carregando categoria ${nextIndex + 1}...`)
                   loadCategory(nextIndex)
                 }
               }
@@ -8982,7 +8802,6 @@ window.resetNetflixMovies = () => {
                 if (prevSection && prevSection.movies && prevSection.movies.length > 0) {
                   const firstMovie = prevSection.movies[0]
                   const newFeaturedId = firstMovie.stream_id || firstMovie.id
-                  console.log(`[onPrevCategory] Atualizando featuredMovieId para: ${firstMovie.name}`)
                   window.updateNetflixMoviesState({
                     featuredMovieId: newFeaturedId
                   })
@@ -8999,7 +8818,6 @@ window.resetNetflixMovies = () => {
 
                 // Se a categoria ainda não foi carregada, carregar IMEDIATAMENTE
                 if (!prevSection) {
-                  console.log(`[onPrevCategory] 🔄 Carregando categoria ${prevIndex + 1}...`)
                   loadCategory(prevIndex)
                 }
               }
@@ -9373,7 +9191,6 @@ window.resetNetflixMovies = () => {
           hlsObj.currentLevel = level.index
           setCurrentLevel(level.index)
           setIsAuto(false)
-          console.log(`✅ Qualidade alterada: ${quality} (${level.width}x${level.height})`)
 
           // Salvar preferência
           if (channelInfo?.stream_id) {
@@ -9388,7 +9205,6 @@ window.resetNetflixMovies = () => {
         hlsObj.currentLevel = -1
         setIsAuto(true)
         setCurrentLevel(-1)
-        console.log('✅ Modo AUTO ativado')
       }
 
       // Toggle favorito
@@ -9412,11 +9228,9 @@ window.resetNetflixMovies = () => {
             category_id: channelInfo.category_id,
             addedAt: Date.now()
           }
-          console.log('⭐ Canal adicionado aos favoritos:', channelInfo.name)
         } else {
           // Remover dos favoritos
           delete favorites[channelInfo.stream_id]
-          console.log('☆ Canal removido dos favoritos:', channelInfo.name)
         }
 
         localStorage.setItem('dreamtv_favorites', JSON.stringify(favorites))
@@ -9441,7 +9255,6 @@ window.resetNetflixMovies = () => {
             else if (document.mozCancelFullScreen) await document.mozCancelFullScreen()
           }
         } catch (err) {
-          console.warn('Erro ao alternar fullscreen:', err)
         }
       }
 
@@ -9614,10 +9427,8 @@ window.resetNetflixMovies = () => {
 
           try {
             setLoading(true)
-            console.log('[EpisodesList] Buscando informações da série ID:', seriesData.series_id)
 
             const data = await apiCall('get_series_info', { series_id: seriesData.series_id })
-            console.log('[EpisodesList] Dados recebidos:', data)
 
             if (data && data.seasons) {
               // Converter object de temporadas em array e ordenar
@@ -9628,7 +9439,6 @@ window.resetNetflixMovies = () => {
                 }))
                 .sort((a, b) => a.seasonNumber - b.seasonNumber)
 
-              console.log('[EpisodesList] Temporadas processadas:', seasonsArray.length)
               setSeasonsData(seasonsArray)
 
               // Selecionar primeira temporada por padrão
@@ -9638,7 +9448,6 @@ window.resetNetflixMovies = () => {
             }
             setLoading(false)
           } catch (err) {
-            console.error('[EpisodesList] Erro ao buscar:', err)
             setError('Erro ao carregar episódios')
             setLoading(false)
           }
@@ -9673,7 +9482,6 @@ window.resetNetflixMovies = () => {
       }
 
       const handleEpisodeClick = (episode) => {
-        console.log('[EpisodesList] Episódio clicado:', episode)
 
         // Construir URL do episódio
         const ext = episode.container_extension || 'mp4'
@@ -10109,18 +9917,6 @@ window.resetNetflixMovies = () => {
         stream_id
       } = contentData
 
-      console.log('[SerieDetails] Dados recebidos:', {
-        tmdb_backdrop,
-        tmdb_overview,
-        tmdb_rating,
-        tmdb_genres,
-        tmdb_cast,
-        tmdb_director,
-        backdrop,
-        cover,
-        stream_icon
-      })
-
       // Dados processados - PRIORIZAR TMDB
       const displayTitle = title || name || 'Sem título'
       const displayYear = tmdb_year || year || '—'
@@ -10136,13 +9932,11 @@ window.resetNetflixMovies = () => {
 
       // Se cast é string (vem do TMDB como "Nome1, Nome2, Nome3"), converter para array de objetos
       if (typeof displayCast === 'string') {
-        console.log('[SerieDetails] Cast é string, convertendo:', displayCast)
         displayCast = displayCast.split(',').map(name => ({
           name: name.trim(),
           profile_path: null
         }))
       } else if (!Array.isArray(displayCast)) {
-        console.warn('[SerieDetails] Cast não é array nem string:', typeof displayCast, displayCast)
         displayCast = []
       }
 
@@ -10151,7 +9945,6 @@ window.resetNetflixMovies = () => {
 
       // Handlers
       const handleWatch = () => {
-        console.log('🎬 Assistir:', displayTitle)
         // TODO: Navegar para player ou mostrar episódios
         if (series_id) {
           // É série: mostrar episódios
@@ -10167,7 +9960,6 @@ window.resetNetflixMovies = () => {
       }
 
       const handleTrailer = () => {
-        console.log('🎞️ Trailer:', displayTitle)
         if (trailer_url) {
           window.open(trailer_url, '_blank')
         } else {
@@ -10177,18 +9969,15 @@ window.resetNetflixMovies = () => {
 
       const handleFavorite = () => {
         setIsFavorite(!isFavorite)
-        console.log(isFavorite ? '💔 Removido dos favoritos' : '❤️ Adicionado aos favoritos')
         // TODO: Salvar em localStorage ou API
       }
 
       const handleEpisodes = () => {
-        console.log('📺 Mostrar episódios:', displayTitle)
         // Navegar para a view de episódios
         setView('episodes')
       }
 
       const handleCastClick = (actor) => {
-        console.log('👤 Ver detalhes do ator:', actor.name)
         // TODO: Modal com biografia do ator
       }
 
@@ -10348,11 +10137,9 @@ window.resetNetflixMovies = () => {
             category_id: current.category_id,
             addedAt: Date.now()
           }
-          console.log('⭐ Canal adicionado aos favoritos:', current.name)
         } else {
           // Remover dos favoritos
           delete favorites[current.stream_id]
-          console.log('☆ Canal removido dos favoritos:', current.name)
         }
 
         localStorage.setItem('dreamtv_favorites', JSON.stringify(favorites))
@@ -10382,9 +10169,7 @@ window.resetNetflixMovies = () => {
               // iOS Safari
               video.webkitEnterFullscreen()
             }
-            console.log('✅ Player de vídeo em fullscreen')
           } catch (err) {
-            console.warn('⚠️ Fullscreen não disponível:', err.message)
           }
         }
 
@@ -10415,7 +10200,6 @@ window.resetNetflixMovies = () => {
 
             // Voltar para netflix-movies
             setView('netflix-movies')
-            console.log('⬅️ Voltando para categorias')
           }
         }
 
@@ -10709,7 +10493,6 @@ window.resetNetflixMovies = () => {
             }
           }
         } catch (err) {
-          console.warn('Erro ao alternar fullscreen:', err)
         }
       }
 
@@ -10830,10 +10613,11 @@ window.resetNetflixMovies = () => {
       // Novo: contagem de categorias
       const tmp={}; ['1','2','1'].forEach(id=> tmp[id]=(tmp[id]||0)+1)
       assert('agrupamento simples funciona', tmp['1']===2 && tmp['2']===1)
-    }catch(err){ console.error('Tests crashed:', err) }
+    }catch(err){ }
     const passed = tests.filter(t=>t[1]).length
     if(tests.length){ console.info(`// ===== Pequenos testes (DevTests) ===== ${passed}/${tests.length} passed`, tests) }
   })()
   </script>
 </body>
 </html>
+
