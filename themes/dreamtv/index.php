@@ -7948,12 +7948,12 @@ window.resetNetflixMovies = () => {
                     }
                   }, '▶ Assistir'),
 
-                  // More info button
+                  // Trailer button
                   e('a', {
                     href: '#',
                     onClick: (ev) => {
                       ev.preventDefault()
-                      setView('home')
+                      alert('Funcionalidade em breve!')
                     },
                     style: {
                       display: 'flex',
@@ -7967,7 +7967,7 @@ window.resetNetflixMovies = () => {
                       color: '#fff',
                       fontWeight: '600'
                     }
-                  }, 'ℹ️ Voltar')
+                  }, '🎬 Trailer')
                 )
               )
             )
@@ -9045,19 +9045,7 @@ window.resetNetflixMovies = () => {
                   margin: 0,
                   textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
                 }
-              }, name),
-
-              // Indicador de filmes carregados - Sempre visível
-              e('span', {
-                style: {
-                  fontSize: '14px',
-                  color: '#ccc',
-                  background: 'rgba(255,255,255,0.15)',
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  fontWeight: '500'
-                }
-              }, `${visibleCount}/${movies.length}`)
+              }, name)
             )
           ),
 
