@@ -1616,6 +1616,177 @@ header("Expires: 0");
            prevProps.className === nextProps.className
   })
 
+  // ===== BARRA DE CATEGORIAS DE FILMES =====
+  function CategoryBar({ vodCats, view, setView, selectedCat, setSelectedCat }) {
+    // Só mostrar na view de filmes
+    if (view !== 'netflix-movies' && view !== 'vod-categories') return null
+
+    const [showDropdown, setShowDropdown] = useState(false)
+
+    // Categorias prioritárias no topo (ordem específica)
+    const priorityNames = [
+      'lançamentos',
+      'lancamentos',
+      'lançamentos legendados',
+      'lancamentos legendados',
+      'cinema',
+      'indicados ao oscar',
+      'oscar'
+    ]
+
+    // Separar categorias prioritárias e outras
+    const priorityCats = []
+    const otherCats = []
+
+    vodCats.forEach(cat => {
+      const catName = cat.category_name || cat.name || ''
+      const normalizedName = catName.toLowerCase().trim()
+
+      // Verificar se é uma categoria prioritária
+      // Lógica especial: "lançamentos" não deve pegar "lançamentos legendados"
+      let priorityIndex = -1
+
+      // Verificar match exato primeiro
+      priorityIndex = priorityNames.findIndex(pName => normalizedName === pName)
+
+      // Se não achou match exato, tentar substring (mas com cuidado)
+      if (priorityIndex === -1) {
+        // Para "lançamentos legendados" e "lancamentos legendados"
+        if (normalizedName.includes('legendado')) {
+          priorityIndex = priorityNames.findIndex(pName => pName.includes('legendado'))
+        }
+        // Para "lançamentos" simples (sem "legendado")
+        else if (normalizedName.includes('lançamento') || normalizedName.includes('lancamento')) {
+          priorityIndex = priorityNames.findIndex(pName =>
+            (pName === 'lançamentos' || pName === 'lancamentos')
+          )
+        }
+        // Para "cinema"
+        else if (normalizedName.includes('cinema')) {
+          priorityIndex = priorityNames.findIndex(pName => pName === 'cinema')
+        }
+        // Para "indicados ao oscar" ou "oscar"
+        else if (normalizedName.includes('oscar')) {
+          priorityIndex = priorityNames.findIndex(pName => pName.includes('oscar'))
+        }
+      }
+
+      if (priorityIndex !== -1) {
+        priorityCats.push({ cat, priority: priorityIndex })
+      } else {
+        otherCats.push(cat)
+      }
+    })
+
+    // Ordenar categorias prioritárias pela ordem definida
+    priorityCats.sort((a, b) => a.priority - b.priority)
+    const sortedPriorityCats = priorityCats.map(item => item.cat)
+
+    // Combinar: prioritárias primeiro, depois as outras
+    const orderedCats = [...sortedPriorityCats, ...otherCats]
+
+    // Inicializar categoria selecionada com useEffect para evitar update durante render
+    useEffect(() => {
+      if (!selectedCat && orderedCats.length > 0) {
+        setSelectedCat(orderedCats[0])
+      }
+    }, [orderedCats.length, selectedCat])
+
+    const selectedCatName = selectedCat ? (selectedCat.category_name || selectedCat.name || 'Categoria') : 'Selecione'
+
+    return e('div', {
+      style: {
+        position: 'fixed',
+        top: '70px',
+        right: '40px',
+        zIndex: 999
+      }
+    },
+      // Botão "Categorias" com dropdown
+      e('div', {
+        style: {
+          position: 'relative'
+        }
+      },
+        e('button', {
+          onClick: () => setShowDropdown(!showDropdown),
+          style: {
+            padding: '8px 20px',
+            background: 'rgba(229, 9, 20, 0.9)',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '600',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            transition: 'all 0.3s'
+          },
+          onMouseEnter: (e) => {
+            e.currentTarget.style.background = 'rgba(229, 9, 20, 1)'
+          },
+          onMouseLeave: (e) => {
+            e.currentTarget.style.background = 'rgba(229, 9, 20, 0.9)'
+          }
+        },
+          'Categorias: ',
+          e('span', { style: { fontWeight: 'normal' } }, selectedCatName),
+          e('span', { style: { marginLeft: '4px' } }, showDropdown ? '▲' : '▼')
+        ),
+
+        // Dropdown com todas as categorias
+        showDropdown && e('div', {
+          style: {
+            position: 'absolute',
+            top: '100%',
+            right: 0,
+            marginTop: '8px',
+            background: '#1a1a1a',
+            borderRadius: '8px',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5)',
+            minWidth: '250px',
+            maxHeight: '400px',
+            overflowY: 'auto',
+            zIndex: 1000,
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }
+        },
+          // Categorias ordenadas (sem opção "Todas")
+          ...orderedCats.map(cat => {
+            const catId = getCatId(cat)
+            const catName = cat.category_name || cat.name || 'Sem nome'
+            const isSelected = selectedCat && getCatId(selectedCat) === catId
+
+            return e('div', {
+              key: catId,
+              onClick: () => {
+                setSelectedCat(cat)
+                setShowDropdown(false)
+              },
+              style: {
+                padding: '12px 20px',
+                color: isSelected ? '#e50914' : '#e0e0e0',
+                fontSize: '14px',
+                cursor: 'pointer',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                transition: 'background 0.2s',
+                fontWeight: isSelected ? '600' : 'normal'
+              },
+              onMouseEnter: (e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+              },
+              onMouseLeave: (e) => {
+                e.currentTarget.style.background = 'transparent'
+              }
+            }, catName)
+          })
+        )
+      )
+    )
+  }
+
   // ===== HEADER GLOBAL NETFLIX-STYLE =====
   function Header({ view, setView, globalSearchQuery, setGlobalSearchQuery, onLogout, account }) {
     const [showProfileMenu, setShowProfileMenu] = useState(false)
@@ -1897,7 +2068,7 @@ header("Expires: 0");
           showProfileMenu && e('div', {
             style: {
               position: 'absolute',
-              top: '50px',
+              top: '60px',
               right: '0',
               width: '280px',
               background: '#1a1a1a',
@@ -2767,6 +2938,64 @@ header("Expires: 0");
     const [selectedCat,setSelectedCat] = useState(null)
     const [items,setItems] = useState([])
     const [query,setQuery] = useState('')
+
+    // Inicializar selectedCat com primeira categoria prioritária quando vodCats carregar
+    useEffect(() => {
+      if (!selectedCat && vodCats.length > 0 && view === 'netflix-movies') {
+        // Aplicar mesma lógica de prioridade do CategoryBar
+        const priorityNames = [
+          'lançamentos',
+          'lancamentos',
+          'lançamentos legendados',
+          'lancamentos legendados',
+          'cinema',
+          'indicados ao oscar',
+          'oscar'
+        ]
+
+        const priorityCats = []
+        const otherCats = []
+
+        vodCats.forEach(cat => {
+          const catName = cat.category_name || cat.name || ''
+          const normalizedName = catName.toLowerCase().trim()
+          let priorityIndex = -1
+
+          priorityIndex = priorityNames.findIndex(pName => normalizedName === pName)
+
+          if (priorityIndex === -1) {
+            if (normalizedName.includes('legendado')) {
+              priorityIndex = priorityNames.findIndex(pName => pName.includes('legendado'))
+            }
+            else if (normalizedName.includes('lançamento') || normalizedName.includes('lancamento')) {
+              priorityIndex = priorityNames.findIndex(pName =>
+                (pName === 'lançamentos' || pName === 'lancamentos')
+              )
+            }
+            else if (normalizedName.includes('cinema')) {
+              priorityIndex = priorityNames.findIndex(pName => pName === 'cinema')
+            }
+            else if (normalizedName.includes('oscar')) {
+              priorityIndex = priorityNames.findIndex(pName => pName.includes('oscar'))
+            }
+          }
+
+          if (priorityIndex !== -1) {
+            priorityCats.push({ cat, priority: priorityIndex })
+          } else {
+            otherCats.push(cat)
+          }
+        })
+
+        priorityCats.sort((a, b) => a.priority - b.priority)
+        const sortedPriorityCats = priorityCats.map(item => item.cat)
+        const orderedCats = [...sortedPriorityCats, ...otherCats]
+
+        if (orderedCats.length > 0) {
+          setSelectedCat(orderedCats[0])
+        }
+      }
+    }, [vodCats, view, selectedCat])
 
     const [current,setCurrent] = useState(null)
     const [selectedContent, setSelectedContent] = useState(null) // Para página de detalhes
@@ -6480,7 +6709,7 @@ window.resetNetflixMovies = () => {
 }
 
 // Componente NetflixMovies com proteção anti-loop
-    function NetflixMovies({ contentType = 'vod', categoryFilter = null }){
+    function NetflixMovies({ contentType = 'vod', categoryFilter = null, selectedCategory = null }){
       const isSeriesMode = contentType === 'series'
       const modeLabel = isSeriesMode ? 'SÉRIES' : 'FILMES'
       const filterLabel = categoryFilter ? ` (${categoryFilter})` : ''
@@ -6736,8 +6965,9 @@ window.resetNetflixMovies = () => {
       }, [])
 
       // ✅ Proteção GLOBAL contra remontagem e loop infinito
-      // ===== IMPORTANTE: Criar chave única baseada em contentType + categoryFilter =====
-      const viewKey = `${contentType}-${categoryFilter || 'all'}`
+      // ===== IMPORTANTE: Criar chave única baseada em contentType + categoryFilter + selectedCategory =====
+      const selectedCatId = selectedCategory ? getCatId(selectedCategory) : null
+      const viewKey = `${contentType}-${categoryFilter || 'all'}-${selectedCatId || 'all'}`
 
       useEffect(() => {
         // ===== CORREÇÃO CRÍTICA: Atualizar currentViewKey IMEDIATAMENTE antes de qualquer async =====
@@ -6781,9 +7011,21 @@ window.resetNetflixMovies = () => {
             // 2. Filtrar categorias se houver filtro específico
             let selectedCategories = categories
 
+            // Se tem uma categoria específica selecionada pelo usuário, usar apenas ela
+            if (selectedCategory) {
+              const catId = getCatId(selectedCategory)
+              selectedCategories = categories.filter(cat => getCatId(cat) === catId)
 
+              if (selectedCategories.length === 0) {
+                window.updateNetflixMoviesState({
+                  loading: false,
+                  errorMsg: `Categoria não encontrada`
+                })
+                return
+              }
+            }
             // Aplicar filtro por nome de categoria se especificado
-            if (categoryFilter) {
+            else if (categoryFilter) {
               const filterLower = categoryFilter.toLowerCase()
 
               selectedCategories = categories.filter(cat => {
@@ -7582,7 +7824,7 @@ window.resetNetflixMovies = () => {
                   flexDirection: 'column',
                   alignItems: 'flex-start',
                   justifyContent: 'flex-start', // Alinha no topo
-                  padding: '20px 40px 0 40px', // Padding mínimo no topo
+                  padding: '60px 40px 0 40px', // Padding mínimo no topo
                   width: '100%',
                   height: '100%',
                   background: 'linear-gradient(to right, rgba(0,0,0,0.6) 40%, transparent 60%)'
@@ -8816,40 +9058,6 @@ window.resetNetflixMovies = () => {
                   fontWeight: '500'
                 }
               }, `${visibleCount}/${movies.length}`)
-            ),
-
-            // Category indicator com total real - Destacado
-            categoryIndex !== undefined && e('div', {
-              style: {
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px'
-              }
-            },
-              // Contador de categorias com fundo destacado - usa total real
-              e('span', {
-                style: {
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  color: '#fff',
-                  background: 'rgba(244, 117, 33, 0.2)',
-                  border: '2px solid #f47521',
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  textShadow: '1px 1px 2px rgba(0,0,0,0.8)'
-                }
-              }, `Categoria ${categoryIndex + 1} / ${globalState.totalCategories || totalCategories || '?'}`),
-
-              // Dica de navegação
-              e('span', {
-                style: {
-                  fontSize: '12px',
-                  color: '#aaa',
-                  background: 'rgba(255,255,255,0.1)',
-                  padding: '5px 10px',
-                  borderRadius: '4px'
-                }
-              }, '↑↓')
             )
           ),
 
@@ -9201,7 +9409,7 @@ window.resetNetflixMovies = () => {
             e('div', {
               style: {
                 position: 'absolute',
-                top: '120px',
+                top: '160px',
                 left: '40px',
                 zIndex: 3,
                 maxWidth: '650px'
@@ -11090,7 +11298,12 @@ window.resetNetflixMovies = () => {
     if(view==='config') content = e(Config)
     else if(view==='home') content = e(Home)
     else if(view==='netflix-movies'){
-      content = e(NetflixMovies, { key: 'vod-all', contentType: 'vod' })
+      // Só renderizar quando selectedCat estiver definido
+      if (selectedCat) {
+        content = e(NetflixMovies, { key: `vod-${getCatId(selectedCat)}`, contentType: 'vod', selectedCategory: selectedCat })
+      } else {
+        content = e('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', color: '#fff' } }, 'Carregando categorias...')
+      }
     }
     else if(view==='netflix-series'){
       content = e(NetflixMovies, { key: 'series-all', contentType: 'series' })
@@ -11119,10 +11332,14 @@ window.resetNetflixMovies = () => {
 
     // Não mostrar header apenas na config (login) e no player
     const showHeader = view !== 'config' && view !== 'player'
+    const showCategoryBar = showHeader && (view === 'netflix-movies' || view === 'vod-categories')
 
     return e('div', { className: 'app-container' },
       // Header global Netflix-style (substitui sidebar)
       showHeader && e(Header, { view, setView, globalSearchQuery, setGlobalSearchQuery, onLogout, account }),
+
+      // Barra de categorias de filmes
+      showHeader && e(CategoryBar, { vodCats, view, setView, selectedCat, setSelectedCat }),
 
       e('div', {
         className: 'main-content',
