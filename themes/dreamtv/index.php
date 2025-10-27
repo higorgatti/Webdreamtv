@@ -1849,35 +1849,86 @@ header("Expires: 0");
       { id: 'movies', icon: '🎬', title: 'Filmes', action: () => {
         // Desativar modo coleções ao voltar para filmes
         if (window.updateNetflixMoviesState) {
-          window.updateNetflixMoviesState({ showCollectionsView: false })
+          // Pegar o primeiro filme da categoria atual
+          const firstSection = window.__netflixMoviesState?.sectionsMovies?.[0]
+          const firstMovie = firstSection?.movies?.[0]
+          const firstMovieId = firstMovie?.stream_id || firstMovie?.id
+
+          window.updateNetflixMoviesState({
+            showCollectionsView: false,
+            heroBackdrop: null, // Limpar backdrop de coleções
+            viewingCollectionMovies: false, // Sair do modo de visualização de coleção
+            currentCategoryIndex: 0, // Voltar para primeira categoria
+            featuredMovieId: firstMovieId || window.__netflixMoviesState?.featuredMovieId // Setar primeiro filme
+          })
         }
         setView('netflix-movies')
       }},
       { id: 'series', icon: '🎭', title: 'Séries', action: () => {
         // Desativar modo coleções
         if (window.updateNetflixMoviesState) {
-          window.updateNetflixMoviesState({ showCollectionsView: false })
+          const firstSection = window.__netflixMoviesState?.sectionsMovies?.[0]
+          const firstMovie = firstSection?.movies?.[0]
+          const firstMovieId = firstMovie?.series_id || firstMovie?.stream_id || firstMovie?.id
+
+          window.updateNetflixMoviesState({
+            showCollectionsView: false,
+            heroBackdrop: null,
+            viewingCollectionMovies: false,
+            currentCategoryIndex: 0,
+            featuredMovieId: firstMovieId || window.__netflixMoviesState?.featuredMovieId
+          })
         }
         setView('netflix-series')
       }},
       { id: 'novelas', icon: '📖', title: 'Novelas', action: () => {
         // Desativar modo coleções
         if (window.updateNetflixMoviesState) {
-          window.updateNetflixMoviesState({ showCollectionsView: false })
+          const firstSection = window.__netflixMoviesState?.sectionsMovies?.[0]
+          const firstMovie = firstSection?.movies?.[0]
+          const firstMovieId = firstMovie?.series_id || firstMovie?.stream_id || firstMovie?.id
+
+          window.updateNetflixMoviesState({
+            showCollectionsView: false,
+            heroBackdrop: null,
+            viewingCollectionMovies: false,
+            currentCategoryIndex: 0,
+            featuredMovieId: firstMovieId || window.__netflixMoviesState?.featuredMovieId
+          })
         }
         setView('netflix-novelas')
       }},
       { id: 'animes', icon: '🌟', title: 'Animes', action: () => {
         // Desativar modo coleções
         if (window.updateNetflixMoviesState) {
-          window.updateNetflixMoviesState({ showCollectionsView: false })
+          const firstSection = window.__netflixMoviesState?.sectionsMovies?.[0]
+          const firstMovie = firstSection?.movies?.[0]
+          const firstMovieId = firstMovie?.stream_id || firstMovie?.id
+
+          window.updateNetflixMoviesState({
+            showCollectionsView: false,
+            heroBackdrop: null,
+            viewingCollectionMovies: false,
+            currentCategoryIndex: 0,
+            featuredMovieId: firstMovieId || window.__netflixMoviesState?.featuredMovieId
+          })
         }
         setView('netflix-animes')
       }},
       { id: 'desenhos', icon: '🎨', title: 'Desenhos', action: () => {
         // Desativar modo coleções
         if (window.updateNetflixMoviesState) {
-          window.updateNetflixMoviesState({ showCollectionsView: false })
+          const firstSection = window.__netflixMoviesState?.sectionsMovies?.[0]
+          const firstMovie = firstSection?.movies?.[0]
+          const firstMovieId = firstMovie?.stream_id || firstMovie?.id
+
+          window.updateNetflixMoviesState({
+            showCollectionsView: false,
+            heroBackdrop: null,
+            viewingCollectionMovies: false,
+            currentCategoryIndex: 0,
+            featuredMovieId: firstMovieId || window.__netflixMoviesState?.featuredMovieId
+          })
         }
         setView('netflix-desenhos')
       }},
@@ -1892,7 +1943,17 @@ header("Expires: 0");
       { id: 'show', icon: '🎤', title: 'Show', action: () => {
         // Desativar modo coleções
         if (window.updateNetflixMoviesState) {
-          window.updateNetflixMoviesState({ showCollectionsView: false })
+          const firstSection = window.__netflixMoviesState?.sectionsMovies?.[0]
+          const firstMovie = firstSection?.movies?.[0]
+          const firstMovieId = firstMovie?.stream_id || firstMovie?.id
+
+          window.updateNetflixMoviesState({
+            showCollectionsView: false,
+            heroBackdrop: null,
+            viewingCollectionMovies: false,
+            currentCategoryIndex: 0,
+            featuredMovieId: firstMovieId || window.__netflixMoviesState?.featuredMovieId
+          })
         }
         setView('netflix-show')
       }}
@@ -6122,6 +6183,29 @@ window.resetNetflixMovies = () => {
         }
       }, [])
 
+      // ===== NOVO: Setar featuredMovieId automaticamente quando sectionsMovies carrega =====
+      useEffect(() => {
+        // Verifica se estamos em uma view de conteúdo (não em coleções ou live)
+        const isContentView = view && view.startsWith('netflix-')
+
+        // Só setar se estamos em view de conteúdo e temos filmes carregados
+        if (isContentView && globalState.sectionsMovies.length > 0) {
+          const firstSection = globalState.sectionsMovies[0]
+          if (firstSection?.movies?.length > 0) {
+            const firstMovie = firstSection.movies[0]
+            const firstMovieId = firstMovie?.series_id || firstMovie?.stream_id || firstMovie?.id
+
+            // Sempre atualizar para garantir que mostra o primeiro filme ao trocar de categoria
+            if (firstMovieId) {
+              window.updateNetflixMoviesState({
+                featuredMovieId: firstMovieId,
+                heroBackdrop: null // Garantir que não há backdrop de coleção
+              })
+            }
+          }
+        }
+      }, [view, globalState.sectionsMovies.length])
+
       // ===== NOVO: Carregar coleções automaticamente quando filmes forem carregados =====
       // Construir coleções em background assim que tiver filmes suficientes
       useEffect(() => {
@@ -7514,7 +7598,10 @@ window.resetNetflixMovies = () => {
             // ✅ OTIMIZAÇÃO: Só atualiza se for um filme DIFERENTE
             if (window.__netflixMoviesState?.featuredMovieId !== movieId) {
               if (window.updateNetflixMoviesState) {
-                window.updateNetflixMoviesState({ featuredMovieId: movieId })
+                window.updateNetflixMoviesState({
+                  featuredMovieId: movieId,
+                  heroBackdrop: null // Limpar backdrop de coleções ao passar mouse em filme
+                })
               }
             }
 
@@ -8702,8 +8789,8 @@ window.resetNetflixMovies = () => {
             onNextCategory: () => {},
             onPrevCategory: () => {}
           }) :
-          // MODO 2: Lista de coleções (carrossel horizontal)
-          showCollectionsView && loadingCollections ? e('div', {
+          // MODO 2: Lista de coleções (carrossel horizontal) - APENAS se view for 'collections'
+          view === 'collections' && showCollectionsView && loadingCollections ? e('div', {
             style: {
               display: 'flex',
               alignItems: 'center',
@@ -8734,7 +8821,7 @@ window.resetNetflixMovies = () => {
               e('span', null, 'Buscando coleções...')
             )
           ) :
-          showCollectionsView && collections.length > 0 ? e(SectionMovies, {
+          view === 'collections' && showCollectionsView && collections.length > 0 ? e(SectionMovies, {
             key: 'collections-list',
             name: `🎬 Coleções (${collections.length})`,
             movies: collections, // Passando coleções como "movies" para reusar SectionMovies
@@ -8745,7 +8832,7 @@ window.resetNetflixMovies = () => {
             onPrevCategory: () => {},
             isCollectionsMode: true // Flag para SectionMovies saber que está renderizando coleções
           }) :
-          showCollectionsView && collections.length === 0 && !loadingCollections ? e('div', {
+          view === 'collections' && showCollectionsView && collections.length === 0 && !loadingCollections ? e('div', {
             style: {
               display: 'flex',
               alignItems: 'center',
