@@ -1617,7 +1617,16 @@ header("Expires: 0");
   })
 
   // ===== HEADER GLOBAL NETFLIX-STYLE =====
-  function Header({ view, setView, globalSearchQuery, setGlobalSearchQuery }) {
+  function Header({ view, setView, globalSearchQuery, setGlobalSearchQuery, onLogout, account }) {
+    const [showProfileMenu, setShowProfileMenu] = useState(false)
+
+    // Função para formatar data de vencimento
+    const formatExpDate = (timestamp) => {
+      if (!timestamp) return 'Sem data'
+      const date = new Date(timestamp * 1000)
+      return date.toLocaleDateString('pt-BR')
+    }
+
     // Determinar qual menu está ativo
     const getActiveMenu = () => {
       if (view === 'home') return 'home'
@@ -1787,7 +1796,7 @@ header("Expires: 0");
         }, 'Canais')
       ),
 
-      // Área direita - Campo de busca
+      // Área direita - Campo de busca e configurações
       e('div', {
         style: {
           display: 'flex',
@@ -1818,7 +1827,316 @@ header("Expires: 0");
           onBlur: (e) => {
             e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)'
           }
-        })
+        }),
+
+        // Avatar/Profile com menu dropdown
+        e('div', {
+          style: {
+            position: 'relative'
+          }
+        },
+          // Avatar clicável
+          e('div', {
+            onClick: () => setShowProfileMenu(!showProfileMenu),
+            style: {
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              color: '#fff',
+              transition: 'transform 0.2s',
+              border: '2px solid rgba(255, 255, 255, 0.3)'
+            },
+            onMouseEnter: (e) => {
+              e.currentTarget.style.transform = 'scale(1.05)'
+            },
+            onMouseLeave: (e) => {
+              e.currentTarget.style.transform = 'scale(1)'
+            }
+          }, (account?.username || 'H').charAt(0).toUpperCase()),
+
+          // Menu dropdown
+          showProfileMenu && e('div', {
+            style: {
+              position: 'absolute',
+              top: '50px',
+              right: '0',
+              width: '280px',
+              background: '#1a1a1a',
+              borderRadius: '8px',
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5)',
+              overflow: 'hidden',
+              zIndex: 2000
+            }
+          },
+            // Header do menu com perfil
+            e('div', {
+              style: {
+                padding: '20px',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }
+            },
+              // Avatar no menu
+              e('div', {
+                style: {
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '20px',
+                  fontWeight: 'bold',
+                  color: '#fff'
+                }
+              }, (account?.username || 'H').charAt(0).toUpperCase()),
+              // Info do usuário
+              e('div', {
+                style: {
+                  flex: 1
+                }
+              },
+                e('div', {
+                  style: {
+                    color: '#fff',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    marginBottom: '4px'
+                  }
+                }, account?.username || 'Usuário'),
+                e('div', {
+                  style: {
+                    color: '#f47521',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }
+                },
+                  e('span', { style: { fontSize: '14px' } }, '📅'),
+                  'Vence: ' + formatExpDate(account?.exp_date)
+                )
+              ),
+              // Ícone de editar
+              e('div', {
+                style: {
+                  color: '#b3b3b3',
+                  fontSize: '18px',
+                  cursor: 'pointer'
+                }
+              }, '✏️')
+            ),
+
+            // Opções do menu
+            e('div', {
+              style: {
+                padding: '8px 0'
+              }
+            },
+              // Trocar de Perfil
+              e('div', {
+                onClick: () => {
+                  alert('Funcionalidade em breve!')
+                  setShowProfileMenu(false)
+                },
+                style: {
+                  padding: '14px 20px',
+                  color: '#e0e0e0',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  transition: 'background 0.2s'
+                },
+                onMouseEnter: (e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'
+                },
+                onMouseLeave: (e) => {
+                  e.currentTarget.style.background = 'transparent'
+                }
+              },
+                e('span', { style: { fontSize: '18px' } }, '🔄'),
+                'Trocar de Perfil'
+              ),
+
+              // Configurações
+              e('div', {
+                onClick: () => {
+                  alert('Funcionalidade em breve!')
+                  setShowProfileMenu(false)
+                },
+                style: {
+                  padding: '14px 20px',
+                  color: '#e0e0e0',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  transition: 'background 0.2s'
+                },
+                onMouseEnter: (e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'
+                },
+                onMouseLeave: (e) => {
+                  e.currentTarget.style.background = 'transparent'
+                }
+              },
+                e('span', { style: { fontSize: '18px' } }, '⚙️'),
+                'Configurações'
+              ),
+
+              // Separador
+              e('div', {
+                style: {
+                  height: '1px',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  margin: '8px 0'
+                }
+              }),
+
+              // Fila
+              e('div', {
+                onClick: () => {
+                  alert('Funcionalidade em breve!')
+                  setShowProfileMenu(false)
+                },
+                style: {
+                  padding: '14px 20px',
+                  color: '#e0e0e0',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  transition: 'background 0.2s'
+                },
+                onMouseEnter: (e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'
+                },
+                onMouseLeave: (e) => {
+                  e.currentTarget.style.background = 'transparent'
+                }
+              },
+                e('span', { style: { fontSize: '18px' } }, '🔖'),
+                'Fila'
+              ),
+
+              // Histórico
+              e('div', {
+                onClick: () => {
+                  alert('Funcionalidade em breve!')
+                  setShowProfileMenu(false)
+                },
+                style: {
+                  padding: '14px 20px',
+                  color: '#e0e0e0',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  transition: 'background 0.2s'
+                },
+                onMouseEnter: (e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'
+                },
+                onMouseLeave: (e) => {
+                  e.currentTarget.style.background = 'transparent'
+                }
+              },
+                e('span', { style: { fontSize: '18px' } }, '🕐'),
+                'Histórico'
+              ),
+
+              // Separador
+              e('div', {
+                style: {
+                  height: '1px',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  margin: '8px 0'
+                }
+              }),
+
+              // Notificações
+              e('div', {
+                onClick: () => {
+                  alert('Funcionalidade em breve!')
+                  setShowProfileMenu(false)
+                },
+                style: {
+                  padding: '14px 20px',
+                  color: '#e0e0e0',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  transition: 'background 0.2s'
+                },
+                onMouseEnter: (e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'
+                },
+                onMouseLeave: (e) => {
+                  e.currentTarget.style.background = 'transparent'
+                }
+              },
+                e('span', { style: { fontSize: '18px' } }, '🔔'),
+                'Notificações'
+              ),
+
+              // Separador
+              e('div', {
+                style: {
+                  height: '1px',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  margin: '8px 0'
+                }
+              }),
+
+              // Sair
+              e('div', {
+                onClick: () => {
+                  if (confirm('Deseja realmente sair?')) {
+                    setShowProfileMenu(false)
+                    onLogout()
+                  }
+                },
+                style: {
+                  padding: '14px 20px',
+                  color: '#e0e0e0',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  transition: 'background 0.2s'
+                },
+                onMouseEnter: (e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'
+                },
+                onMouseLeave: (e) => {
+                  e.currentTarget.style.background = 'transparent'
+                }
+              },
+                e('span', { style: { fontSize: '18px' } }, '🚪'),
+                'Sair'
+              )
+            )
+          )
+        )
       )
     )
   }
@@ -10404,7 +10722,19 @@ window.resetNetflixMovies = () => {
 
       return e('div', { className:'star-bg min-h-screen grid place-items-center p-4' },
         e('div', { className:'frost rounded-2xl p-6 w-full max-w-md' },
-          e('h2', { className:'text-white text-2xl font-bold mb-4 text-center' }, 'Configuração API Xtream Codes'),
+          e('div', {
+            style: {
+              fontSize: '48px',
+              fontWeight: 'bold',
+              letterSpacing: '3px',
+              display: 'flex',
+              justifyContent: 'center',
+              marginBottom: '30px'
+            }
+          },
+            e('span', { style: { color: '#e50914' } }, 'DREAM'),
+            e('span', { style: { color: '#fff' } }, 'TV')
+          ),
           e('div', { className:'space-y-3' },
             // ===== CAMPO DNS REMOVIDO (fixo: http://infcsfortal.pro) =====
             e('div', null, e('label', { className:'text-white text-sm mb-2 block' }, 'Usuário'),
@@ -10641,7 +10971,7 @@ window.resetNetflixMovies = () => {
 
     return e('div', { className: 'app-container' },
       // Header global Netflix-style (substitui sidebar)
-      showHeader && e(Header, { view, setView, globalSearchQuery, setGlobalSearchQuery }),
+      showHeader && e(Header, { view, setView, globalSearchQuery, setGlobalSearchQuery, onLogout, account }),
 
       e('div', {
         className: 'main-content',
