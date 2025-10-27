@@ -1619,12 +1619,43 @@ header("Expires: 0");
   // ===== HEADER GLOBAL NETFLIX-STYLE =====
   function Header({ view, setView, globalSearchQuery, setGlobalSearchQuery, onLogout, account }) {
     const [showProfileMenu, setShowProfileMenu] = useState(false)
+    const [showAvatarSelector, setShowAvatarSelector] = useState(false)
+    const [selectedAvatar, setSelectedAvatar] = useLocalStorage('user_avatar', null)
+
+    // Lista de avatares de personagens - usar imagens locais
+    const avatars = [
+      // Animes
+      { id: 'naruto', name: 'Naruto', url: 'avatars/naruto.png', emoji: '🍥', gradient: 'linear-gradient(135deg, #f39c12, #e67e22)' },
+      { id: 'luffy', name: 'Luffy', url: 'avatars/luffy.png', emoji: '👒', gradient: 'linear-gradient(135deg, #e74c3c, #c0392b)' },
+      { id: 'goku', name: 'Goku', url: 'avatars/goku.png', emoji: '🐉', gradient: 'linear-gradient(135deg, #f39c12, #d35400)' },
+      { id: 'deku', name: 'Deku', url: 'avatars/deku.png', emoji: '💚', gradient: 'linear-gradient(135deg, #2ecc71, #27ae60)' },
+      { id: 'tanjiro', name: 'Tanjiro', url: 'avatars/tanjiro.png', emoji: '🗡️', gradient: 'linear-gradient(135deg, #16a085, #1abc9c)' },
+      { id: 'eren', name: 'Eren', url: 'avatars/eren.png', emoji: '⚔️', gradient: 'linear-gradient(135deg, #8e44ad, #9b59b6)' },
+      { id: 'saitama', name: 'Saitama', url: 'avatars/saitama.png', emoji: '👊', gradient: 'linear-gradient(135deg, #f1c40f, #f39c12)' },
+      { id: 'itachi', name: 'Itachi', url: 'avatars/itachi.png', emoji: '🔴', gradient: 'linear-gradient(135deg, #c0392b, #e74c3c)' },
+      { id: 'levi', name: 'Levi', url: 'avatars/levi.png', emoji: '⚡', gradient: 'linear-gradient(135deg, #34495e, #2c3e50)' },
+      { id: 'vegeta', name: 'Vegeta', url: 'avatars/vegeta.png', emoji: '👑', gradient: 'linear-gradient(135deg, #2980b9, #3498db)' },
+      // Heróis
+      { id: 'ironman', name: 'Iron Man', url: 'avatars/ironman.png', emoji: '🤖', gradient: 'linear-gradient(135deg, #e74c3c, #f39c12)' },
+      { id: 'batman', name: 'Batman', url: 'avatars/batman.png', emoji: '🦇', gradient: 'linear-gradient(135deg, #2c3e50, #34495e)' },
+      { id: 'joker', name: 'Joker', url: 'avatars/joker.png', emoji: '🃏', gradient: 'linear-gradient(135deg, #9b59b6, #8e44ad)' },
+      { id: 'spiderman', name: 'Spider-Man', url: 'avatars/spiderman.png', emoji: '🕷️', gradient: 'linear-gradient(135deg, #e74c3c, #c0392b)' },
+      { id: 'thanos', name: 'Thanos', url: 'avatars/thanos.png', emoji: '💎', gradient: 'linear-gradient(135deg, #9b59b6, #8e44ad)' },
+      { id: 'deadpool', name: 'Deadpool', url: 'avatars/deadpool.png', emoji: '⚔️', gradient: 'linear-gradient(135deg, #c0392b, #e74c3c)' }
+    ]
 
     // Função para formatar data de vencimento
     const formatExpDate = (timestamp) => {
       if (!timestamp) return 'Sem data'
       const date = new Date(timestamp * 1000)
       return date.toLocaleDateString('pt-BR')
+    }
+
+    // Função para selecionar avatar
+    const handleAvatarSelect = (avatar) => {
+      setSelectedAvatar(avatar)
+      setShowAvatarSelector(false)
+      setShowProfileMenu(false)
     }
 
     // Determinar qual menu está ativo
@@ -1842,7 +1873,7 @@ header("Expires: 0");
               width: '40px',
               height: '40px',
               borderRadius: '50%',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: selectedAvatar ? `url(${selectedAvatar.url}) center/cover, ${selectedAvatar.gradient}` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -1851,7 +1882,8 @@ header("Expires: 0");
               fontWeight: 'bold',
               color: '#fff',
               transition: 'transform 0.2s',
-              border: '2px solid rgba(255, 255, 255, 0.3)'
+              border: '2px solid rgba(255, 255, 255, 0.3)',
+              overflow: 'hidden'
             },
             onMouseEnter: (e) => {
               e.currentTarget.style.transform = 'scale(1.05)'
@@ -1859,7 +1891,7 @@ header("Expires: 0");
             onMouseLeave: (e) => {
               e.currentTarget.style.transform = 'scale(1)'
             }
-          }, (account?.username || 'H').charAt(0).toUpperCase()),
+          }, !selectedAvatar && (account?.username || 'H').charAt(0).toUpperCase()),
 
           // Menu dropdown
           showProfileMenu && e('div', {
@@ -1891,15 +1923,16 @@ header("Expires: 0");
                   width: '48px',
                   height: '48px',
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  background: selectedAvatar ? `url(${selectedAvatar.url}) center/cover, ${selectedAvatar.gradient}` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: '20px',
                   fontWeight: 'bold',
-                  color: '#fff'
+                  color: '#fff',
+                  overflow: 'hidden'
                 }
-              }, (account?.username || 'H').charAt(0).toUpperCase()),
+              }, !selectedAvatar && (account?.username || 'H').charAt(0).toUpperCase()),
               // Info do usuário
               e('div', {
                 style: {
@@ -1930,10 +1963,21 @@ header("Expires: 0");
               ),
               // Ícone de editar
               e('div', {
+                onClick: () => {
+                  setShowProfileMenu(false)
+                  setShowAvatarSelector(true)
+                },
                 style: {
                   color: '#b3b3b3',
                   fontSize: '18px',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  transition: 'color 0.2s'
+                },
+                onMouseEnter: (e) => {
+                  e.currentTarget.style.color = '#fff'
+                },
+                onMouseLeave: (e) => {
+                  e.currentTarget.style.color = '#b3b3b3'
                 }
               }, '✏️')
             ),
@@ -2133,6 +2177,113 @@ header("Expires: 0");
               },
                 e('span', { style: { fontSize: '18px' } }, '🚪'),
                 'Sair'
+              )
+            )
+          )
+        ),
+
+        // Modal de seleção de avatares
+        showAvatarSelector && e('div', {
+          onClick: () => setShowAvatarSelector(false),
+          style: {
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.85)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 3000,
+            padding: '20px'
+          }
+        },
+          e('div', {
+            onClick: (e) => e.stopPropagation(),
+            style: {
+              background: '#1a1a1a',
+              borderRadius: '12px',
+              padding: '30px',
+              maxWidth: '800px',
+              width: '100%',
+              maxHeight: '80vh',
+              overflowY: 'auto'
+            }
+          },
+            // Título
+            e('div', {
+              style: {
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '30px'
+              }
+            },
+              e('h2', {
+                style: {
+                  color: '#fff',
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  margin: 0
+                }
+              }, 'Escolha seu Avatar'),
+              e('button', {
+                onClick: () => setShowAvatarSelector(false),
+                style: {
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#b3b3b3',
+                  fontSize: '28px',
+                  cursor: 'pointer',
+                  padding: '0',
+                  lineHeight: '1'
+                },
+                onMouseEnter: (e) => {
+                  e.currentTarget.style.color = '#fff'
+                },
+                onMouseLeave: (e) => {
+                  e.currentTarget.style.color = '#b3b3b3'
+                }
+              }, '×')
+            ),
+
+            // Grid de avatares
+            e('div', {
+              style: {
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+                gap: '20px'
+              }
+            },
+              ...avatars.map(avatar =>
+                e('div', {
+                  key: avatar.id,
+                  onClick: () => handleAvatarSelect(avatar),
+                  style: {
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    transition: 'transform 0.2s'
+                  },
+                  onMouseEnter: (e) => {
+                    e.currentTarget.style.transform = 'scale(1.05)'
+                  },
+                  onMouseLeave: (e) => {
+                    e.currentTarget.style.transform = 'scale(1)'
+                  }
+                },
+                  e('div', {
+                    style: {
+                      width: '120px',
+                      height: '120px',
+                      borderRadius: '50%',
+                      background: `url(${avatar.url}) center/cover, ${avatar.gradient}`,
+                      border: selectedAvatar?.id === avatar.id ? '3px solid #e50914' : '3px solid rgba(255, 255, 255, 0.2)',
+                      marginBottom: '10px',
+                      overflow: 'hidden'
+                    }
+                  })
+                )
               )
             )
           )
