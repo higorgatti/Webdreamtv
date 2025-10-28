@@ -1616,10 +1616,19 @@ header("Expires: 0");
            prevProps.className === nextProps.className
   })
 
-  // ===== BARRA DE CATEGORIAS DE FILMES =====
-  function CategoryBar({ vodCats, view, setView, selectedCat, setSelectedCat }) {
-    // Só mostrar na view de filmes
-    if (view !== 'netflix-movies' && view !== 'vod-categories') return null
+  // ===== BARRA DE CATEGORIAS DE FILMES E SÉRIES =====
+  function CategoryBar({ vodCats, seriesCats, view, setView, selectedCat, setSelectedCat }) {
+    // Só mostrar na view de filmes ou séries
+    const isMoviesView = view === 'netflix-movies' || view === 'vod-categories'
+    const isSeriesView = view === 'netflix-series' || view === 'series-categories'
+
+    if (!isMoviesView && !isSeriesView) return null
+
+    // Usar categorias apropriadas
+    const categories = isSeriesView ? (seriesCats || []) : (vodCats || [])
+
+    // Não renderizar até ter categorias
+    if (categories.length === 0) return null
 
     const [showDropdown, setShowDropdown] = useState(false)
 
@@ -1638,7 +1647,7 @@ header("Expires: 0");
     const priorityCats = []
     const otherCats = []
 
-    vodCats.forEach(cat => {
+    categories.forEach(cat => {
       const catName = cat.category_name || cat.name || ''
       const normalizedName = catName.toLowerCase().trim()
 
@@ -1685,14 +1694,17 @@ header("Expires: 0");
     // Combinar: prioritárias primeiro, depois as outras
     const orderedCats = [...sortedPriorityCats, ...otherCats]
 
-    // Inicializar categoria selecionada com useEffect para evitar update durante render
+    // Inicializar categoria selecionada IMEDIATAMENTE quando categorias estiverem disponíveis
     useEffect(() => {
-      if (!selectedCat && orderedCats.length > 0) {
+      if (orderedCats.length > 0) {
+        // Definir imediatamente sem aguardar próximo render
         setSelectedCat(orderedCats[0])
       }
-    }, [orderedCats.length, selectedCat])
+    }, [categories.length, isMoviesView, isSeriesView])
 
-    const selectedCatName = selectedCat ? (selectedCat.category_name || selectedCat.name || 'Categoria') : 'Selecione'
+    // Se não tem categoria selecionada mas há categorias disponíveis, usar a primeira temporariamente
+    const displayCat = selectedCat || (orderedCats.length > 0 ? orderedCats[0] : null)
+    const selectedCatName = displayCat ? (displayCat.category_name || displayCat.name || 'Categoria') : 'Carregando...'
 
     return e('div', {
       style: {
@@ -2939,9 +2951,14 @@ header("Expires: 0");
     const [items,setItems] = useState([])
     const [query,setQuery] = useState('')
 
-    // Inicializar selectedCat com primeira categoria prioritária quando vodCats carregar
+    // Inicializar selectedCat com primeira categoria prioritária quando vodCats ou seriesCats carregar
     useEffect(() => {
-      if (!selectedCat && vodCats.length > 0 && view === 'netflix-movies') {
+      const isMoviesView = view === 'netflix-movies'
+      const isSeriesView = view === 'netflix-series'
+      const categories = isSeriesView ? seriesCats : vodCats
+
+      // Sempre selecionar primeira categoria quando entrar na view (mesmo que já tenha selectedCat de antes)
+      if (categories.length > 0 && (isMoviesView || isSeriesView)) {
         // Aplicar mesma lógica de prioridade do CategoryBar
         const priorityNames = [
           'lançamentos',
@@ -2956,7 +2973,7 @@ header("Expires: 0");
         const priorityCats = []
         const otherCats = []
 
-        vodCats.forEach(cat => {
+        categories.forEach(cat => {
           const catName = cat.category_name || cat.name || ''
           const normalizedName = catName.toLowerCase().trim()
           let priorityIndex = -1
@@ -2995,7 +3012,7 @@ header("Expires: 0");
           setSelectedCat(orderedCats[0])
         }
       }
-    }, [vodCats, view, selectedCat])
+    }, [vodCats.length, seriesCats.length, view])
 
     const [current,setCurrent] = useState(null)
     const [selectedContent, setSelectedContent] = useState(null) // Para página de detalhes
@@ -3778,6 +3795,9 @@ header("Expires: 0");
       }
       if(view==='movie-categories' && vodCats.length===0) {
         loadCatsByType('vod')
+      }
+      if(view==='netflix-series' && seriesCats.length===0) {
+        loadCatsByType('series')
       }
       if(view==='series-categories' && seriesCats.length===0) {
         loadCatsByType('series')
@@ -7041,7 +7061,15 @@ window.resetNetflixMovies = () => {
                 })
                 return
               }
-            } else {
+            }
+            // Se não tem filtro nem categoria selecionada, NÃO carregar nada
+            // O componente vai aguardar selectedCategory ser definido
+            else if (!selectedCategory && !categoryFilter) {
+              window.updateNetflixMoviesState({
+                loading: false,
+                errorMsg: ''
+              })
+              return
             }
 
             // ===== CORREÇÃO: Guardar categorias com chave única por view =====
@@ -10840,7 +10868,11 @@ window.resetNetflixMovies = () => {
       }
     }
     else if(view==='netflix-series'){
-      content = e(NetflixMovies, { key: 'series-all', contentType: 'series' })
+      if (selectedCat) {
+        content = e(NetflixMovies, { key: `series-${getCatId(selectedCat)}`, contentType: 'series', selectedCategory: selectedCat })
+      } else {
+        content = e('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', color: '#fff' } }, 'Carregando categorias...')
+      }
     }
     else if(view==='netflix-novelas'){
       content = e(NetflixMovies, { key: 'series-novela', contentType: 'series', categoryFilter: 'novela' })
@@ -10872,8 +10904,8 @@ window.resetNetflixMovies = () => {
       // Header global Netflix-style (substitui sidebar)
       showHeader && e(Header, { view, setView, globalSearchQuery, setGlobalSearchQuery, onLogout, account }),
 
-      // Barra de categorias de filmes
-      showHeader && e(CategoryBar, { vodCats, view, setView, selectedCat, setSelectedCat }),
+      // Barra de categorias de filmes e séries
+      showHeader && e(CategoryBar, { vodCats, seriesCats, view, setView, selectedCat, setSelectedCat }),
 
       e('div', {
         className: 'main-content',
