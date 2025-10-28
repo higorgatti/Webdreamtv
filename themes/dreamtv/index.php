@@ -1645,11 +1645,18 @@ header("Expires: 0");
     // Usar categorias apropriadas
     let categories = isSeriesView ? (seriesCats || []) : (vodCats || [])
 
-    // Filtrar apenas categorias 18+ se estiver na view adulta
+    // Filtrar categorias baseado na view
     if (isAdultView) {
+      // Na view adulta: mostrar APENAS categorias 18+
       categories = categories.filter(cat => {
         const catName = cat.category_name || cat.name || ''
         return catName.trim().startsWith('18+')
+      })
+    } else if (isMoviesView) {
+      // Na view de filmes: REMOVER categorias 18+
+      categories = categories.filter(cat => {
+        const catName = cat.category_name || cat.name || ''
+        return !catName.trim().startsWith('18+')
       })
     }
 
@@ -3811,11 +3818,18 @@ header("Expires: 0");
       const isAdultView = view === 'adult-content'
       let categories = isSeriesView ? seriesCats : vodCats
 
-      // Filtrar apenas categorias 18+ se estiver na view adulta
+      // Filtrar categorias baseado na view
       if (isAdultView) {
+        // Na view adulta: mostrar APENAS categorias 18+
         categories = categories.filter(cat => {
           const catName = cat.category_name || cat.name || ''
           return catName.trim().startsWith('18+')
+        })
+      } else if (isMoviesView) {
+        // Na view de filmes: REMOVER categorias 18+
+        categories = categories.filter(cat => {
+          const catName = cat.category_name || cat.name || ''
+          return !catName.trim().startsWith('18+')
         })
       }
 
