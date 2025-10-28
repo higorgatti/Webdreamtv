@@ -6039,7 +6039,7 @@ function Home(){
           e(TopBar),
           e('div', { className:'grid grid-cols-12 gap-4 flex-1 overflow-hidden' },
             // Esquerda: categorias ou canais
-            e('div', { className:'col-span-12 md:col-span-3 flex flex-col h-full overflow-hidden' },
+            e('div', { className:'col-span-12 md:col-span-3 flex flex-col', style: { height: '100%', overflow: 'hidden' } },
               e('button', {
                 className:'w-full frost rounded-lg px-4 py-3 flex items-center justify-between cursor-pointer transition-all hover:border-purple-400/40 mb-3 sticky top-0 z-10',
                 onClick:()=> setLiveLeftMode('categories')
@@ -6059,7 +6059,8 @@ function Home(){
               error && e('div', { className:'text-red-300 text-xs mb-3' }, 'Live: ', error),
               liveLeftMode==='categories' ?
                 e('div', {
-                  className:'overflow-y-auto flex-1 space-y-3 pr-2 pb-20',
+                  className:'overflow-y-scroll flex-1 space-y-3 pr-2',
+                  style: { paddingBottom: '400px', minHeight: 0 },
                   onWheel: (e) => {
                     // Permitir scroll vertical natural com mouse wheel
                     // Não fazer preventDefault para que o scroll funcione normalmente
@@ -6125,7 +6126,8 @@ function Home(){
                 )
               :
                 e('div', {
-                  className:'overflow-y-auto flex-1 space-y-3 pr-2 pb-20',
+                  className:'overflow-y-scroll flex-1 space-y-3 pr-2',
+                  style: { paddingBottom: '400px', minHeight: 0 },
                   onWheel: (e) => {
                     // Permitir scroll vertical natural com mouse wheel
                     // Não fazer preventDefault para que o scroll funcione normalmente
