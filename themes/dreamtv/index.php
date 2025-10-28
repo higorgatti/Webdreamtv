@@ -1825,13 +1825,209 @@ header("Expires: 0");
     )
   }
 
+  // ===== COMPONENTE: PIN DE CONTROLE PARENTAL =====
+  function ParentalPinScreen({ onSuccess, onCancel }) {
+    const [parentalPin, setParentalPin] = useLocalStorage('parental_pin', '0000')
+    const [inputPin, setInputPin] = useState([])
+    const [error, setError] = useState(false)
+
+    const handleNumberClick = (num) => {
+      if (inputPin.length < 4) {
+        const newPin = [...inputPin, num]
+        setInputPin(newPin)
+
+        // Auto-verificar quando completar 4 dígitos
+        if (newPin.length === 4) {
+          const pinString = newPin.join('')
+          if (pinString === parentalPin) {
+            onSuccess()
+          } else {
+            setError(true)
+            setTimeout(() => {
+              setInputPin([])
+              setError(false)
+            }, 1000)
+          }
+        }
+      }
+    }
+
+    const handleDelete = () => {
+      setInputPin(inputPin.slice(0, -1))
+      setError(false)
+    }
+
+    return e('div', {
+      className: 'star-bg',
+      style: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        background: 'rgba(0, 0, 0, 0.95)'
+      }
+    },
+      // Header
+      e('h1', {
+        style: {
+          fontSize: '32px',
+          fontWeight: '700',
+          color: '#fff',
+          marginBottom: '20px',
+          letterSpacing: '2px'
+        }
+      }, '18+ ADULTOS'),
+
+      // Texto instrução
+      e('p', {
+        style: {
+          fontSize: '18px',
+          color: '#b3b3b3',
+          marginBottom: '60px'
+        }
+      }, 'Digite o código pin'),
+
+      // PIN boxes
+      e('div', {
+        style: {
+          display: 'flex',
+          gap: '20px',
+          marginBottom: '60px'
+        }
+      },
+        [0, 1, 2, 3].map(i =>
+          e('div', {
+            key: i,
+            style: {
+              width: '80px',
+              height: '80px',
+              borderRadius: '12px',
+              border: error ? '3px solid #dc2626' : (inputPin[i] !== undefined ? '3px solid #22c55e' : '3px solid rgba(255, 255, 255, 0.3)'),
+              background: inputPin[i] !== undefined ? 'rgba(34, 197, 94, 0.1)' : 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.3s',
+              fontSize: '32px',
+              color: '#fff',
+              fontWeight: '700'
+            }
+          }, inputPin[i] !== undefined ? '●' : '')
+        )
+      ),
+
+      // Teclado numérico
+      e('div', {
+        style: {
+          display: 'flex',
+          gap: '15px',
+          marginBottom: '40px'
+        }
+      },
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(num =>
+          e('button', {
+            key: num,
+            onClick: () => handleNumberClick(num.toString()),
+            style: {
+              width: '70px',
+              height: '70px',
+              borderRadius: '8px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '2px solid rgba(255, 255, 255, 0.2)',
+              color: '#fff',
+              fontSize: '24px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            },
+            onMouseEnter: (e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'
+              e.currentTarget.style.transform = 'scale(1.05)'
+            },
+            onMouseLeave: (e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+              e.currentTarget.style.transform = 'scale(1)'
+            }
+          }, num)
+        ).concat(
+          e('button', {
+            key: 'delete',
+            onClick: handleDelete,
+            style: {
+              width: '70px',
+              height: '70px',
+              borderRadius: '8px',
+              background: 'rgba(220, 38, 38, 0.2)',
+              border: '2px solid rgba(220, 38, 38, 0.5)',
+              color: '#fff',
+              fontSize: '24px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            },
+            onMouseEnter: (e) => {
+              e.currentTarget.style.background = 'rgba(220, 38, 38, 0.3)'
+              e.currentTarget.style.transform = 'scale(1.05)'
+            },
+            onMouseLeave: (e) => {
+              e.currentTarget.style.background = 'rgba(220, 38, 38, 0.2)'
+              e.currentTarget.style.transform = 'scale(1)'
+            }
+          }, '⌫')
+        )
+      ),
+
+      // Código padrão
+      e('p', {
+        style: {
+          fontSize: '14px',
+          color: '#666',
+          marginBottom: '20px'
+        }
+      }, 'Código pin padrão: 0000'),
+
+      // Botão voltar
+      onCancel && e('button', {
+        onClick: onCancel,
+        style: {
+          padding: '12px 30px',
+          background: 'transparent',
+          border: '2px solid rgba(255, 255, 255, 0.3)',
+          borderRadius: '6px',
+          color: '#fff',
+          fontSize: '14px',
+          cursor: 'pointer',
+          transition: 'all 0.2s'
+        },
+        onMouseEnter: (e) => {
+          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+        },
+        onMouseLeave: (e) => {
+          e.currentTarget.style.background = 'transparent'
+        }
+      }, 'Voltar')
+    )
+  }
+
   // ===== COMPONENTE: SETTINGS (CONFIGURAÇÕES) =====
   function Settings({ account, setView }) {
     const [useTMDB, setUseTMDB] = useLocalStorage('use_tmdb', true)
     const [selectedPlayer, setSelectedPlayer] = useLocalStorage('selected_player', 'Clappr Player (Recommended)')
     const [selectedSystem, setSelectedSystem] = useLocalStorage('selected_system', 'TS')
+    const [parentalPin, setParentalPin] = useLocalStorage('parental_pin', '0000')
     const [showPlayerOptions, setShowPlayerOptions] = useState(false)
     const [showSystemOptions, setShowSystemOptions] = useState(false)
+    const [showPinChange, setShowPinChange] = useState(false)
+    const [newPin, setNewPin] = useState('')
 
     // Players disponíveis
     const players = [
@@ -1949,10 +2145,15 @@ header("Expires: 0");
 
             // Botão: Alterar Código Pin
             e('button', {
-              onClick: () => alert('Funcionalidade em breve!'),
+              onClick: () => {
+                setShowPinChange(!showPinChange)
+                setShowPlayerOptions(false)
+                setShowSystemOptions(false)
+                setNewPin('')
+              },
               style: {
                 padding: '18px 24px',
-                background: 'rgba(40, 40, 40, 0.8)',
+                background: showPinChange ? 'rgba(60, 60, 60, 0.8)' : 'rgba(40, 40, 40, 0.8)',
                 border: 'none',
                 borderRadius: '8px',
                 color: '#fff',
@@ -1965,7 +2166,7 @@ header("Expires: 0");
                 ev.target.style.background = 'rgba(60, 60, 60, 0.8)'
               },
               onMouseLeave: (ev) => {
-                ev.target.style.background = 'rgba(40, 40, 40, 0.8)'
+                ev.target.style.background = showPinChange ? 'rgba(60, 60, 60, 0.8)' : 'rgba(40, 40, 40, 0.8)'
               }
             }, 'Alterar Código Pin'),
 
@@ -2208,6 +2409,126 @@ header("Expires: 0");
                 selectedSystem === system && e('span', { style: { fontSize: '20px' } }, '✓')
               )
             )
+            // Mostrar painel de alteração de PIN se estiver ativo
+            : showPinChange ? [
+              e('div', {
+                style: {
+                  padding: '20px',
+                  background: 'rgba(50, 50, 50, 0.8)',
+                  borderRadius: '12px',
+                  marginBottom: '15px'
+                }
+              },
+                e('h3', {
+                  style: {
+                    color: '#fff',
+                    fontSize: '18px',
+                    marginBottom: '15px',
+                    fontWeight: '600'
+                  }
+                }, 'Alterar Código PIN'),
+                e('p', {
+                  style: {
+                    color: '#b3b3b3',
+                    fontSize: '14px',
+                    marginBottom: '20px'
+                  }
+                }, 'Digite um novo código PIN de 4 dígitos'),
+                e('input', {
+                  type: 'password',
+                  maxLength: 4,
+                  value: newPin,
+                  onChange: (ev) => {
+                    const value = ev.target.value.replace(/\D/g, '')
+                    setNewPin(value)
+                  },
+                  placeholder: 'Novo PIN (4 dígitos)',
+                  style: {
+                    width: '100%',
+                    padding: '15px',
+                    background: 'rgba(0, 0, 0, 0.5)',
+                    border: '2px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '8px',
+                    color: '#fff',
+                    fontSize: '16px',
+                    marginBottom: '15px',
+                    outline: 'none'
+                  }
+                }),
+                e('div', {
+                  style: {
+                    display: 'flex',
+                    gap: '10px'
+                  }
+                },
+                  e('button', {
+                    onClick: () => {
+                      if (newPin.length === 4) {
+                        setParentalPin(newPin)
+                        alert('PIN alterado com sucesso!')
+                        setShowPinChange(false)
+                        setNewPin('')
+                      } else {
+                        alert('O PIN deve ter exatamente 4 dígitos!')
+                      }
+                    },
+                    style: {
+                      flex: 1,
+                      padding: '12px',
+                      background: '#22c55e',
+                      border: 'none',
+                      borderRadius: '8px',
+                      color: '#fff',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    },
+                    onMouseEnter: (ev) => {
+                      ev.target.style.background = '#16a34a'
+                    },
+                    onMouseLeave: (ev) => {
+                      ev.target.style.background = '#22c55e'
+                    }
+                  }, 'Salvar'),
+                  e('button', {
+                    onClick: () => {
+                      setShowPinChange(false)
+                      setNewPin('')
+                    },
+                    style: {
+                      flex: 1,
+                      padding: '12px',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      border: '2px solid rgba(255, 255, 255, 0.3)',
+                      borderRadius: '8px',
+                      color: '#fff',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    },
+                    onMouseEnter: (ev) => {
+                      ev.target.style.background = 'rgba(255, 255, 255, 0.2)'
+                    },
+                    onMouseLeave: (ev) => {
+                      ev.target.style.background = 'rgba(255, 255, 255, 0.1)'
+                    }
+                  }, 'Cancelar')
+                )
+              ),
+              e('div', {
+                style: {
+                  padding: '15px',
+                  background: 'rgba(59, 130, 246, 0.1)',
+                  border: '1px solid rgba(59, 130, 246, 0.3)',
+                  borderRadius: '8px',
+                  color: '#93c5fd',
+                  fontSize: '13px',
+                  lineHeight: '1.5'
+                }
+              }, '⚠️ Importante: Este PIN é usado para controle parental na categoria 18+. Guarde-o em local seguro.')
+            ]
             // Caso contrário, mostrar informações da conta
             : [
             // Status
@@ -2296,7 +2617,7 @@ header("Expires: 0");
   }
 
   // ===== HEADER GLOBAL NETFLIX-STYLE =====
-  function Header({ view, setView, globalSearchQuery, setGlobalSearchQuery, onLogout, account }) {
+  function Header({ view, setView, globalSearchQuery, setGlobalSearchQuery, onLogout, account, setShowParentalPin, setPendingAdultView }) {
     const [showProfileMenu, setShowProfileMenu] = useState(false)
     const [showAvatarSelector, setShowAvatarSelector] = useState(false)
     const [selectedAvatar, setSelectedAvatar] = useLocalStorage('user_avatar', null)
@@ -2507,7 +2828,10 @@ header("Expires: 0");
         }, 'Canais'),
 
         e('a', {
-          onClick: () => setView('adult-content'),
+          onClick: () => {
+            setPendingAdultView(true)
+            setShowParentalPin(true)
+          },
           style: {
             cursor: 'pointer',
             textDecoration: 'none',
@@ -3305,6 +3629,8 @@ header("Expires: 0");
 
   function App(){
     const [view,setViewRaw] = useState('config')
+    const [showParentalPin, setShowParentalPin] = useState(false)
+    const [pendingAdultView, setPendingAdultView] = useState(false)
 
     // Wrapper para logar todas as mudanças de view
     const setView = (newView) => {
@@ -11529,7 +11855,7 @@ window.resetNetflixMovies = () => {
 
     return e('div', { className: 'app-container' },
       // Header global Netflix-style (substitui sidebar)
-      showHeader && e(Header, { view, setView, globalSearchQuery, setGlobalSearchQuery, onLogout, account }),
+      showHeader && e(Header, { view, setView, globalSearchQuery, setGlobalSearchQuery, onLogout, account, setShowParentalPin, setPendingAdultView }),
 
       // Barra de categorias de filmes e séries
       showHeader && e(CategoryBar, { vodCats, seriesCats, view, setView, selectedCat, setSelectedCat }),
@@ -11549,7 +11875,21 @@ window.resetNetflixMovies = () => {
         channelInput && e('div', { className: 'tv-channel-input' },
           e('div', { style: { fontSize: '24px', color: '#a855f7', marginBottom: '10px' } }, 'Canal'),
           channelInput
-        )
+        ),
+        // Tela de PIN de controle parental
+        showParentalPin && e(ParentalPinScreen, {
+          onSuccess: () => {
+            setShowParentalPin(false)
+            if (pendingAdultView) {
+              setView('adult-content')
+              setPendingAdultView(false)
+            }
+          },
+          onCancel: () => {
+            setShowParentalPin(false)
+            setPendingAdultView(false)
+          }
+        })
       )
     )
   }
