@@ -1643,7 +1643,15 @@ header("Expires: 0");
     if (!isMoviesView && !isSeriesView && !isAdultView) return null
 
     // Usar categorias apropriadas
-    const categories = isSeriesView ? (seriesCats || []) : (vodCats || [])
+    let categories = isSeriesView ? (seriesCats || []) : (vodCats || [])
+
+    // Filtrar apenas categorias 18+ se estiver na view adulta
+    if (isAdultView) {
+      categories = categories.filter(cat => {
+        const catName = cat.category_name || cat.name || ''
+        return catName.trim().startsWith('18+')
+      })
+    }
 
     // Não renderizar até ter categorias
     if (categories.length === 0) return null
@@ -2501,14 +2509,32 @@ header("Expires: 0");
         e('a', {
           onClick: () => setView('adult-content'),
           style: {
-            color: activeMenu === 'adult' ? '#fff' : '#b3b3b3',
             cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: activeMenu === 'adult' ? '600' : '400',
-            transition: 'color 0.2s',
-            textDecoration: 'none'
+            textDecoration: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
+            transition: 'transform 0.2s'
+          },
+          onMouseEnter: (e) => {
+            e.currentTarget.style.transform = 'scale(1.05)'
+          },
+          onMouseLeave: (e) => {
+            e.currentTarget.style.transform = 'scale(1)'
           }
-        }, 'Adultos')
+        },
+          e('span', {
+            style: {
+              background: activeMenu === 'adult' ? '#dc2626' : '#7f1d1d',
+              color: '#fff',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              fontSize: '12px',
+              fontWeight: '700',
+              border: activeMenu === 'adult' ? '2px solid #fff' : '2px solid #dc2626',
+              letterSpacing: '0.5px'
+            }
+          }, '18+')
+        )
       ),
 
       // Área direita - Campo de busca e configurações
@@ -3457,7 +3483,15 @@ header("Expires: 0");
       const isMoviesView = view === 'netflix-movies'
       const isSeriesView = view === 'netflix-series'
       const isAdultView = view === 'adult-content'
-      const categories = isSeriesView ? seriesCats : vodCats
+      let categories = isSeriesView ? seriesCats : vodCats
+
+      // Filtrar apenas categorias 18+ se estiver na view adulta
+      if (isAdultView) {
+        categories = categories.filter(cat => {
+          const catName = cat.category_name || cat.name || ''
+          return catName.trim().startsWith('18+')
+        })
+      }
 
       // Sempre selecionar primeira categoria quando entrar na view (mesmo que já tenha selectedCat de antes)
       if (categories.length > 0 && (isMoviesView || isSeriesView || isAdultView)) {
