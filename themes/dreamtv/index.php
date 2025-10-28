@@ -7920,8 +7920,6 @@ window.resetNetflixMovies = () => {
 
 // Componente NetflixMovies com proteção anti-loop
     function NetflixMovies({ contentType = 'vod', categoryFilter = null, selectedCategory = null }){
-      console.log('[NetflixMovies] Renderizando - contentType:', contentType, 'categoryFilter:', categoryFilter, 'selectedCategory:', selectedCategory?.category_name)
-
       const isSeriesMode = contentType === 'series'
       const modeLabel = isSeriesMode ? 'SÉRIES' : 'FILMES'
       const filterLabel = categoryFilter ? ` (${categoryFilter})` : ''
@@ -8173,12 +8171,9 @@ window.resetNetflixMovies = () => {
 
       // ===== NOVO: Setar heroBackdrop da primeira coleção quando abrir Coletâneas =====
       useEffect(() => {
-        console.log('[BACKDROP] useEffect collections - showCollectionsView:', showCollectionsView, 'collections:', collections.length, 'viewingCollectionMovies:', viewingCollectionMovies)
-
         // IMPORTANTE: Só setar backdrop se showCollectionsView for EXPLICITAMENTE true
         if (showCollectionsView === true && collections.length > 0 && !viewingCollectionMovies) {
           const firstCollection = collections[0]
-          console.log('[BACKDROP] ✅ Setando backdrop de coleção:', firstCollection.name)
           if (firstCollection && window.updateNetflixMoviesState) {
             window.updateNetflixMoviesState({
               heroBackdrop: {
@@ -8192,7 +8187,6 @@ window.resetNetflixMovies = () => {
           }
         } else if (showCollectionsView === false && window.updateNetflixMoviesState) {
           // Só limpar se showCollectionsView for EXPLICITAMENTE false
-          console.log('[BACKDROP] ❌ Limpando backdrop (showCollectionsView = false)')
           window.updateNetflixMoviesState({
             heroBackdrop: null
           })
@@ -9287,7 +9281,6 @@ window.resetNetflixMovies = () => {
         const updateHeroBackdropFromCollection = (coll) => {
           if (!coll || !window.updateNetflixMoviesState) return
 
-          console.log('[BACKDROP] Mouse sobre coleção - atualizando backdrop:', coll.name)
           window.updateNetflixMoviesState({
             heroBackdrop: {
               name: coll.name,
@@ -10175,9 +10168,6 @@ window.resetNetflixMovies = () => {
         },
           // Featured Movie (fundo completo) ou Hero Backdrop (coleções)
           (() => {
-            if (globalState.heroBackdrop) {
-              console.log('[BACKDROP] Renderizando backdrop:', globalState.heroBackdrop.name)
-            }
             return globalState.heroBackdrop ? e('div', {
               style: {
                 position: 'absolute',
