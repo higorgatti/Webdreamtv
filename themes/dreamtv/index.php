@@ -2977,7 +2977,12 @@ header("Expires: 0");
         }, 'TV Ao Vivo'),
 
         e('a', {
-          onClick: () => setView('netflix-movies'),
+          onClick: () => {
+            if (window.updateNetflixMoviesState) {
+              window.updateNetflixMoviesState({ showCollectionsView: false, heroBackdrop: null })
+            }
+            setView('netflix-movies')
+          },
           style: {
             color: activeMenu === 'movies' ? '#fff' : '#b3b3b3',
             cursor: 'pointer',
@@ -2989,7 +2994,12 @@ header("Expires: 0");
         }, 'Filmes'),
 
         e('a', {
-          onClick: () => setView('netflix-series'),
+          onClick: () => {
+            if (window.updateNetflixMoviesState) {
+              window.updateNetflixMoviesState({ showCollectionsView: false, heroBackdrop: null })
+            }
+            setView('netflix-series')
+          },
           style: {
             color: activeMenu === 'series' ? '#fff' : '#b3b3b3',
             cursor: 'pointer',
@@ -3001,7 +3011,12 @@ header("Expires: 0");
         }, 'Séries'),
 
         e('a', {
-          onClick: () => setView('netflix-novelas'),
+          onClick: () => {
+            if (window.updateNetflixMoviesState) {
+              window.updateNetflixMoviesState({ showCollectionsView: false, heroBackdrop: null })
+            }
+            setView('netflix-novelas')
+          },
           style: {
             color: activeMenu === 'novelas' ? '#fff' : '#b3b3b3',
             cursor: 'pointer',
@@ -3013,7 +3028,12 @@ header("Expires: 0");
         }, 'Novelas'),
 
         e('a', {
-          onClick: () => setView('netflix-animes'),
+          onClick: () => {
+            if (window.updateNetflixMoviesState) {
+              window.updateNetflixMoviesState({ showCollectionsView: false, heroBackdrop: null })
+            }
+            setView('netflix-animes')
+          },
           style: {
             color: activeMenu === 'animes' ? '#fff' : '#b3b3b3',
             cursor: 'pointer',
@@ -3025,7 +3045,12 @@ header("Expires: 0");
         }, 'Animes'),
 
         e('a', {
-          onClick: () => setView('netflix-desenhos'),
+          onClick: () => {
+            if (window.updateNetflixMoviesState) {
+              window.updateNetflixMoviesState({ showCollectionsView: false, heroBackdrop: null })
+            }
+            setView('netflix-desenhos')
+          },
           style: {
             color: activeMenu === 'desenhos' ? '#fff' : '#b3b3b3',
             cursor: 'pointer',
@@ -3037,7 +3062,12 @@ header("Expires: 0");
         }, 'Desenhos'),
 
         e('a', {
-          onClick: () => setView('netflix-show'),
+          onClick: () => {
+            if (window.updateNetflixMoviesState) {
+              window.updateNetflixMoviesState({ showCollectionsView: false, heroBackdrop: null })
+            }
+            setView('netflix-show')
+          },
           style: {
             color: activeMenu === 'show' ? '#fff' : '#b3b3b3',
             cursor: 'pointer',
@@ -7890,6 +7920,8 @@ window.resetNetflixMovies = () => {
 
 // Componente NetflixMovies com proteção anti-loop
     function NetflixMovies({ contentType = 'vod', categoryFilter = null, selectedCategory = null }){
+      console.log('[NetflixMovies] Renderizando - contentType:', contentType, 'categoryFilter:', categoryFilter, 'selectedCategory:', selectedCategory?.category_name)
+
       const isSeriesMode = contentType === 'series'
       const modeLabel = isSeriesMode ? 'SÉRIES' : 'FILMES'
       const filterLabel = categoryFilter ? ` (${categoryFilter})` : ''
@@ -8141,8 +8173,12 @@ window.resetNetflixMovies = () => {
 
       // ===== NOVO: Setar heroBackdrop da primeira coleção quando abrir Coletâneas =====
       useEffect(() => {
-        if (showCollectionsView && collections.length > 0 && !viewingCollectionMovies) {
+        console.log('[BACKDROP] useEffect collections - showCollectionsView:', showCollectionsView, 'collections:', collections.length, 'viewingCollectionMovies:', viewingCollectionMovies)
+
+        // IMPORTANTE: Só setar backdrop se showCollectionsView for EXPLICITAMENTE true
+        if (showCollectionsView === true && collections.length > 0 && !viewingCollectionMovies) {
           const firstCollection = collections[0]
+          console.log('[BACKDROP] ✅ Setando backdrop de coleção:', firstCollection.name)
           if (firstCollection && window.updateNetflixMoviesState) {
             window.updateNetflixMoviesState({
               heroBackdrop: {
@@ -8154,6 +8190,12 @@ window.resetNetflixMovies = () => {
               }
             })
           }
+        } else if (showCollectionsView === false && window.updateNetflixMoviesState) {
+          // Só limpar se showCollectionsView for EXPLICITAMENTE false
+          console.log('[BACKDROP] ❌ Limpando backdrop (showCollectionsView = false)')
+          window.updateNetflixMoviesState({
+            heroBackdrop: null
+          })
         }
       }, [showCollectionsView, collections.length, viewingCollectionMovies])
 
@@ -9245,6 +9287,7 @@ window.resetNetflixMovies = () => {
         const updateHeroBackdropFromCollection = (coll) => {
           if (!coll || !window.updateNetflixMoviesState) return
 
+          console.log('[BACKDROP] Mouse sobre coleção - atualizando backdrop:', coll.name)
           window.updateNetflixMoviesState({
             heroBackdrop: {
               name: coll.name,
@@ -10132,6 +10175,9 @@ window.resetNetflixMovies = () => {
         },
           // Featured Movie (fundo completo) ou Hero Backdrop (coleções)
           (() => {
+            if (globalState.heroBackdrop) {
+              console.log('[BACKDROP] Renderizando backdrop:', globalState.heroBackdrop.name)
+            }
             return globalState.heroBackdrop ? e('div', {
               style: {
                 position: 'absolute',
