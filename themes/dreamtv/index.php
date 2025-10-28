@@ -1866,11 +1866,20 @@ header("Expires: 0");
 
     // Filtrar categorias baseado na view
     if (isAdultView) {
-      // Na view adulta: mostrar APENAS categorias 18+
-      categories = categories.filter(cat => {
+      // Na view adulta: mostrar APENAS categorias 18+ de VOD E SÉRIES combinadas
+      const vodAdult = (vodCats || []).filter(cat => {
         const catName = cat.category_name || cat.name || ''
         return catName.trim().startsWith('18+')
       })
+      const seriesAdult = (seriesCats || []).filter(cat => {
+        const catName = cat.category_name || cat.name || ''
+        return catName.trim().startsWith('18+')
+      })
+      // Combinar ambas e marcar o tipo
+      categories = [
+        ...vodAdult.map(cat => ({ ...cat, contentType: 'vod' })),
+        ...seriesAdult.map(cat => ({ ...cat, contentType: 'series' }))
+      ]
     } else if (isMoviesView) {
       // Na view de filmes: REMOVER categorias 18+, Animes e Show
       categories = categories.filter(cat => {
@@ -4926,8 +4935,10 @@ header("Expires: 0");
       if(view==='animes-categories' && seriesCats.length===0) loadCatsByType('series')
       if(view==='desenhos-categories' && seriesCats.length===0) loadCatsByType('series')
       if(view==='show-categories' && vodCats.length===0) loadCatsByType('vod')
-      if(view==='adult-content' && vodCats.length===0) {
-        loadCatsByType('vod')
+      if(view==='adult-content') {
+        // Carregar AMBAS categorias VOD e SERIES para conteúdo adulto
+        if(vodCats.length===0) loadCatsByType('vod')
+        if(seriesCats.length===0) loadCatsByType('series')
       }
       if(view==='collections' && vodCats.length===0) {
         loadCatsByType('vod')
@@ -6474,11 +6485,14 @@ function Home(){
         })
       }
 
-      // Filtrar categorias de Séries - remover novelas, crunchyroll, desenho
+      // Filtrar categorias de Séries - remover novelas, crunchyroll, desenho E 18+
       if(view==='series-categories'){
         cats = seriesCats.filter(cat => {
           const name = (cat.category_name || '').toLowerCase()
-          return !name.includes('novela') && !name.includes('crunchyroll') && !name.includes('desenho')
+          return !name.includes('novela') &&
+                 !name.includes('crunchyroll') &&
+                 !name.includes('desenho') &&
+                 !name.startsWith('18+')
         })
       }
 
@@ -12183,7 +12197,9 @@ window.resetNetflixMovies = () => {
     }
     else if(view==='adult-content'){
       if (selectedCat) {
-        content = e(NetflixMovies, { key: `adult-${getCatId(selectedCat)}`, contentType: 'vod', selectedCategory: selectedCat })
+        // Usar contentType da categoria (pode ser 'vod' ou 'series')
+        const adultContentType = selectedCat.contentType || 'vod'
+        content = e(NetflixMovies, { key: `adult-${getCatId(selectedCat)}`, contentType: adultContentType, selectedCategory: selectedCat })
       } else {
         content = e('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', color: '#fff' } }, 'Carregando categorias...')
       }
