@@ -25,8 +25,25 @@ header("Expires: 0");
   <!-- Para produção, compile com: npx tailwindcss -i ./src/input.css -o ./dist/output.css -->
   <!-- Mantendo CDN apenas para desenvolvimento rápido -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Players de vídeo disponíveis -->
   <!-- HLS.js para m3u8 no Chrome/Firefox/Edge -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+
+  <!-- Clappr Player (Recommended) -->
+  <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
+
+  <!-- Video.js Player -->
+  <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+  <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@latest/dist/videojs-contrib-hls.min.js"></script>
+
+  <!-- JW Player -->
+  <script src="https://cdn.jwplayer.com/libraries/KB5zFt7A.js"></script>
+
+  <!-- Flow Player -->
+  <link rel="stylesheet" href="https://cdn.flowplayer.com/releases/native/3/stable/style/flowplayer.css">
+  <script src="https://cdn.flowplayer.com/releases/native/3/stable/flowplayer.min.js"></script>
   <style>
     /* Previne scroll - comportamento Netflix (100% fixo na tela) */
     html{margin:0;padding:0;height:100vh;width:100vw;overflow:hidden}
@@ -1799,6 +1816,476 @@ header("Expires: 0");
     )
   }
 
+  // ===== COMPONENTE: SETTINGS (CONFIGURAÇÕES) =====
+  function Settings({ account, setView }) {
+    const [useTMDB, setUseTMDB] = useLocalStorage('use_tmdb', true)
+    const [selectedPlayer, setSelectedPlayer] = useLocalStorage('selected_player', 'Clappr Player (Recommended)')
+    const [selectedSystem, setSelectedSystem] = useLocalStorage('selected_system', 'TS')
+    const [showPlayerOptions, setShowPlayerOptions] = useState(false)
+    const [showSystemOptions, setShowSystemOptions] = useState(false)
+
+    // Players disponíveis
+    const players = [
+      'Clappr Player (Recommended)',
+      'Video.js Player',
+      'JW Player',
+      'Flow Player',
+      'HLS.js (Sistema)'
+    ]
+    const systems = ['M3U8', 'TS']
+
+    // Função para formatar timestamp Unix para data/hora
+    const formatDateTime = (timestamp) => {
+      if (!timestamp) return 'N/A'
+      const date = new Date(timestamp * 1000)
+      const day = String(date.getDate()).padStart(2, '0')
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const year = date.getFullYear()
+      const hours = String(date.getHours()).padStart(2, '0')
+      const minutes = String(date.getMinutes()).padStart(2, '0')
+      const seconds = String(date.getSeconds()).padStart(2, '0')
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+    }
+
+    // Calcular dias restantes
+    const calculateDaysRemaining = (expTimestamp) => {
+      if (!expTimestamp) return 'N/A'
+      const now = Date.now()
+      const expDate = expTimestamp * 1000
+      const diff = expDate - now
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+      return days > 0 ? `${days} days` : 'Expirado'
+    }
+
+    return e('div', {
+      className: 'star-bg',
+      style: {
+        minHeight: '100vh',
+        padding: '80px 40px 40px 40px',
+        color: '#fff'
+      }
+    },
+      e('div', {
+        style: {
+          maxWidth: '1400px',
+          margin: '0 auto'
+        }
+      },
+        // Título
+        e('h1', {
+          style: {
+            fontSize: '36px',
+            fontWeight: '600',
+            marginBottom: '40px',
+            color: '#fff'
+          }
+        }, 'Configurações'),
+
+        e('div', {
+          style: {
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '40px'
+          }
+        },
+          // Coluna esquerda - Botões
+          e('div', {
+            style: {
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
+            }
+          },
+            // Botão: Dados da conta
+            e('button', {
+              style: {
+                padding: '18px 24px',
+                background: 'rgba(60, 60, 60, 0.8)',
+                border: 'none',
+                borderRadius: '8px',
+                color: '#fff',
+                fontSize: '16px',
+                textAlign: 'left',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              },
+              onMouseEnter: (ev) => {
+                ev.target.style.background = 'rgba(80, 80, 80, 0.8)'
+              },
+              onMouseLeave: (ev) => {
+                ev.target.style.background = 'rgba(60, 60, 60, 0.8)'
+              }
+            }, 'Dados da conta'),
+
+            // Botão: Informações do aplicativo
+            e('button', {
+              style: {
+                padding: '18px 24px',
+                background: 'rgba(40, 40, 40, 0.8)',
+                border: 'none',
+                borderRadius: '8px',
+                color: '#fff',
+                fontSize: '16px',
+                textAlign: 'left',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              },
+              onMouseEnter: (ev) => {
+                ev.target.style.background = 'rgba(60, 60, 60, 0.8)'
+              },
+              onMouseLeave: (ev) => {
+                ev.target.style.background = 'rgba(40, 40, 40, 0.8)'
+              }
+            }, 'Informações do aplicativo'),
+
+            // Botão: Alterar Código Pin
+            e('button', {
+              onClick: () => alert('Funcionalidade em breve!'),
+              style: {
+                padding: '18px 24px',
+                background: 'rgba(40, 40, 40, 0.8)',
+                border: 'none',
+                borderRadius: '8px',
+                color: '#fff',
+                fontSize: '16px',
+                textAlign: 'left',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              },
+              onMouseEnter: (ev) => {
+                ev.target.style.background = 'rgba(60, 60, 60, 0.8)'
+              },
+              onMouseLeave: (ev) => {
+                ev.target.style.background = 'rgba(40, 40, 40, 0.8)'
+              }
+            }, 'Alterar Código Pin'),
+
+            // Botão: Alterar Player
+            e('button', {
+              onClick: () => {
+                setShowPlayerOptions(!showPlayerOptions)
+                setShowSystemOptions(false)
+              },
+              style: {
+                padding: '18px 24px',
+                background: showPlayerOptions ? 'rgba(60, 60, 60, 0.8)' : 'rgba(40, 40, 40, 0.8)',
+                border: 'none',
+                borderRadius: '8px',
+                color: '#fff',
+                fontSize: '16px',
+                textAlign: 'left',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              },
+              onMouseEnter: (ev) => {
+                ev.target.style.background = 'rgba(60, 60, 60, 0.8)'
+              },
+              onMouseLeave: (ev) => {
+                ev.target.style.background = showPlayerOptions ? 'rgba(60, 60, 60, 0.8)' : 'rgba(40, 40, 40, 0.8)'
+              }
+            }, 'Alterar Player'),
+
+            // Botão: Alterar Sistema
+            e('button', {
+              onClick: () => {
+                setShowSystemOptions(!showSystemOptions)
+                setShowPlayerOptions(false)
+              },
+              style: {
+                padding: '18px 24px',
+                background: showSystemOptions ? 'rgba(60, 60, 60, 0.8)' : 'rgba(40, 40, 40, 0.8)',
+                border: 'none',
+                borderRadius: '8px',
+                color: '#fff',
+                fontSize: '16px',
+                textAlign: 'left',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              },
+              onMouseEnter: (ev) => {
+                ev.target.style.background = 'rgba(60, 60, 60, 0.8)'
+              },
+              onMouseLeave: (ev) => {
+                ev.target.style.background = showSystemOptions ? 'rgba(60, 60, 60, 0.8)' : 'rgba(40, 40, 40, 0.8)'
+              }
+            }, 'Alterar Sistema'),
+
+            // Botão: Recarregar o Sistema
+            e('button', {
+              onClick: () => window.location.reload(),
+              style: {
+                padding: '18px 24px',
+                background: 'rgba(40, 40, 40, 0.8)',
+                border: 'none',
+                borderRadius: '8px',
+                color: '#fff',
+                fontSize: '16px',
+                textAlign: 'left',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              },
+              onMouseEnter: (ev) => {
+                ev.target.style.background = 'rgba(60, 60, 60, 0.8)'
+              },
+              onMouseLeave: (ev) => {
+                ev.target.style.background = 'rgba(40, 40, 40, 0.8)'
+              }
+            }, 'Recarregar o Sistema'),
+
+            // Botão: Limpar Armazenamento
+            e('button', {
+              onClick: () => {
+                if (confirm('Deseja limpar todo o armazenamento local? Isso vai fazer logout.')) {
+                  localStorage.clear()
+                  window.location.reload()
+                }
+              },
+              style: {
+                padding: '18px 24px',
+                background: 'rgba(40, 40, 40, 0.8)',
+                border: 'none',
+                borderRadius: '8px',
+                color: '#fff',
+                fontSize: '16px',
+                textAlign: 'left',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              },
+              onMouseEnter: (ev) => {
+                ev.target.style.background = 'rgba(60, 60, 60, 0.8)'
+              },
+              onMouseLeave: (ev) => {
+                ev.target.style.background = 'rgba(40, 40, 40, 0.8)'
+              }
+            }, 'Limpar Armazenamento'),
+
+            // Toggle: Usar API TMDB
+            e('div', {
+              style: {
+                padding: '18px 24px',
+                background: 'rgba(40, 40, 40, 0.8)',
+                border: 'none',
+                borderRadius: '8px',
+                color: '#fff',
+                fontSize: '16px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }
+            },
+              e('span', null, 'Usar API TMDB'),
+              e('label', {
+                style: {
+                  position: 'relative',
+                  display: 'inline-block',
+                  width: '50px',
+                  height: '24px',
+                  cursor: 'pointer'
+                }
+              },
+                e('input', {
+                  type: 'checkbox',
+                  checked: useTMDB,
+                  onChange: (ev) => setUseTMDB(ev.target.checked),
+                  style: { display: 'none' }
+                }),
+                e('span', {
+                  style: {
+                    position: 'absolute',
+                    cursor: 'pointer',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: useTMDB ? '#4CAF50' : '#ccc',
+                    borderRadius: '24px',
+                    transition: '0.4s'
+                  }
+                },
+                  e('span', {
+                    style: {
+                      position: 'absolute',
+                      content: '""',
+                      height: '18px',
+                      width: '18px',
+                      left: useTMDB ? '28px' : '3px',
+                      bottom: '3px',
+                      backgroundColor: 'white',
+                      borderRadius: '50%',
+                      transition: '0.4s'
+                    }
+                  })
+                )
+              )
+            )
+          ),
+
+          // Coluna direita - Opções de Player/Sistema ou Informações da conta
+          e('div', {
+            style: {
+              background: 'rgba(40, 40, 40, 0.6)',
+              borderRadius: '12px',
+              padding: '30px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
+            }
+          },
+            // Mostrar opções de Player se estiver ativo
+            showPlayerOptions ? players.map(player =>
+              e('button', {
+                key: player,
+                onClick: () => {
+                  setSelectedPlayer(player)
+                  setShowPlayerOptions(false)
+                },
+                style: {
+                  padding: '18px 24px',
+                  background: 'rgba(50, 50, 50, 0.8)',
+                  border: selectedPlayer === player ? '2px solid #fff' : 'none',
+                  borderRadius: '12px',
+                  color: '#fff',
+                  fontSize: '16px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                },
+                onMouseEnter: (ev) => {
+                  if (selectedPlayer !== player) {
+                    ev.target.style.background = 'rgba(70, 70, 70, 0.8)'
+                  }
+                },
+                onMouseLeave: (ev) => {
+                  ev.target.style.background = 'rgba(50, 50, 50, 0.8)'
+                }
+              },
+                e('span', null, player),
+                selectedPlayer === player && e('span', { style: { fontSize: '20px' } }, '✓')
+              )
+            )
+            // Mostrar opções de Sistema se estiver ativo
+            : showSystemOptions ? systems.map(system =>
+              e('button', {
+                key: system,
+                onClick: () => {
+                  setSelectedSystem(system)
+                  setShowSystemOptions(false)
+                },
+                style: {
+                  padding: '18px 24px',
+                  background: 'rgba(50, 50, 50, 0.8)',
+                  border: selectedSystem === system ? '2px solid #fff' : 'none',
+                  borderRadius: '12px',
+                  color: '#fff',
+                  fontSize: '16px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                },
+                onMouseEnter: (ev) => {
+                  if (selectedSystem !== system) {
+                    ev.target.style.background = 'rgba(70, 70, 70, 0.8)'
+                  }
+                },
+                onMouseLeave: (ev) => {
+                  ev.target.style.background = 'rgba(50, 50, 50, 0.8)'
+                }
+              },
+                e('span', null, system),
+                selectedSystem === system && e('span', { style: { fontSize: '20px' } }, '✓')
+              )
+            )
+            // Caso contrário, mostrar informações da conta
+            : [
+            // Status
+            e('div', {
+              style: {
+                display: 'flex',
+                justifyContent: 'space-between',
+                paddingBottom: '15px',
+                borderBottom: '1px solid rgba(255,255,255,0.1)'
+              }
+            },
+              e('span', { style: { color: '#aaa', fontSize: '16px' } }, 'Status'),
+              e('span', { style: { color: '#4CAF50', fontSize: '16px', fontWeight: '600' } }, 'Active')
+            ),
+
+            // Nome de usuário
+            e('div', {
+              style: {
+                display: 'flex',
+                justifyContent: 'space-between',
+                paddingBottom: '15px',
+                borderBottom: '1px solid rgba(255,255,255,0.1)'
+              }
+            },
+              e('span', { style: { color: '#aaa', fontSize: '16px' } }, 'Nome de usuário'),
+              e('span', { style: { color: '#fff', fontSize: '16px', fontWeight: '600' } }, account?.username || 'N/A')
+            ),
+
+            // Data de registro
+            e('div', {
+              style: {
+                display: 'flex',
+                justifyContent: 'space-between',
+                paddingBottom: '15px',
+                borderBottom: '1px solid rgba(255,255,255,0.1)'
+              }
+            },
+              e('span', { style: { color: '#aaa', fontSize: '16px' } }, 'Data de registro'),
+              e('span', { style: { color: '#fff', fontSize: '16px' } }, formatDateTime(account?.created_at))
+            ),
+
+            // Data de expiração
+            e('div', {
+              style: {
+                display: 'flex',
+                justifyContent: 'space-between',
+                paddingBottom: '15px',
+                borderBottom: '1px solid rgba(255,255,255,0.1)'
+              }
+            },
+              e('span', { style: { color: '#aaa', fontSize: '16px' } }, 'Data de expiração'),
+              e('span', { style: { color: '#fff', fontSize: '16px' } }, formatDateTime(account?.exp_date))
+            ),
+
+            // Dias restantes
+            e('div', {
+              style: {
+                display: 'flex',
+                justifyContent: 'space-between'
+              }
+            },
+              e('span', { style: { color: '#aaa', fontSize: '16px' } }, 'Dias restantes'),
+              e('span', { style: { color: '#fff', fontSize: '16px', fontWeight: '600' } }, calculateDaysRemaining(account?.exp_date))
+            )
+          ]
+          )
+        ),
+
+        // Footer com versão
+        e('div', {
+          style: {
+            position: 'fixed',
+            bottom: '20px',
+            left: '40px',
+            color: '#aaa',
+            fontSize: '14px',
+            display: 'flex',
+            gap: '20px'
+          }
+        },
+          e('span', null, 'IPTV'),
+          e('span', null, 'Versão: 1.6.0')
+        )
+      )
+    )
+  }
+
   // ===== HEADER GLOBAL NETFLIX-STYLE =====
   function Header({ view, setView, globalSearchQuery, setGlobalSearchQuery, onLogout, account }) {
     const [showProfileMenu, setShowProfileMenu] = useState(false)
@@ -2201,7 +2688,7 @@ header("Expires: 0");
               // Configurações
               e('div', {
                 onClick: () => {
-                  alert('Funcionalidade em breve!')
+                  setView('settings')
                   setShowProfileMenu(false)
                 },
                 style: {
@@ -10427,13 +10914,26 @@ window.resetNetflixMovies = () => {
 
     function Player(){
       const videoRef = useRef(null)
+      const playerInstanceRef = useRef(null)
       const [hlsObj,setHlsObj] = useState(null)
       const containerRef = useRef(null)
       const [showHUD, setShowHUD] = useState(true) // HUD visível por padrão
       const [channelEPG, setChannelEPG] = useState(null)
       const [isFavorite, setIsFavorite] = useState(false)
+      const [selectedPlayer] = useLocalStorage('selected_player', 'Clappr Player (Recommended)')
 
-      useEffect(()=>{ return ()=>{ if(hlsObj){ try{ hlsObj.destroy() }catch{} } } },[hlsObj])
+      // Cleanup ao desmontar
+      useEffect(()=>{
+        return ()=>{
+          if(hlsObj){ try{ hlsObj.destroy() }catch{} }
+          if(playerInstanceRef.current){
+            try{
+              if(typeof playerInstanceRef.current.destroy === 'function') playerInstanceRef.current.destroy()
+              if(typeof playerInstanceRef.current.dispose === 'function') playerInstanceRef.current.dispose()
+            }catch{}
+          }
+        }
+      },[hlsObj])
 
       // Verificar se canal atual está nos favoritos
       useEffect(() => {
@@ -10536,22 +11036,89 @@ window.resetNetflixMovies = () => {
       useEffect(()=>{
         const v = videoRef.current
         if(!v || !current) return
-        const isM3U8 = /\.m3u8($|\?)/i.test(current.url)
-        const canNative = v.canPlayType('application/vnd.apple.mpegURL')
-        if(isM3U8 && !canNative && window.Hls && window.Hls.isSupported()){
-          // ⚡ Configuração otimizada para início RÁPIDO
-          const hls = new Hls({
-            maxBufferLength: 10,        // Reduzido: 30s → 10s (inicia 3x mais rápido!)
-            maxMaxBufferLength: 20,      // Buffer máximo: 20s
-            autoStartLoad: true,         // Carregar imediatamente
-            enableWorker: true           // Usar Web Worker (performance)
+
+        // Cleanup player anterior
+        if(playerInstanceRef.current){
+          try{
+            if(typeof playerInstanceRef.current.destroy === 'function') playerInstanceRef.current.destroy()
+            if(typeof playerInstanceRef.current.dispose === 'function') playerInstanceRef.current.dispose()
+          }catch{}
+          playerInstanceRef.current = null
+        }
+
+        // Inicializar player baseado na seleção
+        if(selectedPlayer === 'Clappr Player (Recommended)' && window.Clappr){
+          const player = new Clappr.Player({
+            source: current.url,
+            parentId: `#${v.parentElement.id || 'player-container'}`,
+            width: '100%',
+            height: '100%',
+            autoPlay: true,
+            playback: {
+              hlsjsConfig: {
+                maxBufferLength: 10,
+                maxMaxBufferLength: 20
+              }
+            }
           })
-          hls.loadSource(current.url)
-          hls.attachMedia(v)
-          setHlsObj(hls)
-        }else{ v.src = current.url }
-        v.play().catch(()=>{})
-      },[current])
+          playerInstanceRef.current = player
+          v.style.display = 'none'
+        }
+        else if(selectedPlayer === 'Video.js Player' && window.videojs){
+          v.className = 'video-js vjs-default-skin'
+          const player = videojs(v, {
+            autoplay: true,
+            controls: false,
+            fluid: true,
+            html5: {
+              hls: {
+                overrideNative: true
+              }
+            }
+          })
+          player.src({ src: current.url, type: 'application/x-mpegURL' })
+          playerInstanceRef.current = player
+        }
+        else if(selectedPlayer === 'JW Player' && window.jwplayer){
+          const player = jwplayer(v.parentElement)
+          player.setup({
+            file: current.url,
+            width: '100%',
+            height: '100%',
+            autostart: true,
+            controls: false
+          })
+          playerInstanceRef.current = player
+          v.style.display = 'none'
+        }
+        else if(selectedPlayer === 'Flow Player' && window.flowplayer){
+          const player = flowplayer(v.parentElement, {
+            src: current.url,
+            autoplay: true,
+            controls: false
+          })
+          playerInstanceRef.current = player
+          v.style.display = 'none'
+        }
+        else {
+          // HLS.js (Sistema) - fallback padrão
+          v.style.display = 'block'
+          const isM3U8 = /\.m3u8($|\?)/i.test(current.url)
+          const canNative = v.canPlayType('application/vnd.apple.mpegURL')
+          if(isM3U8 && !canNative && window.Hls && window.Hls.isSupported()){
+            const hls = new Hls({
+              maxBufferLength: 10,
+              maxMaxBufferLength: 20,
+              autoStartLoad: true,
+              enableWorker: true
+            })
+            hls.loadSource(current.url)
+            hls.attachMedia(v)
+            setHlsObj(hls)
+          }else{ v.src = current.url }
+          v.play().catch(()=>{})
+        }
+      },[current, selectedPlayer])
 
       // Handlers para mostrar HUD
       useEffect(() => {
@@ -10588,7 +11155,7 @@ window.resetNetflixMovies = () => {
           e('h2', { className:'text-white font-semibold truncate max-w-[60vw]' }, current?.name || 'Reprodução'),
           e('div', { className:'w-10' })
         ),
-        e('div', { className:'flex-1 grid place-items-center p-4 relative' },
+        e('div', { id: 'player-container', className:'flex-1 grid place-items-center p-4 relative' },
           e('video', { ref:videoRef, controls:false, playsInline:true, className:'w-full max-w-6xl rounded-lg bg-black' }),
           // PlayerHUD sobreposto
           e(PlayerHUD, {
@@ -10858,6 +11425,7 @@ window.resetNetflixMovies = () => {
     // ===== Router =====
     let content
     if(view==='config') content = e(Config)
+    else if(view==='settings') content = e(Settings, { account, setView })
     else if(view==='home') content = e(Home)
     else if(view==='netflix-movies'){
       // Só renderizar quando selectedCat estiver definido
@@ -10896,8 +11464,8 @@ window.resetNetflixMovies = () => {
     else if(view==='player' && current) content = e(Player)
     else content = e('div', { className:'star-bg min-h-screen grid place-items-center text-white' }, 'Carregando...')
 
-    // Não mostrar header apenas na config (login) e no player
-    const showHeader = view !== 'config' && view !== 'player'
+    // Não mostrar header apenas na config (login), settings e no player
+    const showHeader = view !== 'config' && view !== 'player' && view !== 'settings'
     const showCategoryBar = showHeader && (view === 'netflix-movies' || view === 'vod-categories')
 
     return e('div', { className: 'app-container' },
