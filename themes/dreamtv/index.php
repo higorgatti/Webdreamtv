@@ -11464,6 +11464,8 @@ window.resetNetflixMovies = () => {
     function SerieDetails({ contentData }) {
       const [isFavorite, setIsFavorite] = useState(false)
       const [showEpisodes, setShowEpisodes] = useState(false)
+      const [tmdbTrailerUrl, setTmdbTrailerUrl] = useState(null)
+      const [loadingTrailer, setLoadingTrailer] = useState(false)
 
       if (!contentData) {
         return e('div', { className: 'serie-detail-page' },
@@ -11530,6 +11532,34 @@ window.resetNetflixMovies = () => {
       const displayEpisodes = episodes_count || '—'
       const displaySeasons = seasons_count || '—'
 
+      // Buscar trailer do TMDB se não existir trailer_url do servidor
+      useEffect(() => {
+        const fetchTrailer = async () => {
+          // Se já tem trailer_url do servidor, não precisa buscar
+          if (trailer_url || tmdbTrailerUrl || loadingTrailer) return
+
+          // Buscar tmdb_id do contentData
+          const tmdbId = contentData.tmdb_id
+          if (!tmdbId) return
+
+          setLoadingTrailer(true)
+          try {
+            // Detectar se é série ou filme
+            const type = series_id ? 'tv' : 'movie'
+            const trailerUrl = await getTMDBTrailer(tmdbId, type)
+            if (trailerUrl) {
+              setTmdbTrailerUrl(trailerUrl)
+            }
+          } catch (err) {
+            console.error('Erro ao buscar trailer:', err)
+          } finally {
+            setLoadingTrailer(false)
+          }
+        }
+
+        fetchTrailer()
+      }, [contentData])
+
       // Handlers
       const handleWatch = () => {
         // TODO: Navegar para player ou mostrar episódios
@@ -11547,8 +11577,16 @@ window.resetNetflixMovies = () => {
       }
 
       const handleTrailer = () => {
-        if (trailer_url) {
-          window.open(trailer_url, '_blank')
+        const url = trailer_url || tmdbTrailerUrl
+        if (url) {
+          // Abrir trailer em modal ou nova janela
+          if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            // Abrir modal de trailer
+            setTrailerUrl(url)
+            setShowTrailerModal(true)
+          } else {
+            window.open(url, '_blank')
+          }
         } else {
           alert('Trailer não disponível')
         }
@@ -11636,11 +11674,17 @@ window.resetNetflixMovies = () => {
               '▶ Assistir'
             ),
 
-            trailer_url && e('button', {
+            // Sempre mostrar botão de trailer (busca do TMDB se necessário)
+            e('button', {
               className: 'serie-detail-btn serie-detail-btn-trailer',
-              onClick: handleTrailer
+              onClick: handleTrailer,
+              disabled: loadingTrailer,
+              style: {
+                opacity: loadingTrailer ? 0.6 : 1,
+                cursor: loadingTrailer ? 'wait' : 'pointer'
+              }
             },
-              'Trailer'
+              loadingTrailer ? '⏳ Buscando...' : (trailer_url || tmdbTrailerUrl ? '🎬 Trailer' : '🎬 Trailer')
             ),
 
             e('button', {
