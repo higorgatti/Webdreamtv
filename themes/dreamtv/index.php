@@ -4693,6 +4693,9 @@ header("Expires: 0");
       if(view==='adult-content' && vodCats.length===0) {
         loadCatsByType('vod')
       }
+      if(view==='collections' && vodCats.length===0) {
+        loadCatsByType('vod')
+      }
     }, [view])
 
     // Ao carregar as categorias do Live, abrimos a 1ª e, se necessário, buscamos contagens
@@ -5821,7 +5824,7 @@ function Home(){
               ),
               error && e('div', { className:'text-red-300 text-xs mb-3' }, 'Live: ', error),
               liveLeftMode==='categories' ?
-                e('div', { className:'overflow-y-auto flex-1 space-y-3 pr-2 pb-4' },
+                e('div', { className:'overflow-y-auto flex-1 space-y-3 pr-2 pb-20' },
                   // Categoria Favoritos (sempre primeiro)
                   (() => {
                     const favorites = JSON.parse(localStorage.getItem('dreamtv_favorites') || '{}')
@@ -5881,7 +5884,7 @@ function Home(){
                   e('div', { className:'text-center text-xs text-gray-400 mt-3 py-2' }, '↑↓ Navegar | → Enter Abrir | ← ESC Voltar')
                 )
               :
-                e('div', { className:'overflow-y-auto flex-1 space-y-3 pr-2 pb-4' },
+                e('div', { className:'overflow-y-auto flex-1 space-y-3 pr-2 pb-20' },
                   toArray(liveStreams).map((item, idx)=> {
                       const key = item.stream_id || item.id || item.name
                       const isFocused = idx === focusedChannelIdx
@@ -7564,7 +7567,8 @@ if(typeof window.__netflixMoviesState === 'undefined') {
     showCollectionsView: false,
     selectedCollectionMovies: [],
     viewingCollectionMovies: false,
-    heroBackdrop: null
+    heroBackdrop: null,
+    loadingCollections: false // ===== ADICIONAR AO ESTADO GLOBAL =====
   }
 }
 
@@ -7682,7 +7686,11 @@ window.resetNetflixMovies = () => {
         window.updateNetflixMoviesState({ viewingCollectionMovies: value })
       }
 
-      const [loadingCollections, setLoadingCollections] = useState(false) // Carregando coleções
+      // ===== USAR ESTADO GLOBAL para loadingCollections =====
+      const loadingCollections = globalState.loadingCollections || false
+      const setLoadingCollections = (value) => {
+        window.updateNetflixMoviesState({ loadingCollections: value })
+      }
 
       // Função para carregar índice de coleções pré-construído (INSTANTÂNEO)
       const loadCollectionsFromJSON = async (setCollections) => {
@@ -7755,7 +7763,7 @@ window.resetNetflixMovies = () => {
 
       // Função para construir coleções dinamicamente a partir dos filmes carregados
       const loadCollections = async () => {
-
+        console.log('[loadCollections] INICIANDO...')
         setLoadingCollections(true)
 
         try {
@@ -7767,16 +7775,20 @@ window.resetNetflixMovies = () => {
             }
           }
 
+          console.log('[loadCollections] Total de filmes:', allMovies.length)
 
           // Usar a função global findCollectionsInMovies
           const foundCollections = await findCollectionsInMovies(allMovies)
 
+          console.log('[loadCollections] Coleções encontradas:', foundCollections.length)
 
           setCollections(foundCollections)
         } catch(err) {
+          console.error('[loadCollections] ERRO:', err)
           setCollections([])
         } finally {
           setLoadingCollections(false)
+          console.log('[loadCollections] FINALIZADO')
         }
       }
 
@@ -7823,6 +7835,47 @@ window.resetNetflixMovies = () => {
           loadCollections()
         }
       }, [globalState.sectionsMovies.length]) // Disparar quando novas seções forem adicionadas
+
+      // ===== NOVO: Forçar carregamento de coleções quando entrar na view collections =====
+      useEffect(() => {
+        console.log('[useEffect collections] view:', view, 'collections.length:', collections.length, 'loadingCollections:', loadingCollections, 'sections:', globalState.sectionsMovies.length)
+
+        if (view === 'collections' && collections.length === 0 && !loadingCollections) {
+          const totalMovies = globalState.sectionsMovies.reduce((sum, section) => {
+            return sum + (section?.movies?.length || 0)
+          }, 0)
+
+          console.log('[useEffect collections] Total de filmes:', totalMovies)
+
+          // Se tem pelo menos alguns filmes, tenta carregar coleções
+          if (totalMovies > 0) {
+            console.log('[useEffect collections] Chamando loadCollections()...')
+            loadCollections()
+          } else {
+            // ===== NOVO: Se não tem filmes, carregar automaticamente da netflix-movies =====
+            console.log('[useEffect collections] Sem filmes - redirecionando para netflix-movies temporariamente')
+
+            // Salvar que queremos voltar para collections
+            window.__pendingCollectionsView = true
+
+            // Ir para netflix-movies para carregar filmes
+            setView('netflix-movies')
+          }
+        }
+
+        // ===== NOVO: Após carregar filmes, voltar para collections =====
+        if (window.__pendingCollectionsView && view === 'netflix-movies' && globalState.sectionsMovies.length > 0) {
+          const totalMovies = globalState.sectionsMovies.reduce((sum, section) => {
+            return sum + (section?.movies?.length || 0)
+          }, 0)
+
+          if (totalMovies > 0) {
+            console.log('[useEffect collections] Filmes carregados! Voltando para collections...')
+            window.__pendingCollectionsView = false
+            setView('collections')
+          }
+        }
+      }, [view, collections.length, globalState.sectionsMovies.length])
 
       // ===== NOVO: Setar heroBackdrop da primeira coleção quando abrir Coletâneas =====
       useEffect(() => {
@@ -9350,8 +9403,11 @@ window.resetNetflixMovies = () => {
       // COMPONENTE: CollectionsGrid (Grade de coleções)
       // COMPONENTE: SectionMovies
       const SectionMovies = ({ name, movies, sectionId, categoryIndex, totalCategories, onNextCategory, onPrevCategory, isCollectionsMode }) => {
+        console.log('[SectionMovies] name:', name, 'movies:', movies?.length, 'isCollectionsMode:', isCollectionsMode)
+
         // Proteção contra movies undefined
         if (!movies || !Array.isArray(movies)) {
+          console.log('[SectionMovies] RETORNANDO NULL - movies inválido')
           return null
         }
 
@@ -9782,7 +9838,9 @@ window.resetNetflixMovies = () => {
       }
 
       // Se não tem filmes carregados e não está loading nem com erro, mostra tela vazia
-      if(globalState.sectionsMovies.length === 0){
+      // EXCETO se estamos em modo collections E já temos coleções carregadas
+      if(globalState.sectionsMovies.length === 0 && !(view === 'collections' && collections.length > 0)){
+        console.log('[NetflixMovies] Retornando tela vazia - sections:', globalState.sectionsMovies.length, 'view:', view, 'collections:', collections.length)
         return e('div', {
           style: {
             background: '#111',
@@ -9916,7 +9974,7 @@ window.resetNetflixMovies = () => {
             onPrevCategory: () => {}
           }) :
           // MODO 2: Lista de coleções (carrossel horizontal) - APENAS se view for 'collections'
-          view === 'collections' && showCollectionsView && loadingCollections ? e('div', {
+          view === 'collections' && loadingCollections ? e('div', {
             style: {
               display: 'flex',
               alignItems: 'center',
@@ -9947,7 +10005,7 @@ window.resetNetflixMovies = () => {
               e('span', null, 'Buscando coleções...')
             )
           ) :
-          view === 'collections' && showCollectionsView && collections.length > 0 ? e(SectionMovies, {
+          view === 'collections' && collections.length > 0 ? (console.log('[RENDER] Renderizando SectionMovies com', collections.length, 'coleções'), e(SectionMovies, {
             key: 'collections-list',
             name: `🎬 Coleções (${collections.length})`,
             movies: collections, // Passando coleções como "movies" para reusar SectionMovies
@@ -9957,17 +10015,39 @@ window.resetNetflixMovies = () => {
             onNextCategory: () => {},
             onPrevCategory: () => {},
             isCollectionsMode: true // Flag para SectionMovies saber que está renderizando coleções
-          }) :
-          view === 'collections' && showCollectionsView && collections.length === 0 && !loadingCollections ? e('div', {
+          })) :
+          view === 'collections' && collections.length === 0 && !loadingCollections ? e('div', {
             style: {
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
               padding: '60px 40px',
-              color: '#999',
-              fontSize: '16px'
+              gap: '20px',
+              minHeight: '400px'
             }
-          }, 'Nenhuma coleção encontrada nesta categoria') :
+          },
+            e('div', {
+              style: {
+                fontSize: '48px'
+              }
+            }, '🎬'),
+            e('div', {
+              style: {
+                color: '#fff',
+                fontSize: '20px',
+                fontWeight: '600'
+              }
+            }, 'Preparando coleções...'),
+            e('div', {
+              style: {
+                color: '#999',
+                fontSize: '14px',
+                textAlign: 'center',
+                maxWidth: '400px'
+              }
+            }, 'Carregando filmes para montar as coleções. Aguarde alguns instantes.')
+          ) :
           // MODO 1: Renderiza a categoria atual OU loading se ainda não carregou
           globalState.sectionsMovies[currentCategoryIndex] && globalState.sectionsMovies[currentCategoryIndex].movies ? e(SectionMovies, {
             key: globalState.sectionsMovies[currentCategoryIndex].id,
