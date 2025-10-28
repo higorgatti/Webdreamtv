@@ -1654,10 +1654,14 @@ header("Expires: 0");
         return catName.trim().startsWith('18+')
       })
     } else if (isMoviesView) {
-      // Na view de filmes: REMOVER categorias 18+
+      // Na view de filmes: REMOVER categorias 18+, Animes e Show
       categories = categories.filter(cat => {
-        const catName = cat.category_name || cat.name || ''
-        return !catName.trim().startsWith('18+')
+        const catName = (cat.category_name || cat.name || '').toLowerCase().trim()
+        // Remover: 18+, animes (crunchyroll, anime), show
+        return !catName.startsWith('18+') &&
+               !catName.includes('crunchyroll') &&
+               !catName.includes('anime') &&
+               !catName.includes('show')
       })
     }
 
@@ -3826,10 +3830,14 @@ header("Expires: 0");
           return catName.trim().startsWith('18+')
         })
       } else if (isMoviesView) {
-        // Na view de filmes: REMOVER categorias 18+
+        // Na view de filmes: REMOVER categorias 18+, Animes e Show
         categories = categories.filter(cat => {
-          const catName = cat.category_name || cat.name || ''
-          return !catName.trim().startsWith('18+')
+          const catName = (cat.category_name || cat.name || '').toLowerCase().trim()
+          // Remover: 18+, animes (crunchyroll, anime), show
+          return !catName.startsWith('18+') &&
+                 !catName.includes('crunchyroll') &&
+                 !catName.includes('anime') &&
+                 !catName.includes('show')
         })
       }
 
