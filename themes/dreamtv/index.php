@@ -2738,6 +2738,18 @@ header("Expires: 0");
         }, 'Início'),
 
         e('a', {
+          onClick: () => setView('live-categories'),
+          style: {
+            color: activeMenu === 'channels' ? '#fff' : '#b3b3b3',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: activeMenu === 'channels' ? '600' : '400',
+            transition: 'color 0.2s',
+            textDecoration: 'none'
+          }
+        }, 'TV Ao Vivo'),
+
+        e('a', {
           onClick: () => setView('netflix-movies'),
           style: {
             color: activeMenu === 'movies' ? '#fff' : '#b3b3b3',
@@ -2825,18 +2837,6 @@ header("Expires: 0");
             textDecoration: 'none'
           }
         }, 'Coletâneas'),
-
-        e('a', {
-          onClick: () => setView('live-categories'),
-          style: {
-            color: activeMenu === 'channels' ? '#fff' : '#b3b3b3',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: activeMenu === 'channels' ? '600' : '400',
-            transition: 'color 0.2s',
-            textDecoration: 'none'
-          }
-        }, 'Canais'),
 
         e('a', {
           onClick: () => {
@@ -3359,7 +3359,7 @@ header("Expires: 0");
 
     const menuItems = [
       { id: 'home', icon: '🏠', title: 'Home', action: () => setView('home') },
-      { id: 'channels', icon: '📺', title: 'Canais', action: () => setView('live-categories') },
+      { id: 'channels', icon: '📺', title: 'TV Ao Vivo', action: () => setView('live-categories') },
       { id: 'movies', icon: '🎬', title: 'Filmes', action: () => {
         // Desativar modo coleções ao voltar para filmes
         if (window.updateNetflixMoviesState) {
