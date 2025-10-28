@@ -5976,6 +5976,21 @@ function Home(){
         return ()=> window.removeEventListener('keydown', handleKeyDown)
       }, [isLive, liveLeftMode, liveCats, liveStreams, focusedCatIdx, focusedChannelIdx])
 
+      // Listener para abrir categoria 18+ após validação de PIN
+      useEffect(()=>{
+        if(!isLive) return
+
+        const handleOpenAdultCategory = (event) => {
+          const { cat, idx } = event.detail
+          setFocusedCatIdx(idx)
+          setFocusedChannelIdx(0)
+          openLiveCategory(cat, true)
+        }
+
+        window.addEventListener('openAdultLiveCategory', handleOpenAdultCategory)
+        return ()=> window.removeEventListener('openAdultLiveCategory', handleOpenAdultCategory)
+      }, [isLive])
+
       // Scroll automático para item focado (APENAS dentro do container, sem afetar a página)
       useEffect(()=>{
         if(liveLeftMode==='categories' && liveCats.length>0){
@@ -6107,17 +6122,33 @@ function Home(){
                     const count = (liveCounts && liveCounts[String(catId)]) ?? cat.total ?? 0
                     const isFocused = idx === focusedCatIdx
                     const isSelected = selectedLiveCat && getCatId(selectedLiveCat)===catId
+                    const catName = (cat.category_name || '').toLowerCase().trim()
+                    const isAdultCategory = catName.startsWith('18+') || catName.includes('adulto')
+
                     return e('button', {
                       key:catId||cat.category_name,
                       id: 'cat-' + catId,
-                      onClick:()=>{ setFocusedCatIdx(idx); setFocusedChannelIdx(0); openLiveCategory(cat, true) },
+                      onClick:()=>{
+                        if (isAdultCategory) {
+                          // Armazenar categoria e índice pendentes
+                          window.__pendingLiveCategory = { cat, idx }
+                          setShowParentalPin(true)
+                        } else {
+                          setFocusedCatIdx(idx)
+                          setFocusedChannelIdx(0)
+                          openLiveCategory(cat, true)
+                        }
+                      },
                       className:'w-full rounded-lg px-4 py-3 text-left frost hover:border-purple-400/40 transition-all cursor-pointer ' + (isSelected || isFocused ? ' border-2 border-white/80 bg-white/10 text-white' : ' text-white/90')
                     },
                       e('div', {
                         className:'flex items-center justify-between',
                         style: { pointerEvents: 'none' } // Permite clicks em toda a área do button
                       },
-                        e('span', { className:'truncate font-semibold' }, cat.category_name||'Sem nome'),
+                        e('div', { className:'flex items-center gap-2' },
+                          isAdultCategory && e('span', { style: { fontSize: '16px' } }, '🔒'),
+                          e('span', { className:'truncate font-semibold' }, cat.category_name||'Sem nome')
+                        ),
                         e('span', { className:'opacity-80 ml-3' }, String(count))
                       )
                     )
@@ -12234,10 +12265,22 @@ window.resetNetflixMovies = () => {
               setView('adult-content')
               setPendingAdultView(false)
             }
+            // Abrir categoria Live 18+ se estava pendente
+            if (window.__pendingLiveCategory) {
+              const { cat, idx } = window.__pendingLiveCategory
+              // Usar a função que está no escopo do componente LiveCategories
+              // Como estamos no App, precisamos disparar um evento customizado
+              const event = new CustomEvent('openAdultLiveCategory', {
+                detail: { cat, idx }
+              })
+              window.dispatchEvent(event)
+              window.__pendingLiveCategory = null
+            }
           },
           onCancel: () => {
             setShowParentalPin(false)
             setPendingAdultView(false)
+            window.__pendingLiveCategory = null
           }
         })
       )
