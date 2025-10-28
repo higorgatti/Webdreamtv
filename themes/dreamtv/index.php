@@ -1635,6 +1635,9 @@ header("Expires: 0");
 
   // ===== BARRA DE CATEGORIAS DE FILMES E SÉRIES =====
   function CategoryBar({ vodCats, seriesCats, view, setView, selectedCat, setSelectedCat }) {
+    // IMPORTANTE: Hooks devem ser chamados ANTES de qualquer return condicional
+    const [showDropdown, setShowDropdown] = useState(false)
+
     // Só mostrar na view de filmes, séries ou adultos
     const isMoviesView = view === 'netflix-movies' || view === 'vod-categories'
     const isSeriesView = view === 'netflix-series' || view === 'series-categories'
@@ -1662,8 +1665,6 @@ header("Expires: 0");
 
     // Não renderizar até ter categorias
     if (categories.length === 0) return null
-
-    const [showDropdown, setShowDropdown] = useState(false)
 
     // Categorias prioritárias no topo (ordem específica)
     const priorityNames = [
