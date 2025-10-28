@@ -8785,6 +8785,8 @@ window.resetNetflixMovies = () => {
         const [showPrevious, setShowPrevious] = useState(false)
         // State para controlar se a imagem falhou ao carregar
         const [imageError, setImageError] = useState(false)
+        const [featuredTrailerUrl, setFeaturedTrailerUrl] = useState(null)
+        const [loadingFeaturedTrailer, setLoadingFeaturedTrailer] = useState(false)
         const transitionTimeoutRef = useRef(null)
         const lastProcessedIdRef = useRef(null) // ===== NOVO: Evitar reprocessamento =====
 
@@ -8989,6 +8991,29 @@ window.resetNetflixMovies = () => {
             enrichAndSetMovie()
           }
         }, [featuredMovieId])
+
+        // Buscar trailer do TMDB quando o filme mudar
+        useEffect(() => {
+          const fetchFeaturedTrailer = async () => {
+            if (!movie || !movie.tmdb_id || featuredTrailerUrl || loadingFeaturedTrailer) return
+
+            setLoadingFeaturedTrailer(true)
+            try {
+              // Detectar se é série ou filme
+              const type = movie.series_id ? 'tv' : 'movie'
+              const trailerUrl = await getTMDBTrailer(movie.tmdb_id, type)
+              if (trailerUrl) {
+                setFeaturedTrailerUrl(trailerUrl)
+              }
+            } catch (err) {
+              console.error('Erro ao buscar trailer do featured:', err)
+            } finally {
+              setLoadingFeaturedTrailer(false)
+            }
+          }
+
+          fetchFeaturedTrailer()
+        }, [movie?.tmdb_id])
 
         // Preload image e detectar erro
         useEffect(() => {
@@ -9215,25 +9240,31 @@ window.resetNetflixMovies = () => {
                   }, '▶ Assistir'),
 
                   // Trailer button
-                  e('a', {
-                    href: '#',
-                    onClick: (ev) => {
-                      ev.preventDefault()
-                      alert('Funcionalidade em breve!')
+                  e('button', {
+                    onClick: () => {
+                      if (featuredTrailerUrl) {
+                        setTrailerUrl(featuredTrailerUrl)
+                        setShowTrailerModal(true)
+                      } else if (!loadingFeaturedTrailer) {
+                        alert('Trailer não disponível para este conteúdo')
+                      }
                     },
+                    disabled: loadingFeaturedTrailer,
                     style: {
                       display: 'flex',
                       alignItems: 'center',
                       padding: '9px 24px',
                       borderRadius: '5px',
-                      cursor: 'pointer',
+                      cursor: loadingFeaturedTrailer ? 'wait' : (featuredTrailerUrl ? 'pointer' : 'not-allowed'),
                       textDecoration: 'none',
                       fontSize: '20px',
-                      background: 'rgba(109,109,110,0.7)',
+                      background: loadingFeaturedTrailer ? 'rgba(109,109,110,0.5)' : (featuredTrailerUrl ? 'rgba(109,109,110,0.7)' : 'rgba(109,109,110,0.4)'),
                       color: '#fff',
-                      fontWeight: '600'
+                      fontWeight: '600',
+                      border: 'none',
+                      opacity: loadingFeaturedTrailer ? 0.6 : (featuredTrailerUrl ? 1 : 0.5)
                     }
-                  }, '🎬 Trailer')
+                  }, loadingFeaturedTrailer ? '⏳ Buscando...' : '🎬 Trailer')
                 )
               )
             )
