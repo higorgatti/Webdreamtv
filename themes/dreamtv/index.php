@@ -1635,15 +1635,13 @@ header("Expires: 0");
 
   // ===== BARRA DE CATEGORIAS DE FILMES E SÉRIES =====
   function CategoryBar({ vodCats, seriesCats, view, setView, selectedCat, setSelectedCat }) {
-    // IMPORTANTE: Hooks devem ser chamados ANTES de qualquer return condicional
+    // IMPORTANTE: Todos os Hooks devem ser chamados ANTES de qualquer return condicional
     const [showDropdown, setShowDropdown] = useState(false)
 
-    // Só mostrar na view de filmes, séries ou adultos
+    // Calcular flags de view
     const isMoviesView = view === 'netflix-movies' || view === 'vod-categories'
     const isSeriesView = view === 'netflix-series' || view === 'series-categories'
     const isAdultView = view === 'adult-content' || view === 'adult-categories'
-
-    if (!isMoviesView && !isSeriesView && !isAdultView) return null
 
     // Usar categorias apropriadas
     let categories = isSeriesView ? (seriesCats || []) : (vodCats || [])
@@ -1662,9 +1660,6 @@ header("Expires: 0");
         return !catName.trim().startsWith('18+')
       })
     }
-
-    // Não renderizar até ter categorias
-    if (categories.length === 0) return null
 
     // Categorias prioritárias no topo (ordem específica)
     const priorityNames = [
@@ -1735,6 +1730,10 @@ header("Expires: 0");
         setSelectedCat(orderedCats[0])
       }
     }, [categories.length, isMoviesView, isSeriesView, isAdultView])
+
+    // AGORA SIM, fazer returns condicionais APÓS todos os hooks
+    if (!isMoviesView && !isSeriesView && !isAdultView) return null
+    if (categories.length === 0) return null
 
     // Se não tem categoria selecionada mas há categorias disponíveis, usar a primeira temporariamente
     const displayCat = selectedCat || (orderedCats.length > 0 ? orderedCats[0] : null)
