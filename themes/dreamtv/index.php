@@ -1507,18 +1507,20 @@ header("Expires: 0");
     // Retorna apenas um canal por base name (para o menu esquerdo)
     const groups = groupChannelsByBaseName(channels)
     return groups.map(g => {
-      // 🔧 CORRIGIDO: Se QUALQUER variante tiver tv_archive=1, o canal tem playback
+      // 🔧 IMPORTANTE: Se QUALQUER variante tem tv_archive=1, mostrar REC
+      // Verificar se alguma variante tem playback
       const variantWithArchive = g.variants.find(v => v.tv_archive === 1 || v.tv_archive === "1")
       const hasTvArchive = !!variantWithArchive
+
 
       return {
         ...g.baseChannel,
         baseName: g.baseName,
         hasVariants: g.variants.length > 1,
         variantCount: g.variants.length,
-        // Usar tv_archive da variante que tem playback (se existir)
+        // Se qualquer variante tem tv_archive, mostrar badge REC
         tv_archive: hasTvArchive ? 1 : (g.baseChannel.tv_archive || 0),
-        tv_archive_duration: hasTvArchive ? variantWithArchive.tv_archive_duration : g.baseChannel.tv_archive_duration
+        tv_archive_duration: variantWithArchive?.tv_archive_duration || g.baseChannel.tv_archive_duration
       }
     })
   }
@@ -5926,12 +5928,13 @@ function Home(){
 
                     // Preservar hasPlayback e tv_archive do canal original
                     // ✅ LIMPAR playback_url ao trocar de canal (volta ao vivo)
+                    // ✅ Usar tv_archive da variante que está sendo reproduzida (channelToPlay)
                     setSelectedChannel({
                       ...channelToPlay,
                       baseName,
                       allVariants: variants,
-                      hasPlayback: channel.hasPlayback,
-                      tv_archive: channel.tv_archive,
+                      hasPlayback: channelToPlay.hasPlayback || channel.hasPlayback,
+                      tv_archive: channelToPlay.tv_archive || channel.tv_archive, // Usar tv_archive da variante atual
                       playback_url: null, // Limpa playback ao trocar canal
                       playback_mode: false,
                       // ✅ Manter referência ao item da lista
@@ -6351,9 +6354,15 @@ function Home(){
                       return
                     }
 
+                    // VERIFICAÇÃO ADICIONAL: Não permitir playback de programas futuros
+                    const startUtc = pg.start_timestamp || pg.start
+                    const now = Math.floor(Date.now() / 1000)
+                    if(startUtc > now){
+                      return
+                    }
+
                     // Abrir playback do programa gravado
                     const channelId = selectedChannel?.stream_id || selectedChannel?.id
-                    const startUtc = pg.start_timestamp || pg.start
                     const endUtc = pg.stop_timestamp || pg.end
                     const url = getPlaybackUrl(channelId, startUtc, endUtc)
 
@@ -6694,14 +6703,9 @@ function Home(){
 
         if(!channel){
           v.removeAttribute('src'); v.load()
-          setLoadError(null)
           retryCountRef.current = 0
           return
         }
-
-
-        // Limpar erro anterior ao trocar de canal
-        setLoadError(null)
 
         // Debounce: aguardar 200ms antes de iniciar o vídeo
         // Isso evita múltiplas inicializações quando o estado muda rapidamente
@@ -6713,7 +6717,8 @@ function Home(){
 
           const canNative = v.canPlayType('application/vnd.apple.mpegURL')
 
-          if(window.Hls && window.Hls.isSupported() && !canNative){
+          // FORÇAR uso do HLS.js sempre que disponível (melhor compatibilidade)
+          if(window.Hls && window.Hls.isSupported()){
             // ⚡ Configuração otimizada para início RÁPIDO
             const h = new Hls({
               maxBufferLength: 10,        // Reduzido: 30s → 10s (inicia 3x mais rápido!)
@@ -6728,7 +6733,6 @@ function Home(){
             h.attachMedia(v)
             h.on(window.Hls.Events.MANIFEST_PARSED, ()=>{
               if(cancelled) return
-              setLoadError(null)
               retryCountRef.current = 0
             })
             h.on(window.Hls.Events.ERROR, (event, data)=>{
@@ -6752,42 +6756,31 @@ function Home(){
                       newHls.attachMedia(v)
                       newHls.on(window.Hls.Events.MANIFEST_PARSED, ()=>{
                         if(!cancelled){
-                          setLoadError(null)
                           v.play().catch(()=>{})
                         }
                       })
                       newHls.on(window.Hls.Events.ERROR, (e, d)=>{
                         if(d.fatal && !cancelled){
-                          setLoadError('Stream indisponível. Tente outro canal.')
+                          // Erro fatal no retry
                         }
                       })
                     }
                   }, 1000)
                 }else{
-                  // Após 2 tentativas, mostrar erro
-                  setLoadError('Stream indisponível. Tente outro canal.')
+                  // Após 2 tentativas, sem mais retries
                 }
               }
             })
           }else{
             v.src = url
-            v.onerror = ()=>{
-              if(!cancelled) setLoadError('Stream indisponível. Tente outro canal.')
-            }
+            v.onerror = ()=>{}
           }
 
           if(!cancelled){
             v.play().then(()=>{
-              if(!cancelled){
-                setLoadError(null)
-              }
+              // Reprodução iniciada
             }).catch((err)=>{
-              if(!cancelled){
-                // Não mostrar erro se for "interrupted" (normal durante navegação rápida)
-                if(!err.message.includes('interrupted')){
-                  setLoadError('Erro ao iniciar reprodução')
-                }
-              }
+              // Erro ao iniciar play
             })
           }
         }, 200) // Aguardar 200ms antes de iniciar
@@ -6829,6 +6822,19 @@ function Home(){
             localStorage.setItem('channel_quality_prefs', JSON.stringify(current))
           }catch{}
         }
+
+        // ✅ Atualizar selectedChannel com tv_archive da nova variante
+        setSelectedChannel({
+          ...channel,
+          ...variant, // Substituir com dados da nova variante
+          baseName: channel.baseName,
+          allVariants: channel.allVariants,
+          quality: variant.quality,
+          tv_archive: variant.tv_archive || 0, // Usar tv_archive da variante
+          playback_url: channel.playback_url, // Manter playback se estiver ativo
+          playback_mode: channel.playback_mode,
+          playback_program: channel.playback_program
+        })
 
         // Trocar a URL diretamente no HLS sem recriar o player (mantém fullscreen)
         const v = vref.current
@@ -7137,36 +7143,6 @@ function Home(){
             toggleFullscreen()
           }
         },
-          // Mensagem de erro (se houver)
-          loadError && e('div', {
-            style: {
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              background: 'rgba(220, 38, 38, 0.95)',
-              color: '#FFFFFF',
-              padding: '20px 40px',
-              borderRadius: '12px',
-              fontSize: '18px',
-              fontWeight: '600',
-              textAlign: 'center',
-              zIndex: 10000,
-              filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.5))',
-              maxWidth: '80%',
-              lineHeight: '1.5'
-            }
-          },
-            e('div', { style: { fontSize: '32px', marginBottom: '10px' } }, '⚠️'),
-            loadError,
-            e('div', {
-              style: {
-                fontSize: '14px',
-                marginTop: '10px',
-                opacity: 0.9
-              }
-            }, 'Selecione outro canal para continuar')
-          ),
           e('video', {
             id:'liveVideo',
             autoPlay:true,
@@ -8117,28 +8093,22 @@ window.resetNetflixMovies = () => {
 
       // ===== NOVO: Forçar carregamento de coleções quando entrar na view collections =====
       useEffect(() => {
-        console.log('[useEffect collections] view:', view, 'collections.length:', collections.length, 'loadingCollections:', loadingCollections, 'sections:', globalState.sectionsMovies.length)
-
         if (view === 'collections' && collections.length === 0 && !loadingCollections) {
           const totalMovies = globalState.sectionsMovies.reduce((sum, section) => {
             return sum + (section?.movies?.length || 0)
           }, 0)
 
-          console.log('[useEffect collections] Total de filmes:', totalMovies)
-
           // Se tem pelo menos alguns filmes, tenta carregar coleções
           if (totalMovies > 0) {
-            console.log('[useEffect collections] Chamando loadCollections()...')
             loadCollections()
           } else {
             // ===== NOVO: Se não tem filmes, carregar automaticamente da netflix-movies =====
-            console.log('[useEffect collections] Sem filmes - redirecionando para netflix-movies temporariamente')
-
             // Salvar que queremos voltar para collections
-            window.__pendingCollectionsView = true
-
-            // Ir para netflix-movies para carregar filmes
-            setView('netflix-movies')
+            if (!window.__pendingCollectionsView) {
+              window.__pendingCollectionsView = true
+              // Ir para netflix-movies para carregar filmes
+              setView('netflix-movies')
+            }
           }
         }
 
@@ -8149,12 +8119,11 @@ window.resetNetflixMovies = () => {
           }, 0)
 
           if (totalMovies > 0) {
-            console.log('[useEffect collections] Filmes carregados! Voltando para collections...')
             window.__pendingCollectionsView = false
-            setView('collections')
+            setTimeout(() => setView('collections'), 100)
           }
         }
-      }, [view, collections.length, globalState.sectionsMovies.length])
+      }, [collections.length, globalState.sectionsMovies.length])
 
       // ===== NOVO: Setar heroBackdrop da primeira coleção quando abrir Coletâneas =====
       useEffect(() => {
@@ -9682,11 +9651,8 @@ window.resetNetflixMovies = () => {
       // COMPONENTE: CollectionsGrid (Grade de coleções)
       // COMPONENTE: SectionMovies
       const SectionMovies = ({ name, movies, sectionId, categoryIndex, totalCategories, onNextCategory, onPrevCategory, isCollectionsMode }) => {
-        console.log('[SectionMovies] name:', name, 'movies:', movies?.length, 'isCollectionsMode:', isCollectionsMode)
-
         // Proteção contra movies undefined
         if (!movies || !Array.isArray(movies)) {
-          console.log('[SectionMovies] RETORNANDO NULL - movies inválido')
           return null
         }
 
@@ -10119,7 +10085,6 @@ window.resetNetflixMovies = () => {
       // Se não tem filmes carregados e não está loading nem com erro, mostra tela vazia
       // EXCETO se estamos em modo collections E já temos coleções carregadas
       if(globalState.sectionsMovies.length === 0 && !(view === 'collections' && collections.length > 0)){
-        console.log('[NetflixMovies] Retornando tela vazia - sections:', globalState.sectionsMovies.length, 'view:', view, 'collections:', collections.length)
         return e('div', {
           style: {
             background: '#111',
