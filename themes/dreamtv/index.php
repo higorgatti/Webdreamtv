@@ -725,6 +725,222 @@ header("Expires: 0");
         max-width: 100%;
       }
     }
+
+    /* ===== RESPONSIVIDADE COMPLETA ===== */
+
+    /* Tablets pequenos e celulares grandes (landscape) */
+    @media (max-width: 1024px) {
+      :root {
+        --sidebar-w: 70px;
+      }
+
+      .sidebar-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+      }
+
+      header {
+        padding: 0 20px !important;
+      }
+
+      header input[type="text"] {
+        width: 150px !important;
+      }
+    }
+
+    /* Tablets e celulares grandes */
+    @media (max-width: 768px) {
+      :root {
+        --sidebar-w: 60px;
+      }
+
+      .sidebar {
+        padding: 15px 0;
+        gap: 6px;
+      }
+
+      .sidebar-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+      }
+
+      /* Esconder tooltips em telas pequenas */
+      .sidebar-btn::after {
+        display: none;
+      }
+
+      /* Header responsivo */
+      header {
+        height: 50px !important;
+        padding: 0 15px !important;
+      }
+
+      header nav {
+        gap: 15px !important;
+      }
+
+      header a {
+        font-size: 12px !important;
+      }
+
+      header input[type="text"] {
+        width: 120px !important;
+        font-size: 12px !important;
+      }
+
+      /* Ajustar cards de filmes */
+      .main-content {
+        width: calc(100vw - var(--sidebar-w)) !important;
+      }
+
+      /* Menu de perfil */
+      header > div:last-child > div:last-child {
+        width: 240px !important;
+        right: -10px !important;
+      }
+    }
+
+    /* Celulares médios */
+    @media (max-width: 640px) {
+      :root {
+        --sidebar-w: 0px; /* Esconder sidebar em mobile */
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
+
+      /* Botão hamburger para abrir sidebar */
+      .mobile-menu-btn {
+        display: block !important;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1001;
+        width: 40px;
+        height: 40px;
+        background: rgba(0, 0, 0, 0.8);
+        border: 1px solid rgba(168, 85, 247, 0.3);
+        border-radius: 8px;
+        color: #fff;
+        font-size: 20px;
+        cursor: pointer;
+      }
+
+      .main-content {
+        margin-left: 0 !important;
+        width: 100vw !important;
+      }
+
+      /* Header mobile */
+      header {
+        padding: 0 10px !important;
+        padding-left: 55px !important; /* Espaço para o botão hamburger */
+      }
+
+      header nav {
+        display: none !important; /* Esconder navegação em mobile */
+      }
+
+      header input[type="text"] {
+        width: 100px !important;
+        font-size: 11px !important;
+        padding: 6px 10px !important;
+      }
+
+      /* Avatar menor */
+      header > div:last-child img,
+      header > div:last-child > div:first-child {
+        width: 32px !important;
+        height: 32px !important;
+      }
+
+      /* Esconder busca em telas muito pequenas */
+      @media (max-width: 480px) {
+        header input[type="text"] {
+          display: none !important;
+        }
+      }
+    }
+
+    /* Celulares pequenos */
+    @media (max-width: 480px) {
+      /* Header ainda menor */
+      header {
+        height: 45px !important;
+      }
+
+      header a {
+        font-size: 11px !important;
+      }
+
+      /* Menu de perfil ocupa mais espaço */
+      header > div:last-child > div:last-child {
+        width: calc(100vw - 30px) !important;
+        right: -5px !important;
+      }
+
+      /* Ajustar modais */
+      .tv-channel-input {
+        min-width: 200px !important;
+        padding: 20px !important;
+      }
+
+      .tv-channel-input > div:first-child {
+        font-size: 32px !important;
+      }
+    }
+
+    /* Telas muito grandes (> 1920px) */
+    @media (min-width: 1920px) {
+      :root {
+        --sidebar-w: 90px;
+      }
+
+      .sidebar-btn {
+        width: 55px;
+        height: 55px;
+        font-size: 26px;
+      }
+
+      header {
+        height: 70px !important;
+      }
+
+      header a {
+        font-size: 16px !important;
+      }
+
+      header input[type="text"] {
+        width: 250px !important;
+        font-size: 15px !important;
+      }
+    }
+
+    /* Modo paisagem em celulares */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .sidebar {
+        padding: 10px 0;
+        gap: 4px;
+      }
+
+      .sidebar-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+      }
+
+      header {
+        height: 40px !important;
+      }
+    }
   </style>
 
   <!-- ===== CACHE SYSTEM - IndexedDB Manager ===== -->
@@ -3340,6 +3556,7 @@ header("Expires: 0");
   // ===== SIDEBAR COMPONENT (DEPRECATED - Mantido para compatibilidade) =====
   function Sidebar({ view, setView }) {
     const [activeMenu, setActiveMenu] = useState('home')
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
     // Atualizar ícone ativo baseado na view atual
     useEffect(() => {
@@ -3473,7 +3690,15 @@ header("Expires: 0");
       }}
     ]
 
-    return e('aside', { className: 'sidebar' },
+    return e('aside', {
+      className: `sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`,
+      onClick: (e) => {
+        // Fechar menu quando clicar em um item (apenas em mobile)
+        if (window.innerWidth <= 640) {
+          setMobileMenuOpen(false)
+        }
+      }
+    },
       ...menuItems.map(item =>
         e('button', {
           key: item.id,
@@ -3491,6 +3716,15 @@ header("Expires: 0");
         style: { marginTop: 'auto' }
       }, e('span', { style: { fontSize: '24px' } }, '⚙️'))
     )
+  }
+
+  // ===== BOTÃO HAMBURGER PARA MOBILE =====
+  function MobileMenuButton({ onClick }) {
+    return e('button', {
+      className: 'mobile-menu-btn',
+      onClick: onClick,
+      style: { display: 'none' } // Será exibido apenas em mobile via CSS
+    }, '☰')
   }
 
   // ===== HOOK CUSTOMIZADO PARA CONTROLE REMOTO =====
@@ -5824,7 +6058,13 @@ function Home(){
               ),
               error && e('div', { className:'text-red-300 text-xs mb-3' }, 'Live: ', error),
               liveLeftMode==='categories' ?
-                e('div', { className:'overflow-y-auto flex-1 space-y-3 pr-2 pb-20' },
+                e('div', {
+                  className:'overflow-y-auto flex-1 space-y-3 pr-2 pb-20',
+                  onWheel: (e) => {
+                    // Permitir scroll vertical natural com mouse wheel
+                    // Não fazer preventDefault para que o scroll funcione normalmente
+                  }
+                },
                   // Categoria Favoritos (sempre primeiro)
                   (() => {
                     const favorites = JSON.parse(localStorage.getItem('dreamtv_favorites') || '{}')
@@ -5884,7 +6124,13 @@ function Home(){
                   e('div', { className:'text-center text-xs text-gray-400 mt-3 py-2' }, '↑↓ Navegar | → Enter Abrir | ← ESC Voltar')
                 )
               :
-                e('div', { className:'overflow-y-auto flex-1 space-y-3 pr-2 pb-20' },
+                e('div', {
+                  className:'overflow-y-auto flex-1 space-y-3 pr-2 pb-20',
+                  onWheel: (e) => {
+                    // Permitir scroll vertical natural com mouse wheel
+                    // Não fazer preventDefault para que o scroll funcione normalmente
+                  }
+                },
                   toArray(liveStreams).map((item, idx)=> {
                       const key = item.stream_id || item.id || item.name
                       const isFocused = idx === focusedChannelIdx
