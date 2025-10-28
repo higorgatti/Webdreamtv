@@ -1635,11 +1635,12 @@ header("Expires: 0");
 
   // ===== BARRA DE CATEGORIAS DE FILMES E SÉRIES =====
   function CategoryBar({ vodCats, seriesCats, view, setView, selectedCat, setSelectedCat }) {
-    // Só mostrar na view de filmes ou séries
+    // Só mostrar na view de filmes, séries ou adultos
     const isMoviesView = view === 'netflix-movies' || view === 'vod-categories'
     const isSeriesView = view === 'netflix-series' || view === 'series-categories'
+    const isAdultView = view === 'adult-content' || view === 'adult-categories'
 
-    if (!isMoviesView && !isSeriesView) return null
+    if (!isMoviesView && !isSeriesView && !isAdultView) return null
 
     // Usar categorias apropriadas
     const categories = isSeriesView ? (seriesCats || []) : (vodCats || [])
@@ -1717,7 +1718,7 @@ header("Expires: 0");
         // Definir imediatamente sem aguardar próximo render
         setSelectedCat(orderedCats[0])
       }
-    }, [categories.length, isMoviesView, isSeriesView])
+    }, [categories.length, isMoviesView, isSeriesView, isAdultView])
 
     // Se não tem categoria selecionada mas há categorias disponíveis, usar a primeira temporariamente
     const displayCat = selectedCat || (orderedCats.length > 0 ? orderedCats[0] : null)
@@ -2332,6 +2333,7 @@ header("Expires: 0");
     const getActiveMenu = () => {
       if (view === 'home') return 'home'
       if (view === 'live-categories' || view === 'channels') return 'channels'
+      if (view === 'adult-content' || view === 'adult-categories') return 'adult'
       if (view === 'netflix-movies' || view === 'vod-categories') return 'movies'
       if (view === 'netflix-series' || view === 'series-categories') return 'series'
       if (view === 'netflix-novelas' || view === 'novelas-categories') return 'novelas'
@@ -2494,7 +2496,19 @@ header("Expires: 0");
             transition: 'color 0.2s',
             textDecoration: 'none'
           }
-        }, 'Canais')
+        }, 'Canais'),
+
+        e('a', {
+          onClick: () => setView('adult-content'),
+          style: {
+            color: activeMenu === 'adult' ? '#fff' : '#b3b3b3',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: activeMenu === 'adult' ? '600' : '400',
+            transition: 'color 0.2s',
+            textDecoration: 'none'
+          }
+        }, 'Adultos')
       ),
 
       // Área direita - Campo de busca e configurações
@@ -3442,10 +3456,11 @@ header("Expires: 0");
     useEffect(() => {
       const isMoviesView = view === 'netflix-movies'
       const isSeriesView = view === 'netflix-series'
+      const isAdultView = view === 'adult-content'
       const categories = isSeriesView ? seriesCats : vodCats
 
       // Sempre selecionar primeira categoria quando entrar na view (mesmo que já tenha selectedCat de antes)
-      if (categories.length > 0 && (isMoviesView || isSeriesView)) {
+      if (categories.length > 0 && (isMoviesView || isSeriesView || isAdultView)) {
         // Aplicar mesma lógica de prioridade do CategoryBar
         const priorityNames = [
           'lançamentos',
@@ -4293,6 +4308,9 @@ header("Expires: 0");
       if(view==='animes-categories' && seriesCats.length===0) loadCatsByType('series')
       if(view==='desenhos-categories' && seriesCats.length===0) loadCatsByType('series')
       if(view==='show-categories' && vodCats.length===0) loadCatsByType('vod')
+      if(view==='adult-content' && vodCats.length===0) {
+        loadCatsByType('vod')
+      }
     }, [view])
 
     // Ao carregar as categorias do Live, abrimos a 1ª e, se necessário, buscamos contagens
@@ -11456,6 +11474,13 @@ window.resetNetflixMovies = () => {
     }
     else if(view==='collections'){
       content = e(NetflixMovies, { key: 'vod-collections', contentType: 'vod' })
+    }
+    else if(view==='adult-content'){
+      if (selectedCat) {
+        content = e(NetflixMovies, { key: `adult-${getCatId(selectedCat)}`, contentType: 'vod', selectedCategory: selectedCat })
+      } else {
+        content = e('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', color: '#fff' } }, 'Carregando categorias...')
+      }
     }
     else if(view.endsWith('-categories')) content = e(Categories)
     else if(view==='channels' && selectedCat) content = e(Channels)
