@@ -3082,7 +3082,10 @@ header("Expires: 0");
           onClick: () => {
             setView('collections')
             if (window.updateNetflixMoviesState) {
-              window.updateNetflixMoviesState({ showCollectionsView: true })
+              window.updateNetflixMoviesState({
+                showCollectionsView: true,
+                heroBackdrop: null  // Limpar heroBackdrop ao entrar em coleções
+              })
             }
           },
           style: {
@@ -8779,7 +8782,7 @@ window.resetNetflixMovies = () => {
       }
 
       // COMPONENTE: FeaturedMovie
-      const FeaturedMovie = React.memo(({ featuredMovieId }) => {
+      const FeaturedMovie = React.memo(({ featuredMovieId, collectionMovies }) => {
         const [movie, setMovie] = useState(null)
         const [previousMovie, setPreviousMovie] = useState(null)
         const [showPrevious, setShowPrevious] = useState(false)
@@ -8815,6 +8818,13 @@ window.resetNetflixMovies = () => {
             if(section && section.movies && Array.isArray(section.movies) && section.movies.length > 0) {
               foundMovie = section.movies.find(m => (m.series_id || m.stream_id) === featuredMovieId)
               if(foundMovie) break
+            }
+          }
+
+          if(!foundMovie) {
+            // Tentar buscar nos filmes da coleção
+            if(collectionMovies && collectionMovies.length > 0) {
+              foundMovie = collectionMovies.find(m => (m.series_id || m.stream_id) === featuredMovieId)
             }
           }
 
@@ -9336,11 +9346,11 @@ window.resetNetflixMovies = () => {
             borderRadius: '8px',
             overflow: 'visible',
             cursor: 'pointer',
-            transform: isHovered ? 'scale(1.15)' : 'scale(1)',
+            transform: isHovered ? 'scale(1.1) translateY(-10px)' : 'scale(1)',
             transformOrigin: 'center center',
             transition: 'all 0.3s ease-out',
-            boxShadow: isHovered ? '0 12px 32px rgba(0,0,0,0.9)' : '0 2px 8px rgba(0,0,0,0.3)',
-            zIndex: isHovered ? 999999 : 'auto'
+            boxShadow: isHovered ? '0 16px 48px rgba(0,0,0,0.8)' : '0 4px 12px rgba(0,0,0,0.4)',
+            zIndex: isHovered ? 50 : 'auto'
           },
           onMouseEnter: () => {
             isHoveredRef.current = true
@@ -9353,7 +9363,7 @@ window.resetNetflixMovies = () => {
           },
           onClick: () => onClick(displayCollection, collection.movies)
         },
-          // Poster/Backdrop
+          // Poster/Backdrop - SIMPLES, SEM OVERLAY
           e('img', {
             src: displayCollection.poster || displayCollection.backdrop || '',
             alt: displayCollection.name,
@@ -9362,93 +9372,10 @@ window.resetNetflixMovies = () => {
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              filter: isHovered ? 'brightness(0.4)' : 'brightness(1)',
-              transition: 'filter 0.3s ease',
-              pointerEvents: 'none',
+              transition: 'transform 0.3s ease',
               borderRadius: '8px'
             }
-          }),
-
-          // Overlay com informações (aparece no hover)
-          isHovered && e('div', {
-            style: {
-              position: 'absolute',
-              top: '0',
-              left: '0',
-              width: '100%',
-              height: '100%',
-              background: 'rgba(0, 0, 0, 0.85)',
-              backdropFilter: 'blur(6px)',
-              WebkitBackdropFilter: 'blur(6px)',
-              opacity: 1,
-              transition: 'all 0.3s ease',
-              padding: '14px 12px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'flex-start',
-              gap: '8px',
-              pointerEvents: 'none',
-              zIndex: 2,
-              borderRadius: '8px'
-            }
-          },
-            // Título no topo
-            e('div', {
-              style: {
-                fontSize: '15px',
-                fontWeight: 'bold',
-                color: '#fff',
-                lineHeight: '1.2',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: '-webkit-box',
-                WebkitLineClamp: '2',
-                WebkitBoxOrient: 'vertical',
-                marginBottom: '4px'
-              }
-            }, displayCollection.name),
-
-            // Contador de filmes
-            e('div', {
-              style: {
-                fontSize: '12px',
-                color: '#4ade80',
-                fontWeight: '600',
-                marginBottom: '6px'
-              }
-            }, `📚 ${movieCount} ${movieCount === 1 ? 'filme' : 'filmes'}`),
-
-            // Overview da coleção (se disponível)
-            displayCollection.overview && e('p', {
-              style: {
-                fontSize: '11px',
-                color: '#ccc',
-                lineHeight: '1.4',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: '-webkit-box',
-                WebkitLineClamp: '4',
-                WebkitBoxOrient: 'vertical',
-                marginBottom: 'auto',
-                flex: '1'
-              }
-            }, displayCollection.overview),
-
-            // Botão visual (fixo no bottom)
-            e('div', {
-              style: {
-                background: '#fff',
-                color: '#000',
-                padding: '8px 14px',
-                borderRadius: '4px',
-                fontSize: '13px',
-                fontWeight: 'bold',
-                textAlign: 'center',
-                pointerEvents: 'auto',
-                marginTop: '8px'
-              }
-            }, '▶ Ver Coleção')
-          )
+          })
         )
       }, (prevProps, nextProps) => {
         // Custom comparison: só re-render se collection.id mudar
@@ -9978,6 +9905,14 @@ window.resetNetflixMovies = () => {
                       setViewingCollectionMovies(true)
                       setShowCollectionsView(false)
 
+                      // Definir imediatamente o primeiro filme como featured
+                      if (movies.length > 0 && window.updateNetflixMoviesState) {
+                        window.updateNetflixMoviesState({
+                          featuredMovieId: movies[0].stream_id,
+                          heroBackdrop: null
+                        })
+                      }
+
                       // 2. DEPOIS carregar dados completos em background (sem bloquear UI)
 
                       const fetchPromises = movies.map(async (movie, index) => {
@@ -10032,6 +9967,13 @@ window.resetNetflixMovies = () => {
                       })
 
                       setSelectedCollectionMovies(fullMovies)
+
+                      // Definir o primeiro filme como featured para mostrar backdrop
+                      if (fullMovies.length > 0 && window.updateNetflixMoviesState) {
+                        window.updateNetflixMoviesState({
+                          featuredMovieId: fullMovies[0].stream_id
+                        })
+                      }
                     }
                   })
                 : e(Movie, {
@@ -10199,7 +10141,7 @@ window.resetNetflixMovies = () => {
         },
           // Featured Movie (fundo completo) ou Hero Backdrop (coleções)
           (() => {
-            return globalState.heroBackdrop ? e('div', {
+            return (globalState.heroBackdrop && !viewingCollectionMovies) ? e('div', {
               style: {
                 position: 'absolute',
                 top: 0,
@@ -10272,7 +10214,10 @@ window.resetNetflixMovies = () => {
                 }
               }, globalState.heroBackdrop.overview) : null
             )
-          ) : e(FeaturedMovie, { featuredMovieId: globalState.featuredMovieId })
+          ) : e(FeaturedMovie, {
+            featuredMovieId: globalState.featuredMovieId,
+            collectionMovies: viewingCollectionMovies ? selectedCollectionMovies : null
+          })
           })(),
 
           // Sections - Alterna entre 3 MODOS: Categorias / Lista de Coleções / Filmes de Coleção
@@ -10330,7 +10275,7 @@ window.resetNetflixMovies = () => {
               e('span', null, 'Buscando coleções...')
             )
           ) :
-          view === 'collections' && collections.length > 0 ? (console.log('[RENDER] Renderizando SectionMovies com', collections.length, 'coleções'), e(SectionMovies, {
+          view === 'collections' && collections.length > 0 ? e(SectionMovies, {
             key: 'collections-list',
             name: `🎬 Coleções (${collections.length})`,
             movies: collections, // Passando coleções como "movies" para reusar SectionMovies
@@ -10340,7 +10285,7 @@ window.resetNetflixMovies = () => {
             onNextCategory: () => {},
             onPrevCategory: () => {},
             isCollectionsMode: true // Flag para SectionMovies saber que está renderizando coleções
-          })) :
+          }) :
           view === 'collections' && collections.length === 0 && !loadingCollections ? e('div', {
             style: {
               display: 'flex',
