@@ -1891,6 +1891,12 @@ header("Expires: 0");
                !catName.includes('anime') &&
                !catName.includes('show')
       })
+    } else if (isSeriesView) {
+      // Na view de séries: REMOVER categorias 18+
+      categories = categories.filter(cat => {
+        const catName = (cat.category_name || cat.name || '').toLowerCase().trim()
+        return !catName.startsWith('18+')
+      })
     }
 
     // Categorias prioritárias no topo (ordem específica)
@@ -4128,6 +4134,12 @@ header("Expires: 0");
                  !catName.includes('crunchyroll') &&
                  !catName.includes('anime') &&
                  !catName.includes('show')
+        })
+      } else if (isSeriesView) {
+        // Na view de séries: REMOVER categorias 18+
+        categories = categories.filter(cat => {
+          const catName = (cat.category_name || cat.name || '').toLowerCase().trim()
+          return !catName.startsWith('18+')
         })
       }
 
