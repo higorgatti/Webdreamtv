@@ -6523,8 +6523,12 @@ function Home(){
                     return rd.getTime() === targetDate.getTime()
                   }) : true // Sem playback = sempre disponível (EPG futuro)
 
+                  // Verificar se é dia futuro
+                  const isFutureDay = offset > 0
+
                   const handleDayClick = ()=>{
                     if(hasPlayback && !isAvailable) return // Playback: só clica se disponível
+                    if(isFutureDay) return // Bloquear clique em dias futuros
 
                     setSelectedDay(offset)
                     setSelectedEpgId(null) // Limpar seleção EPG ao trocar dia
@@ -6539,12 +6543,13 @@ function Home(){
                     key:offset,
                     onClick: handleDayClick,
                     className:`rounded-xl px-6 py-6 text-center transition-all ${
+                      isFutureDay ? 'opacity-40 pointer-events-none cursor-not-allowed' :
                       hasPlayback && !isAvailable ? 'opacity-40 pointer-events-none cursor-not-allowed' :
                       isSelected ? 'bg-violet-600/90 ring-2 ring-white/20 cursor-pointer' : // ROXO pixel-perfect
                       'frost cursor-pointer hover:bg-white/5'
                     }`,
                     style: isSelected ? { transform: 'scale(1.02)' } : {},
-                    title: hasPlayback && !isAvailable ? 'Sem gravações disponíveis' : ''
+                    title: isFutureDay ? 'Data futura não disponível' : hasPlayback && !isAvailable ? 'Sem gravações disponíveis' : ''
                   },
                     e('div', { className:`text-3xl font-bold ${isSelected ? 'text-white' : 'text-white/90'}` }, dayNum(offset)),
                     e('div', { className:`text-sm ${isSelected ? 'opacity-100 font-semibold' : 'opacity-80'} text-white` }, dayWeek(offset))
