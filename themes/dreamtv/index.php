@@ -8493,11 +8493,9 @@ window.resetNetflixMovies = () => {
               selectedCategories = categories.filter(cat => getCatId(cat) === catId)
 
               if (selectedCategories.length === 0) {
-                window.updateNetflixMoviesState({
-                  loading: false,
-                  errorMsg: `Categoria não encontrada`
-                })
-                return
+                console.warn('[NETFLIX-MOVIES] Categoria não encontrada (ID:', catId, ') - usando todas as categorias como fallback')
+                // FALLBACK: Usar todas as categorias em vez de mostrar erro
+                selectedCategories = categories
               }
             }
             // Aplicar filtro por nome de categoria se especificado
