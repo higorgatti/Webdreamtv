@@ -3926,10 +3926,16 @@ header("Expires: 0");
     const [view,setViewRaw] = useState('config')
     const [showParentalPin, setShowParentalPin] = useState(false)
     const [pendingAdultView, setPendingAdultView] = useState(false)
+    const [previousView, setPreviousView] = useState(null) // Para lembrar de onde veio antes do player
 
     // Wrapper para logar todas as mudanças de view
     const setView = (newView) => {
       console.trace('[setView] Stack trace:')
+      // Salvar a view atual como previousView ANTES de ir para o player
+      if(newView === 'player' && view !== 'player') {
+        setPreviousView(view)
+        console.log('[setView] Salvando previousView:', view, '-> indo para player')
+      }
       setViewRaw(newView)
     }
     const [account,setAccount] = useState(null)
@@ -12034,7 +12040,7 @@ window.resetNetflixMovies = () => {
       }, [current])
       */
 
-      // Handler ESC - volta para netflix-movies
+      // Handler ESC - volta para a view anterior
       useEffect(() => {
         const handleEscape = (e) => {
           if (e.key === 'Escape') {
@@ -12054,14 +12060,16 @@ window.resetNetflixMovies = () => {
               }
             }
 
-            // Voltar para netflix-movies
-            setView('netflix-movies')
+            // Voltar para a view de onde veio (ou netflix-movies como fallback)
+            const targetView = previousView || 'netflix-movies'
+            console.log('[PLAYER] ESC pressionado - voltando para:', targetView)
+            setView(targetView)
           }
         }
 
         window.addEventListener('keydown', handleEscape)
         return () => window.removeEventListener('keydown', handleEscape)
-      }, [])
+      }, [previousView])
 
       useEffect(()=>{
         const v = videoRef.current
@@ -12181,7 +12189,14 @@ window.resetNetflixMovies = () => {
       return e('div', { ref: containerRef, className:'bg-black min-h-screen flex flex-col' },
         e(TopBar),
         e('div', { className:'bg-zinc-900/60 px-4 py-3 flex items-center justify-between' },
-          e('button', { onClick:()=>setView('channels'), className:'text-white hover:text-purple-400 flex items-center gap-2' }, '← Voltar'),
+          e('button', {
+            onClick:()=>{
+              const targetView = previousView || 'netflix-movies'
+              console.log('[PLAYER] Botão voltar clicado - voltando para:', targetView)
+              setView(targetView)
+            },
+            className:'text-white hover:text-purple-400 flex items-center gap-2'
+          }, '← Voltar'),
           e('h2', { className:'text-white font-semibold truncate max-w-[60vw]' }, current?.name || 'Reprodução'),
           e('div', { className:'w-10' })
         ),
