@@ -695,10 +695,11 @@ header("Expires: 0");
     }
 
     .serie-detail-cast-card p {
-      margin-top: 8px;
+      margin: 4px 0;
       font-size: 14px;
       color: #ffffff;
       text-align: center;
+      line-height: 1.3;
       font-weight: 500;
     }
 
@@ -4541,7 +4542,12 @@ header("Expires: 0");
       // ===== NOVO: Verificar cache em memória primeiro =====
       const cached = getMemCache('details', cacheKey)
       if (cached && cached.belongs_to_collection !== undefined) {
-        return cached
+        // Verificar se cast está no formato antigo (string) - se sim, invalidar cache
+        const hasOldCastFormat = typeof cached.cast === 'string'
+        if(!hasOldCastFormat) {
+          return cached
+        }
+        // Se tem formato antigo, não retornar - continuar para busca nova
       }
 
       // ===== NOVO: Usar batching para evitar requisições duplicadas =====
@@ -4554,8 +4560,12 @@ header("Expires: 0");
           const res = await rateLimitedFetch(url, `details:${tmdb_id}`)
           const data = await res.json()
 
-          // ===== EXTRAIR ELENCO PRINCIPAL (top 5) =====
-          const cast = data.credits?.cast?.slice(0, 5).map(actor => actor.name).join(', ') || null
+          // ===== EXTRAIR ELENCO PRINCIPAL (top 5) com fotos =====
+          const cast = data.credits?.cast?.slice(0, 5).map(actor => ({
+            name: actor.name,
+            profile_path: actor.profile_path,
+            character: actor.character
+          })) || []
 
           // ===== EXTRAIR DIRETOR =====
           const director = data.credits?.crew?.find(person => person.job === 'Director')?.name || null
@@ -4765,7 +4775,14 @@ header("Expires: 0");
 
       if (window.__enrichmentCache.has(cacheKey)) {
         const cached = window.__enrichmentCache.get(cacheKey)
-        return cached
+        // Verificar se cast está no formato antigo (string) - se sim, invalidar cache
+        const hasOldCastFormat = typeof cached.tmdb_cast === 'string'
+        if(hasOldCastFormat) {
+          window.__enrichmentCache.delete(cacheKey)
+          // NÃO retornar - continuar para busca nova
+        } else {
+          return cached
+        }
       }
 
       // ===== NOVO: Usar prepareForTMDB para normalização =====
@@ -4782,10 +4799,17 @@ header("Expires: 0");
       }
 
       // Se já tem dados TMDB completos, retorna e cacheia
+      // EXCETO se tmdb_cast for string (formato antigo) - nesse caso busca novamente
       if(movie.tmdb_overview && movie.tmdb_poster && movie.tmdb_backdrop) {
-        const enriched = { ...movieWithLangType, ...movie }
-        window.__enrichmentCache.set(cacheKey, enriched)
-        return enriched
+        // Verificar se cast está no formato novo (array) ou antigo (string)
+        const hasOldCastFormat = typeof movie.tmdb_cast === 'string'
+
+        if(!hasOldCastFormat) {
+          const enriched = { ...movieWithLangType, ...movie }
+          window.__enrichmentCache.set(cacheKey, enriched)
+          return enriched
+        }
+        // Se tem formato antigo, continuar para busca nova
       }
 
       // ===== OTIMIZAÇÃO: Verificar cache por nome PRIMEIRO (mais rápido) =====
@@ -4793,25 +4817,30 @@ header("Expires: 0");
       const cachedSearch = getMemCache('search', cleanName)
 
       if (cachedSearch) {
-        const enriched = {
-          ...movieWithLangType,
-          tmdb_id: cachedSearch.tmdb_id,
-          tmdb_poster: cachedSearch.poster,
-          tmdb_backdrop: cachedSearch.backdrop,
-          tmdb_overview: cachedSearch.overview,
-          tmdb_rating: cachedSearch.rating,
-          tmdb_vote_count: cachedSearch.vote_count,
-          tmdb_year: cachedSearch.year,
-          tmdb_runtime: cachedSearch.runtime,
-          tmdb_genres: cachedSearch.genres,
-          tmdb_cast: cachedSearch.cast,
-          tmdb_director: cachedSearch.director,
-          tmdb_language: cachedSearch.original_language,
-          tmdb_status: cachedSearch.status,
-          tmdb_collection: cachedSearch.belongs_to_collection
+        // Verificar se cast está no formato novo (array) ou antigo (string)
+        const hasOldCastFormat = typeof cachedSearch.cast === 'string'
+
+        if(!hasOldCastFormat) {
+          const enriched = {
+            ...movieWithLangType,
+            tmdb_id: cachedSearch.tmdb_id,
+            tmdb_poster: cachedSearch.poster,
+            tmdb_backdrop: cachedSearch.backdrop,
+            tmdb_overview: cachedSearch.overview,
+            tmdb_rating: cachedSearch.rating,
+            tmdb_vote_count: cachedSearch.vote_count,
+            tmdb_year: cachedSearch.year,
+            tmdb_runtime: cachedSearch.runtime,
+            tmdb_genres: cachedSearch.genres,
+            tmdb_cast: cachedSearch.cast,
+            tmdb_director: cachedSearch.director,
+            tmdb_language: cachedSearch.original_language,
+            tmdb_status: cachedSearch.status,
+            tmdb_collection: cachedSearch.belongs_to_collection
+          }
+          window.__enrichmentCache.set(cacheKey, enriched)
+          return enriched
         }
-        window.__enrichmentCache.set(cacheKey, enriched)
-        return enriched
       }
 
       try {
@@ -4842,6 +4871,7 @@ header("Expires: 0");
               tmdb_status: details.status,
               tmdb_collection: details.belongs_to_collection
             }
+
             window.__enrichmentCache.set(cacheKey, enriched)
             return enriched
           }
@@ -8895,8 +8925,11 @@ window.resetNetflixMovies = () => {
             const enrichAndSetMovie = async () => {
               let enrichedMovie = foundMovie
 
-              // Se não tem dados TMDB completos, buscar agora
-              if(!foundMovie.tmdb_overview || !foundMovie.tmdb_genres) {
+              // Verificar se cast está no formato antigo (string)
+              const hasOldCastFormat = typeof foundMovie.tmdb_cast === 'string'
+
+              // Se não tem dados TMDB completos OU cast está em formato antigo, buscar agora
+              if(!foundMovie.tmdb_overview || !foundMovie.tmdb_genres || hasOldCastFormat) {
                 const detectedType = foundMovie.series_id ? 'series' : 'movie'
                 enrichedMovie = await enrichMovieWithTMDB(foundMovie, detectedType)
               }
@@ -11495,15 +11528,23 @@ window.resetNetflixMovies = () => {
       // ===== CORREÇÃO: Garantir que cast seja sempre um array =====
       let displayCast = tmdb_cast || cast || []
 
-      // Se cast é string (vem do TMDB como "Nome1, Nome2, Nome3"), converter para array de objetos
+      // Se cast é string (formato antigo: "Nome1, Nome2, Nome3"), converter para array de objetos
       if (typeof displayCast === 'string') {
         displayCast = displayCast.split(',').map(name => ({
           name: name.trim(),
-          profile_path: null
+          profile_path: null,
+          character: null
         }))
       } else if (!Array.isArray(displayCast)) {
         displayCast = []
       }
+
+      // Garantir que cada item tenha as propriedades necessárias
+      displayCast = displayCast.map(actor => ({
+        name: actor.name || actor,
+        profile_path: actor.profile_path || null,
+        character: actor.character || null
+      }))
 
       const displayEpisodes = episodes_count || '—'
       const displaySeasons = seasons_count || '—'
@@ -11691,13 +11732,29 @@ window.resetNetflixMovies = () => {
                   onClick: () => handleCastClick(actor)
                 },
                   e('img', {
-                    src: actor.photo || actor.profile_path
-                      ? `https://image.tmdb.org/t/p/w185${actor.profile_path || actor.photo}`
-                      : 'https://via.placeholder.com/140x200/333/fff?text=Sem+Foto',
+                    src: actor.profile_path
+                      ? `https://image.tmdb.org/t/p/w185${actor.profile_path}`
+                      : 'https://via.placeholder.com/140x200/333/666?text=Sem+Foto',
                     alt: actor.name,
-                    loading: 'lazy'
+                    loading: 'lazy',
+                    onError: (e) => {
+                      e.target.src = 'https://via.placeholder.com/140x200/333/666?text=' + encodeURIComponent(actor.name.substring(0, 1))
+                    }
                   }),
-                  e('p', null, actor.name)
+                  e('p', {
+                    style: {
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      marginBottom: '2px'
+                    }
+                  }, actor.name),
+                  actor.character && e('p', {
+                    style: {
+                      fontSize: '12px',
+                      color: '#999',
+                      fontStyle: 'italic'
+                    }
+                  }, actor.character)
                 )
               )
             )
