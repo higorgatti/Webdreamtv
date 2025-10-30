@@ -2030,8 +2030,6 @@ header("Expires: 0");
             borderRadius: '8px',
             boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5)',
             minWidth: '250px',
-            maxHeight: '400px',
-            overflowY: 'auto',
             zIndex: 1000,
             border: '1px solid rgba(255, 255, 255, 0.1)'
           }
@@ -12530,14 +12528,17 @@ window.resetNetflixMovies = () => {
 
     // Não mostrar header apenas na config (login), settings e no player
     const showHeader = view !== 'config' && view !== 'player' && view !== 'settings'
-    const showCategoryBar = showHeader && (view === 'netflix-movies' || view === 'vod-categories')
+    const showCategoryBar = showHeader && (
+      view === 'netflix-movies' || view === 'vod-categories' ||
+      view === 'netflix-series' || view === 'series-categories'
+    )
 
     return e('div', { className: 'app-container' },
       // Header global Netflix-style (substitui sidebar)
       showHeader && e(Header, { view, setView, globalSearchQuery, setGlobalSearchQuery, onLogout, account, setShowParentalPin, setPendingAdultView }),
 
       // Barra de categorias de filmes e séries
-      showHeader && e(CategoryBar, { vodCats, seriesCats, view, setView, selectedCat, setSelectedCat }),
+      showCategoryBar && e(CategoryBar, { vodCats, seriesCats, view, setView, selectedCat, setSelectedCat }),
 
       e('div', {
         className: 'main-content',
