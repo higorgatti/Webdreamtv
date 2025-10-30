@@ -3917,6 +3917,11 @@ header("Expires: 0");
     return { channelInput }
   }
 
+  // Variável global para rastrear o último canal carregado no player
+  let lastLoadedChannel = { id: null, playback_url: null }
+  // Variável global para preservar a instância do HLS entre re-renders
+  let globalHlsInstance = null
+
   function App(){
     const [view,setViewRaw] = useState('config')
     const [showParentalPin, setShowParentalPin] = useState(false)
@@ -5268,13 +5273,28 @@ header("Expires: 0");
 
     // ===== TV AO VIVO =====
     async function openLiveCategory(cat, switchLeft = true){
+      console.log('[CATEGORIA] 📂 Abrindo categoria:', cat?.category_name, 'switchLeft:', switchLeft, 'liveLeftMode:', liveLeftMode)
+
+      // ⚠️ BLOQUEIO TOTAL: Se já está na mesma categoria com canal tocando, não fazer NADA
+      if(selectedLiveCat && getCatId(selectedLiveCat) === getCatId(cat) && selectedChannel) {
+        console.log('[CATEGORIA] ⏹️ Mesma categoria já selecionada com canal tocando - IGNORANDO totalmente')
+        // Apenas mudar o modo para channels se necessário
+        if(switchLeft && liveLeftMode !== 'channels') setLiveLeftMode('channels')
+        return
+      }
+
       try{
         setLoading(true)
         setSelectedLiveCat(cat)
         const catId = getCatId(cat)
-        if(!catId){ setLiveStreams([]); setSelectedChannel(null); setEpg([]); return }
+        if(!catId){
+          console.log('[CATEGORIA] ⚠️ Categoria sem ID - limpando estado')
+          setLiveStreams([]); setSelectedChannel(null); setEpg([]); return
+        }
+        console.log('[CATEGORIA] 📡 Buscando canais da categoria ID:', catId)
         const data = await apiCall('get_live_streams', { category_id: catId })
         const fullList = toArray(data)
+        console.log('[CATEGORIA] 📊 Total de canais recebidos:', fullList.length)
 
         // Agrupar e pegar apenas canais únicos para exibir no menu
         // ✅ getUniqueChannels agora detecta tv_archive=1 de QUALQUER variante
@@ -5286,6 +5306,8 @@ header("Expires: 0");
           hasPlayback: ch.tv_archive === 1 || ch.tv_archive === "1"
         }))
 
+        console.log('[CATEGORIA] 📋 Canais únicos após agrupamento:', uniqueListWithPlayback.length)
+
         setLiveStreams(uniqueListWithPlayback)
 
         if(uniqueListWithPlayback.length>0){
@@ -5294,13 +5316,19 @@ header("Expires: 0");
             ch => (ch.stream_id || ch.id) === (selectedChannel.stream_id || selectedChannel.id)
           )
 
-          // Se já tem canal da mesma categoria E a lista já está aberta, manter ele. Senão, selecionar o primeiro
-          if(currentChannelStillExists && liveLeftMode === 'channels') {
+          console.log('[CATEGORIA] 🔍 Canal atual existe na categoria?', currentChannelStillExists, 'Canal:', selectedChannel?.baseName)
+
+          // ⚠️ Se o canal atual existe na categoria, SEMPRE manter ele (não importa o liveLeftMode)
+          if(currentChannelStillExists) {
+            console.log('[CATEGORIA] ✅ Canal atual existe nesta categoria - mantendo sem recarregar player')
             // Não fazer nada - manter canal atual e não recarregar player
-            // Apenas atualizar a lista de canais
+            // Apenas atualizar a lista de canais e modo
             if(switchLeft) setLiveLeftMode('channels')
+            setLoading(false)
             return
           }
+
+          console.log('[CATEGORIA] 🔄 Selecionando primeiro canal da categoria')
 
           const firstChannel = uniqueListWithPlayback[0] // Usar lista COM hasPlayback
           const baseName = firstChannel.baseName
@@ -6240,6 +6268,19 @@ function Home(){
                       key:catId||cat.category_name,
                       id: 'cat-' + catId,
                       onClick:()=>{
+                        console.log('[CATEGORIA-CLICK] 📂 Categoria clicada:', cat.category_name, 'isSelected:', isSelected, 'liveLeftMode:', liveLeftMode, 'selectedChannel:', selectedChannel?.baseName)
+
+                        // ⚠️ BLOQUEIO TOTAL: Se já está na mesma categoria com canal tocando, não fazer NADA
+                        if(isSelected && selectedChannel) {
+                          console.log('[CATEGORIA-CLICK] ⏹️ Categoria já selecionada com canal tocando - BLOQUEIO TOTAL (não chamar openLiveCategory)')
+                          // Apenas trocar o modo se necessário, SEM chamar openLiveCategory
+                          if(liveLeftMode !== 'channels') {
+                            console.log('[CATEGORIA-CLICK] 🔄 Mudando apenas o modo para channels')
+                            setLiveLeftMode('channels')
+                          }
+                          return
+                        }
+
                         if (isAdultCategory) {
                           // Armazenar categoria e índice pendentes
                           window.__pendingLiveCategory = { cat, idx }
@@ -6284,6 +6325,14 @@ function Home(){
                     const isSel = selectedChannel && selectedChannel.listItemId && itemId && (selectedChannel.listItemId === itemId)
 
                     const handleChannelClick = async ()=>{
+                      console.log('[CANAL-CLICK] 🎯 Canal clicado:', item.baseName || item.name, 'ID:', item.stream_id || item.id)
+
+                      // ⚠️ Se clicar no canal que já está tocando, não fazer nada
+                      if(isSel && selectedChannel && (selectedChannel.stream_id || selectedChannel.id) === (item.stream_id || item.id)){
+                        console.log('[CANAL-CLICK] ⏹️ Canal já está selecionado - ignorando clique')
+                        return
+                      }
+
                       // ✅ Atualizar foco do teclado para o canal clicado
                       setFocusedChannelIdx(idx)
 
@@ -6815,8 +6864,53 @@ function Home(){
       useEffect(()=>{
         const v = vref.current
         if(!v) {
+          console.log('[PLAYER] ⚠️ Video ref não encontrado')
           return
         }
+
+        console.log('[PLAYER] 🎬 useEffect disparado - Canal:', channel?.baseName || channel?.name, 'ID:', channel?.stream_id || channel?.id)
+
+        // ⚠️ Verificar se é o mesmo canal que já está carregado
+        const currentChannelId = channel?.stream_id || channel?.id
+        const currentPlaybackUrl = channel?.playback_url || null
+
+        if(channel && lastLoadedChannel.id === currentChannelId && lastLoadedChannel.playback_url === currentPlaybackUrl) {
+          console.log('[PLAYER] ⏹️ Mesmo canal já carregado - IGNORANDO reload (ID:', currentChannelId, ')')
+          console.log('[PLAYER] 🔍 Estado do vídeo - paused:', v.paused, 'readyState:', v.readyState, 'currentTime:', v.currentTime)
+          console.log('[PLAYER] 🔍 hlsRef.current existe?', !!hlsRef.current, '| globalHlsInstance existe?', !!globalHlsInstance)
+
+          // Restaurar hlsRef da variável global se necessário
+          if(!hlsRef.current && globalHlsInstance) {
+            console.log('[PLAYER] 🔄 Restaurando hlsRef da variável global')
+            hlsRef.current = globalHlsInstance
+          }
+
+          // ⚠️ Se o vídeo está sem dados (readyState: 0), significa que o elemento foi recriado
+          // Precisamos reconectar o HLS ao novo elemento
+          if(hlsRef.current && v.readyState === 0) {
+            console.log('[PLAYER] 🔌 Elemento de vídeo foi recriado - reconectando HLS global')
+            try {
+              hlsRef.current.attachMedia(v)
+              console.log('[PLAYER] ✅ HLS reconectado - aguardando play')
+              // Aguardar um pouco para o HLS reconectar antes de dar play
+              setTimeout(() => {
+                v.play().catch(err => console.log('[PLAYER] ❌ Erro ao play após reconexão:', err.message))
+              }, 100)
+            } catch(err) {
+              console.log('[PLAYER] ❌ Erro ao reconectar HLS:', err.message)
+            }
+          } else if(v.paused && hlsRef.current) {
+            // Vídeo apenas pausado, retomar play
+            console.log('[PLAYER] ▶️ Vídeo estava pausado - retomando play')
+            v.play().catch(err => console.log('[PLAYER] ❌ Erro ao retomar:', err.message))
+          } else {
+            console.log('[PLAYER] ⚠️ hlsRef.current é null e globalHlsInstance também - não é possível reconectar')
+          }
+
+          return
+        }
+
+        console.log('[PLAYER] 🔄 Canal diferente detectado - prosseguindo com carregamento')
 
         // Flag para evitar race conditions
         let cancelled = false
@@ -6824,13 +6918,16 @@ function Home(){
 
         // Cleanup anterior
         if(hlsRef.current){
+          console.log('[PLAYER] 🧹 Destruindo HLS anterior')
           try{ hlsRef.current.destroy() }catch{}
           hlsRef.current = null
         }
 
         if(!channel){
+          console.log('[PLAYER] ⛔ Sem canal selecionado - limpando player')
           v.removeAttribute('src'); v.load()
           retryCountRef.current = 0
+          lastLoadedChannel = { id: null, playback_url: null }
           return
         }
 
@@ -6839,13 +6936,18 @@ function Home(){
         loadTimeout = setTimeout(()=>{
           if(cancelled) return
 
+          console.log('[PLAYER] ⏱️ Debounce completo - iniciando carregamento')
+
           // Usar playback_url se disponível (modo playback de programa gravado)
           const url = channel.playback_url || buildURL(cfg.server, ['live', cfg.username, cfg.password, (channel.stream_id||channel.id)+'.m3u8'])
+
+          console.log('[PLAYER] 🔗 URL construída:', url.substring(0, 100) + '...')
 
           const canNative = v.canPlayType('application/vnd.apple.mpegURL')
 
           // FORÇAR uso do HLS.js sempre que disponível (melhor compatibilidade)
           if(window.Hls && window.Hls.isSupported()){
+            console.log('[PLAYER] 🎥 Inicializando HLS.js')
             // ⚡ Configuração otimizada para início RÁPIDO
             const h = new Hls({
               maxBufferLength: 10,        // Reduzido: 30s → 10s (inicia 3x mais rápido!)
@@ -6856,11 +6958,19 @@ function Home(){
               lowLatencyMode: false        // Desabilitar baixa latência (mais rápido para VOD)
             })
             hlsRef.current = h
+            // Salvar também na variável global para sobreviver a re-renders
+            globalHlsInstance = h
+            console.log('[PLAYER] 💾 HLS salvo em hlsRef e globalHlsInstance')
+            console.log('[PLAYER] 📥 Carregando fonte:', url.substring(0, 50))
             h.loadSource(url)
             h.attachMedia(v)
             h.on(window.Hls.Events.MANIFEST_PARSED, ()=>{
               if(cancelled) return
+              console.log('[PLAYER] ✅ Manifesto parseado com sucesso')
               retryCountRef.current = 0
+              // Salvar canal como último carregado com sucesso
+              lastLoadedChannel = { id: currentChannelId, playback_url: currentPlaybackUrl }
+              console.log('[PLAYER] 💾 Canal salvo como último carregado (ID:', currentChannelId, ')')
             })
             h.on(window.Hls.Events.ERROR, (event, data)=>{
               if(data.fatal && !cancelled){
@@ -6904,10 +7014,11 @@ function Home(){
           }
 
           if(!cancelled){
+            console.log('[PLAYER] ▶️ Iniciando play...')
             v.play().then(()=>{
-              // Reprodução iniciada
+              console.log('[PLAYER] ✅ Play iniciado com sucesso')
             }).catch((err)=>{
-              // Erro ao iniciar play
+              console.log('[PLAYER] ❌ Erro ao iniciar play:', err.message)
             })
           }
         }, 200) // Aguardar 200ms antes de iniciar
@@ -6915,9 +7026,27 @@ function Home(){
         return ()=>{
           cancelled = true
           if(loadTimeout) clearTimeout(loadTimeout)
-          if(hlsRef.current){
-            try{ hlsRef.current.destroy() }catch{}
+
+          // ⚠️ NÃO destruir o HLS se é o mesmo canal (será reutilizado)
+          // Apenas limpar hlsRef.current, mas manter globalHlsInstance
+          const currentId = channel?.stream_id || channel?.id
+          const currentUrl = channel?.playback_url || null
+
+          if(currentId === lastLoadedChannel.id && currentUrl === lastLoadedChannel.playback_url) {
+            console.log('[PLAYER] 🧹 Cleanup - Mesmo canal, preservando globalHlsInstance')
+            // Limpar apenas a ref local, manter global
             hlsRef.current = null
+          } else {
+            console.log('[PLAYER] 🧹 Cleanup - Canal diferente, destruindo HLS')
+            if(hlsRef.current){
+              try{ hlsRef.current.destroy() }catch{}
+              hlsRef.current = null
+            }
+            if(globalHlsInstance){
+              try{ globalHlsInstance.destroy() }catch{}
+              globalHlsInstance = null
+            }
+            lastLoadedChannel = { id: null, playback_url: null }
           }
         }
       }, [channel?.stream_id, channel?.id, channel?.playback_url])
