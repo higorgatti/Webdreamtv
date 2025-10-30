@@ -5459,19 +5459,27 @@ function Home(){
     const fetchTopContent = async () => {
       try {
         const tmdbKey = '7e61dfdf698b31e14082e80a0ca9f9fa'
+        console.log('[Top10] Iniciando busca de filmes e séries...')
 
         // Buscar filmes populares
         const moviesRes = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${tmdbKey}&language=pt-BR&page=1`)
         const moviesData = await moviesRes.json()
-        setTopMovies(moviesData.results.slice(0, 10))
+        // Filtrar apenas filmes que têm poster
+        const moviesWithPosters = moviesData.results.filter(m => m.poster_path)
+        console.log('[Top10] Filmes com poster:', moviesWithPosters.length, 'primeiro:', moviesWithPosters[0]?.title)
+        setTopMovies(moviesWithPosters.slice(0, 10))
 
         // Buscar séries populares
         const seriesRes = await fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${tmdbKey}&language=pt-BR&page=1`)
         const seriesData = await seriesRes.json()
-        setTopSeries(seriesData.results.slice(0, 10))
+        // Filtrar apenas séries que têm poster
+        const seriesWithPosters = seriesData.results.filter(s => s.poster_path)
+        console.log('[Top10] Séries com poster:', seriesWithPosters.length, 'primeira:', seriesWithPosters[0]?.name)
+        setTopSeries(seriesWithPosters.slice(0, 10))
 
         setLoading(false)
       } catch(err) {
+        console.error('[Top10] Erro ao buscar:', err)
         setLoading(false)
       }
     }
@@ -5556,9 +5564,10 @@ function Home(){
                   color: '#000',
                   WebkitTextStroke: '3px #464646',
                   lineHeight: '0.75',
-                  marginRight: '-45px',
+                  marginRight: '-80px',
                   zIndex: 1,
-                  fontFamily: 'Arial, sans-serif'
+                  fontFamily: 'Arial, sans-serif',
+                  pointerEvents: 'none' // Permite clicar através do número
                 }
               }, (index + 1).toString()),
 
@@ -5566,7 +5575,9 @@ function Home(){
               e('div', {
                 style: {
                   position: 'relative',
-                  zIndex: 2
+                  zIndex: 2,
+                  background: '#1a1a1a',
+                  borderRadius: '4px'
                 }
               },
                 // Poster do filme
@@ -5580,7 +5591,16 @@ function Home(){
                     height: '300px',
                     objectFit: 'cover',
                     borderRadius: '4px',
-                    transition: 'transform 0.2s'
+                    transition: 'transform 0.2s',
+                    display: 'block',
+                    backgroundColor: '#2a2a2a'
+                  },
+                  onError: (e) => {
+                    console.error('[Top10] Erro ao carregar imagem:', movie.title, movie.poster_path)
+                    e.target.src = 'https://via.placeholder.com/200x300/333/fff?text=Erro+Imagem'
+                  },
+                  onLoad: (e) => {
+                    if(index === 0) console.log('[Top10] Primeira imagem carregou:', movie.title)
                   },
                   onMouseEnter: (e) => e.target.style.transform = 'scale(1.05)',
                   onMouseLeave: (e) => e.target.style.transform = 'scale(1)'
@@ -5719,9 +5739,10 @@ function Home(){
                   color: '#000',
                   WebkitTextStroke: '3px #464646',
                   lineHeight: '0.75',
-                  marginRight: '-45px',
+                  marginRight: '-60px',
                   zIndex: 1,
-                  fontFamily: 'Arial, sans-serif'
+                  fontFamily: 'Arial, sans-serif',
+                  pointerEvents: 'none' // Permite clicar através do número
                 }
               }, (index + 1).toString()),
 
