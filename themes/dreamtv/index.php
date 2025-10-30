@@ -5289,6 +5289,19 @@ header("Expires: 0");
         setLiveStreams(uniqueListWithPlayback)
 
         if(uniqueListWithPlayback.length>0){
+          // Verificar se já tem um canal selecionado da mesma categoria
+          const currentChannelStillExists = selectedChannel && uniqueListWithPlayback.some(
+            ch => (ch.stream_id || ch.id) === (selectedChannel.stream_id || selectedChannel.id)
+          )
+
+          // Se já tem canal da mesma categoria E a lista já está aberta, manter ele. Senão, selecionar o primeiro
+          if(currentChannelStillExists && liveLeftMode === 'channels') {
+            // Não fazer nada - manter canal atual e não recarregar player
+            // Apenas atualizar a lista de canais
+            if(switchLeft) setLiveLeftMode('channels')
+            return
+          }
+
           const firstChannel = uniqueListWithPlayback[0] // Usar lista COM hasPlayback
           const baseName = firstChannel.baseName
 
@@ -6521,14 +6534,20 @@ function Home(){
                     const rd = new Date(d)
                     rd.setHours(0,0,0,0)
                     return rd.getTime() === targetDate.getTime()
-                  }) : true // Sem playback = sempre disponível (EPG futuro)
+                  }) : false // Sem playback = não disponível
 
-                  // Verificar se é dia futuro
+                  // Verificar se é dia futuro ou passado
                   const isFutureDay = offset > 0
+                  const isPastDay = offset < 0
+
+                  // Desabilitar se:
+                  // 1. Dia futuro (sempre bloqueado)
+                  // 2. Dia passado SEM playback (não tem gravação)
+                  // 3. Dia passado COM playback mas sem gravação disponível
+                  const isDisabled = isFutureDay || (isPastDay && !hasPlayback) || (hasPlayback && !isAvailable)
 
                   const handleDayClick = ()=>{
-                    if(hasPlayback && !isAvailable) return // Playback: só clica se disponível
-                    if(isFutureDay) return // Bloquear clique em dias futuros
+                    if(isDisabled) return // Bloqueado
 
                     setSelectedDay(offset)
                     setSelectedEpgId(null) // Limpar seleção EPG ao trocar dia
@@ -6539,17 +6558,22 @@ function Home(){
                     }
                   }
 
+                  // Tooltip dinâmico
+                  let tooltipText = ''
+                  if(isFutureDay) tooltipText = 'Data futura não disponível'
+                  else if(isPastDay && !hasPlayback) tooltipText = 'Canal sem playback'
+                  else if(hasPlayback && !isAvailable) tooltipText = 'Sem gravações disponíveis'
+
                   return e('div', {
                     key:offset,
                     onClick: handleDayClick,
                     className:`rounded-xl px-6 py-6 text-center transition-all ${
-                      isFutureDay ? 'opacity-40 pointer-events-none cursor-not-allowed' :
-                      hasPlayback && !isAvailable ? 'opacity-40 pointer-events-none cursor-not-allowed' :
+                      isDisabled ? 'opacity-40 pointer-events-none cursor-not-allowed' :
                       isSelected ? 'bg-violet-600/90 ring-2 ring-white/20 cursor-pointer' : // ROXO pixel-perfect
                       'frost cursor-pointer hover:bg-white/5'
                     }`,
                     style: isSelected ? { transform: 'scale(1.02)' } : {},
-                    title: isFutureDay ? 'Data futura não disponível' : hasPlayback && !isAvailable ? 'Sem gravações disponíveis' : ''
+                    title: tooltipText
                   },
                     e('div', { className:`text-3xl font-bold ${isSelected ? 'text-white' : 'text-white/90'}` }, dayNum(offset)),
                     e('div', { className:`text-sm ${isSelected ? 'opacity-100 font-semibold' : 'opacity-80'} text-white` }, dayWeek(offset))
