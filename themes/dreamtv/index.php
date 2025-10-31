@@ -11143,6 +11143,333 @@ window.resetNetflixMovies = () => {
     }
 
     // ============================================================
+    // SEARCH RESULTS - Busca em tempo real estilo Netflix
+    // ============================================================
+    function SearchResults({ searchQuery, vodCats, seriesCats, onClose, setCurrent, setSelectedContent, setView }) {
+      const [results, setResults] = useState([])
+      const [loading, setLoading] = useState(false)
+
+      // Buscar em tempo real quando searchQuery muda
+      useEffect(() => {
+        if (!searchQuery || searchQuery.length < 2) {
+          setResults([])
+          return
+        }
+
+        setLoading(true)
+        setResults([]) // Limpar resultados anteriores
+
+        // Debounce: esperar 300ms após parar de digitar
+        const timeoutId = setTimeout(async () => {
+          const query = searchQuery.toLowerCase().trim()
+
+          console.log('[SearchResults] ========================================')
+          console.log('[SearchResults] 🚀 BUSCA PROGRESSIVA iniciada para:', query)
+          console.log('[SearchResults] VOD Categories:', vodCats.length)
+          console.log('[SearchResults] Series Categories:', seriesCats.length)
+
+          // Buscar em todas as categorias de VOD (progressivo)
+          let vodProcessed = 0
+          for (const cat of vodCats) {
+            const catId = getCatId(cat)
+            if (!catId) {
+              console.log('[SearchResults] ⚠️ Categoria VOD sem ID:', cat)
+              continue
+            }
+
+            vodProcessed++
+            console.log(`[SearchResults] 🎬 Buscando VOD categoria ${vodProcessed}/${vodCats.length}: ${cat.category_name || cat.name}`)
+
+            try {
+              const url = buildURL(cfg.server, ['player_api.php']) + '?' + new URLSearchParams({
+                username: cfg.username,
+                password: cfg.password,
+                action: 'get_vod_streams',
+                category_id: catId
+              })
+
+              const response = await fetch(url)
+              const data = await response.json()
+              const movies = toArray(data)
+
+              // Filtrar por nome
+              const filtered = movies.filter(movie =>
+                movie.name?.toLowerCase().includes(query) ||
+                movie.title?.toLowerCase().includes(query)
+              ).slice(0, 5).map(movie => ({
+                ...movie,
+                type: 'movie',
+                categoryName: cat.category_name || cat.name
+              }))
+
+              // 🎯 ATUALIZAR RESULTADOS IMEDIATAMENTE quando encontrar algo
+              if (filtered.length > 0) {
+                console.log(`[SearchResults] ⚡ ${filtered.length} filmes encontrados! Atualizando UI...`)
+                setResults(prev => [...prev, ...filtered].slice(0, 20)) // Limitar a 20
+              }
+
+              // Parar se já tiver 20 resultados
+              if (filtered.length >= 20) {
+                console.log('[SearchResults] 🛑 20 resultados atingidos, parando VOD')
+                break
+              }
+            } catch (err) {
+              console.error('[SearchResults] ❌ Erro categoria VOD:', catId)
+            }
+          }
+
+          console.log('[SearchResults] 📺 Iniciando busca em SÉRIES...')
+
+          // Buscar em todas as categorias de Séries
+          for (const cat of seriesCats) {
+            const catId = getCatId(cat)
+            if (!catId) continue
+
+            console.log(`[SearchResults] 📺 Buscando série: ${cat.category_name || cat.name}`)
+
+            try {
+              const url = buildURL(cfg.server, ['player_api.php']) + '?' + new URLSearchParams({
+                username: cfg.username,
+                password: cfg.password,
+                action: 'get_series',
+                category_id: catId
+              })
+
+              const response = await fetch(url)
+              const data = await response.json()
+              const series = toArray(data)
+
+              // Filtrar por nome
+              const filtered = series.filter(s =>
+                s.name?.toLowerCase().includes(query) ||
+                s.title?.toLowerCase().includes(query)
+              ).slice(0, 5).map(s => ({
+                ...s,
+                type: 'series',
+                categoryName: cat.category_name || cat.name
+              }))
+
+              // 🎯 ATUALIZAR RESULTADOS IMEDIATAMENTE quando encontrar algo
+              if (filtered.length > 0) {
+                console.log(`[SearchResults] ⚡ ${filtered.length} séries encontradas! Atualizando UI...`)
+                setResults(prev => [...prev, ...filtered].slice(0, 20)) // Limitar a 20
+              }
+
+              // Parar se já tiver 20 resultados no total
+              const currentTotal = document.querySelectorAll('[data-search-result]').length
+              if (currentTotal >= 20) {
+                console.log('[SearchResults] 🛑 20 resultados atingidos, parando Séries')
+                break
+              }
+            } catch (err) {
+              console.error('[SearchResults] ❌ Erro categoria Série:', catId)
+            }
+          }
+
+          console.log('[SearchResults] ✅ Busca progressiva concluída!')
+          setLoading(false)
+        }, 300)
+
+        return () => clearTimeout(timeoutId)
+      }, [searchQuery, vodCats, seriesCats])
+
+      // Não mostrar se query vazia
+      if (!searchQuery || searchQuery.length < 2) return null
+
+      return e('div', {
+        style: {
+          position: 'fixed',
+          top: '60px',
+          right: '20px',
+          width: '450px',
+          maxHeight: '70vh',
+          backgroundColor: 'rgba(0, 0, 0, 0.95)',
+          borderRadius: '8px',
+          overflow: 'hidden',
+          zIndex: 1000,
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.8)',
+          border: '1px solid rgba(255, 255, 255, 0.1)'
+        }
+      },
+        // Header
+        e('div', {
+          style: {
+            padding: '16px',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }
+        },
+          e('h3', {
+            style: {
+              color: '#fff',
+              fontSize: '16px',
+              fontWeight: '600',
+              margin: 0
+            }
+          }, `Resultados para "${searchQuery}"`),
+          e('button', {
+            onClick: onClose,
+            style: {
+              background: 'transparent',
+              border: 'none',
+              color: '#fff',
+              fontSize: '20px',
+              cursor: 'pointer',
+              padding: '0',
+              lineHeight: 1
+            }
+          }, '×')
+        ),
+
+        // Resultados
+        e('div', {
+          style: {
+            maxHeight: 'calc(70vh - 60px)',
+            overflowY: 'auto',
+            padding: '8px'
+          }
+        },
+          loading && results.length === 0 && e('div', {
+            style: {
+              padding: '32px',
+              textAlign: 'center',
+              color: '#999',
+              fontSize: '14px'
+            }
+          }, 'Buscando...'),
+
+          !loading && results.length === 0 && e('div', {
+            style: {
+              padding: '32px',
+              textAlign: 'center',
+              color: '#999',
+              fontSize: '14px'
+            }
+          }, 'Nenhum resultado encontrado'),
+
+          results.length > 0 && results.map((item, idx) =>
+            e('div', {
+              key: `${item.type}-${item.stream_id || item.series_id}-${idx}`,
+              'data-search-result': true,
+              onClick: () => {
+                if (item.type === 'movie') {
+                  setCurrent({ ...item, url: buildURL(cfg.server, ['movie', cfg.username, cfg.password, `${item.stream_id}.${item.container_extension || 'mp4'}`]) })
+                  setView('player')
+                } else if (item.type === 'series') {
+                  setSelectedContent(item)
+                  setView('serie-details')
+                }
+                onClose()
+              },
+              style: {
+                display: 'flex',
+                gap: '12px',
+                padding: '8px',
+                cursor: 'pointer',
+                borderRadius: '4px',
+                transition: 'background-color 0.2s',
+                ':hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                }
+              },
+              onMouseEnter: (e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
+              },
+              onMouseLeave: (e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }
+            },
+              // Poster
+              e('img', {
+                src: item.stream_icon || item.cover || 'https://via.placeholder.com/80x120/333/666?text=Sem+Poster',
+                alt: item.name || item.title,
+                style: {
+                  width: '60px',
+                  height: '90px',
+                  objectFit: 'cover',
+                  borderRadius: '4px',
+                  flexShrink: 0
+                },
+                onError: (e) => {
+                  e.target.src = 'https://via.placeholder.com/80x120/333/666?text=?'
+                }
+              }),
+
+              // Info
+              e('div', {
+                style: {
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px'
+                }
+              },
+                e('h4', {
+                  style: {
+                    color: '#fff',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    margin: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }
+                }, item.name || item.title),
+
+                e('div', {
+                  style: {
+                    display: 'flex',
+                    gap: '8px',
+                    alignItems: 'center'
+                  }
+                },
+                  e('span', {
+                    style: {
+                      color: '#999',
+                      fontSize: '12px'
+                    }
+                  }, item.type === 'movie' ? '🎬 Filme' : '📺 Série'),
+
+                  item.rating && e('span', {
+                    style: {
+                      color: '#fbbf24',
+                      fontSize: '12px',
+                      fontWeight: '600'
+                    }
+                  }, `⭐ ${item.rating}`)
+                ),
+
+                e('p', {
+                  style: {
+                    color: '#666',
+                    fontSize: '11px',
+                    margin: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }
+                }, item.categoryName || 'Categoria')
+              )
+            )
+          ),
+
+          // Indicador de busca em andamento (aparece no final da lista)
+          loading && results.length > 0 && e('div', {
+            style: {
+              padding: '16px',
+              textAlign: 'center',
+              color: '#999',
+              fontSize: '12px',
+              borderTop: '1px solid rgba(255,255,255,0.1)'
+            }
+          }, '🔍 Buscando mais resultados...')
+        )
+      )
+    }
+
+    // ============================================================
     // PLAYER HUD - Controles sobre o vídeo
     // ============================================================
     function PlayerHUD({ visible, videoRef, hlsObj, channelInfo, onHide }) {
@@ -12731,6 +13058,17 @@ window.resetNetflixMovies = () => {
     return e('div', { className: 'app-container' },
       // Header global Netflix-style (substitui sidebar)
       showHeader && e(Header, { view, setView, globalSearchQuery, setGlobalSearchQuery, onLogout, account, setShowParentalPin, setPendingAdultView }),
+
+      // Search Results - Dropdown com resultados da busca
+      showHeader && globalSearchQuery && e(SearchResults, {
+        searchQuery: globalSearchQuery,
+        vodCats: vodCats,
+        seriesCats: seriesCats,
+        onClose: () => setGlobalSearchQuery(''),
+        setCurrent: setCurrent,
+        setSelectedContent: setSelectedContent,
+        setView: setView
+      }),
 
       // Barra de categorias de filmes e séries
       showCategoryBar && e(CategoryBar, { vodCats, seriesCats, view, setView, selectedCat, setSelectedCat }),
