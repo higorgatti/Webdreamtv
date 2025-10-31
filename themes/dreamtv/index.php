@@ -12235,9 +12235,6 @@ window.resetNetflixMovies = () => {
       const playerInstanceRef = useRef(null)
       const [hlsObj,setHlsObj] = useState(null)
       const containerRef = useRef(null)
-      const [showHUD, setShowHUD] = useState(true) // HUD visível por padrão
-      const [channelEPG, setChannelEPG] = useState(null)
-      const [isFavorite, setIsFavorite] = useState(false)
       const [selectedPlayer] = useLocalStorage('selected_player', 'Clappr Player (Recommended)')
 
       // Cleanup ao desmontar
@@ -12252,45 +12249,6 @@ window.resetNetflixMovies = () => {
           }
         }
       },[hlsObj])
-
-      // Verificar se canal atual está nos favoritos
-      useEffect(() => {
-        if (!current?.stream_id) return
-        const favorites = JSON.parse(localStorage.getItem('dreamtv_favorites') || '{}')
-        setIsFavorite(!!favorites[current.stream_id])
-      }, [current?.stream_id])
-
-      // Toggle favorito
-      const toggleFavorite = () => {
-        if (!current?.stream_id) return
-
-        const newState = !isFavorite
-        setIsFavorite(newState)
-
-        // Salvar/remover do localStorage
-        const favorites = JSON.parse(localStorage.getItem('dreamtv_favorites') || '{}')
-
-        if (newState) {
-          // Adicionar aos favoritos
-          favorites[current.stream_id] = {
-            stream_id: current.stream_id,
-            num: current.num,
-            name: current.name,
-            stream_icon: current.stream_icon,
-            stream_url: current.url,
-            category_id: current.category_id,
-            addedAt: Date.now()
-          }
-        } else {
-          // Remover dos favoritos
-          delete favorites[current.stream_id]
-        }
-
-        localStorage.setItem('dreamtv_favorites', JSON.stringify(favorites))
-
-        // Notificar sistema para atualizar lista se estiver na categoria favoritos
-        window.dispatchEvent(new CustomEvent('favorites-updated'))
-      }
 
       // ⚠️ FULLSCREEN AUTOMÁTICO DESABILITADO
       // Agora o usuário controla quando quer fullscreen (botão F ou duplo clique)
@@ -12440,34 +12398,6 @@ window.resetNetflixMovies = () => {
         }
       },[current, selectedPlayer])
 
-      // Handlers para mostrar HUD
-      useEffect(() => {
-        const handleInteraction = () => setShowHUD(true)
-        const handleKeyDown = (e) => {
-          // OK/Enter - toggle HUD
-          if (e.key === 'Enter' || e.key === 'OK') {
-            e.preventDefault()
-            setShowHUD(prev => !prev)
-          }
-          // F - Fullscreen (o próprio HUD tem o botão)
-          if (e.key === 'f' || e.key === 'F') {
-            setShowHUD(true)
-          }
-          // Setas - mostrar HUD
-          if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-            setShowHUD(true)
-          }
-        }
-
-        window.addEventListener('mousemove', handleInteraction)
-        window.addEventListener('keydown', handleKeyDown)
-
-        return () => {
-          window.removeEventListener('mousemove', handleInteraction)
-          window.removeEventListener('keydown', handleKeyDown)
-        }
-      }, [])
-
       return e('div', { ref: containerRef, className:'bg-black min-h-screen flex flex-col' },
         e(TopBar),
         e('div', { className:'bg-zinc-900/60 px-4 py-3 flex items-center justify-between' },
@@ -12483,21 +12413,7 @@ window.resetNetflixMovies = () => {
           e('div', { className:'w-10' })
         ),
         e('div', { id: 'player-container', className:'flex-1 grid place-items-center p-4 relative' },
-          e('video', { ref:videoRef, controls:false, playsInline:true, className:'w-full max-w-6xl rounded-lg bg-black' }),
-          // PlayerHUD sobreposto
-          e(PlayerHUD, {
-            visible: showHUD,
-            videoRef: videoRef,
-            hlsObj: hlsObj,
-            channelInfo: {
-              num: current?.num || '---',
-              name: current?.name || 'Canal',
-              stream_icon: current?.stream_icon,
-              stream_id: current?.stream_id,
-              epg: channelEPG
-            },
-            onHide: () => setShowHUD(false)
-          })
+          e('video', { ref:videoRef, controls:true, playsInline:true, className:'w-full max-w-6xl rounded-lg bg-black' })
         )
       )
     }
