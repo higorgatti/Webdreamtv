@@ -11152,8 +11152,6 @@ window.resetNetflixMovies = () => {
       const [currentLevel, setCurrentLevel] = useState(-1)
       const [isAuto, setIsAuto] = useState(true)
       const [isFavorite, setIsFavorite] = useState(false)
-      const [volume, setVolume] = useState(100)
-      const [isMuted, setIsMuted] = useState(false)
       const hideTimerRef = useRef(null)
 
       // Verificar se canal está nos favoritos ao carregar
@@ -11162,37 +11160,6 @@ window.resetNetflixMovies = () => {
         const favorites = JSON.parse(localStorage.getItem('dreamtv_favorites') || '{}')
         setIsFavorite(!!favorites[channelInfo.stream_id])
       }, [channelInfo?.stream_id])
-
-      // Sincronizar volume com o player
-      useEffect(() => {
-        const video = videoRef?.current
-        if (!video) return
-
-        // Carregar volume salvo
-        const savedVolume = localStorage.getItem('dreamtv_volume')
-        if (savedVolume) {
-          const vol = parseInt(savedVolume, 10)
-          setVolume(vol)
-          video.volume = vol / 100
-        }
-
-        video.muted = isMuted
-      }, [videoRef])
-
-      // Atualizar volume do player quando state mudar
-      useEffect(() => {
-        const video = videoRef?.current
-        if (!video) return
-        video.volume = volume / 100
-        localStorage.setItem('dreamtv_volume', volume.toString())
-      }, [volume, videoRef])
-
-      // Atualizar mute do player
-      useEffect(() => {
-        const video = videoRef?.current
-        if (!video) return
-        video.muted = isMuted
-      }, [isMuted, videoRef])
 
       // Atualizar hora atual a cada segundo
       useEffect(() => {
@@ -11355,15 +11322,9 @@ window.resetNetflixMovies = () => {
         }
       }
 
-      console.log('[PlayerHUD] visible:', visible, 'videoRef:', !!videoRef?.current, 'channelInfo:', channelInfo)
-
       if (!visible) {
-        console.log('[PlayerHUD] ❌ HUD não visível - retornando null')
         return null
       }
-
-      console.log('[PlayerHUD] ✅ HUD VISÍVEL - renderizando controles')
-      console.log('[PlayerHUD] Volume atual:', volume, '% | Muted:', isMuted)
 
       const now = channelInfo?.epg?.now || { title: channelInfo?.name || 'Sem informação', start: '--:--', end: '--:--', isLive: false }
       const next = channelInfo?.epg?.next || null
@@ -11501,40 +11462,6 @@ window.resetNetflixMovies = () => {
                 : 'bg-white/10 text-white hover:bg-white/20'
             }`
           }, 'Original'),
-
-          // Separador
-          e('div', { className: 'w-px h-6 bg-white/20' }),
-
-          // Controle de Volume
-          (() => {
-            console.log('[PlayerHUD] 🎚️ Renderizando controle de volume - Volume:', volume, '% | Muted:', isMuted)
-            return e('div', { className: 'flex items-center gap-2' },
-            // Botão Mute
-            e('button', {
-              onClick: () => setIsMuted(!isMuted),
-              className: 'px-3 py-2 rounded-full text-sm font-semibold bg-white/10 text-white hover:bg-white/20 transition-all'
-            }, isMuted ? '🔇' : '🔊'),
-
-            // Slider de Volume
-            e('input', {
-              type: 'range',
-              min: 0,
-              max: 100,
-              value: volume,
-              onChange: (e) => setVolume(parseInt(e.target.value, 10)),
-              className: 'w-24 h-2 bg-white/20 rounded-full appearance-none cursor-pointer',
-              style: {
-                background: `linear-gradient(to right, #8b5cf6 0%, #8b5cf6 ${volume}%, rgba(255,255,255,0.2) ${volume}%, rgba(255,255,255,0.2) 100%)`
-              }
-            }),
-
-            // Valor do volume
-            e('span', { className: 'text-sm text-white font-medium min-w-[3ch]' }, `${volume}%`)
-          )
-          })(),
-
-          // Separador
-          e('div', { className: 'w-px h-6 bg-white/20' }),
 
           // Fullscreen
           e('button', {
