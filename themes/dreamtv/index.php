@@ -1860,10 +1860,33 @@ header("Expires: 0");
     // Calcular flags de view
     const isMoviesView = view === 'netflix-movies' || view === 'vod-categories'
     const isSeriesView = view === 'netflix-series' || view === 'series-categories'
+    const isCollectionsView = view === 'collections'
     const isAdultView = view === 'adult-content' || view === 'adult-categories'
 
-    // Usar categorias apropriadas
-    let categories = isSeriesView ? (seriesCats || []) : (vodCats || [])
+    // Gêneros TMDB para Collections (IDs oficiais do TMDB)
+    const tmdbGenres = [
+      { category_id: 28, category_name: 'Ação' },
+      { category_id: 12, category_name: 'Aventura' },
+      { category_id: 16, category_name: 'Animação' },
+      { category_id: 35, category_name: 'Comédia' },
+      { category_id: 80, category_name: 'Crime' },
+      { category_id: 99, category_name: 'Documentário' },
+      { category_id: 18, category_name: 'Drama' },
+      { category_id: 10751, category_name: 'Família' },
+      { category_id: 14, category_name: 'Fantasia' },
+      { category_id: 36, category_name: 'História' },
+      { category_id: 27, category_name: 'Terror' },
+      { category_id: 10402, category_name: 'Música' },
+      { category_id: 9648, category_name: 'Mistério' },
+      { category_id: 10749, category_name: 'Romance' },
+      { category_id: 878, category_name: 'Ficção Científica' },
+      { category_id: 53, category_name: 'Thriller' },
+      { category_id: 10752, category_name: 'Guerra' },
+      { category_id: 37, category_name: 'Faroeste' }
+    ]
+
+    // Usar categorias apropriadas (collections usa gêneros TMDB)
+    let categories = isCollectionsView ? tmdbGenres : (isSeriesView ? (seriesCats || []) : (vodCats || []))
 
     // Filtrar categorias baseado na view
     if (isAdultView) {
@@ -1964,18 +1987,22 @@ header("Expires: 0");
     // Inicializar categoria selecionada IMEDIATAMENTE quando categorias estiverem disponíveis
     useEffect(() => {
       if (orderedCats.length > 0) {
-        // Definir imediatamente sem aguardar próximo render
-        setSelectedCat(orderedCats[0])
+        // Collections não deve auto-selecionar categoria (deve mostrar "Todas")
+        if (!isCollectionsView) {
+          setSelectedCat(orderedCats[0])
+        }
       }
-    }, [categories.length, isMoviesView, isSeriesView, isAdultView])
+    }, [categories.length, isMoviesView, isSeriesView, isCollectionsView, isAdultView])
 
     // AGORA SIM, fazer returns condicionais APÓS todos os hooks
-    if (!isMoviesView && !isSeriesView && !isAdultView) return null
+    if (!isMoviesView && !isSeriesView && !isCollectionsView && !isAdultView) return null
     if (categories.length === 0) return null
 
     // Se não tem categoria selecionada mas há categorias disponíveis, usar a primeira temporariamente
     const displayCat = selectedCat || (orderedCats.length > 0 ? orderedCats[0] : null)
-    const selectedCatName = displayCat ? (displayCat.category_name || displayCat.name || 'Categoria') : 'Carregando...'
+    const selectedCatName = selectedCat
+      ? (selectedCat.category_name || selectedCat.name || 'Categoria')
+      : (isCollectionsView ? 'TODAS' : 'Carregando...')
 
     return e('div', {
       style: {
@@ -2034,7 +2061,32 @@ header("Expires: 0");
             border: '1px solid rgba(255, 255, 255, 0.1)'
           }
         },
-          // Categorias ordenadas (sem opção "Todas")
+          // Opção "TODAS" apenas para Collections
+          ...(isCollectionsView ? [
+            e('div', {
+              key: 'all',
+              onClick: () => {
+                setSelectedCat(null)
+                setShowDropdown(false)
+              },
+              style: {
+                padding: '12px 20px',
+                color: !selectedCat ? '#e50914' : '#e0e0e0',
+                fontSize: '14px',
+                cursor: 'pointer',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                transition: 'background 0.2s',
+                fontWeight: !selectedCat ? '600' : 'normal'
+              },
+              onMouseEnter: (e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+              },
+              onMouseLeave: (e) => {
+                e.currentTarget.style.background = 'transparent'
+              }
+            }, 'TODAS')
+          ] : []),
+          // Categorias ordenadas
           ...orderedCats.map(cat => {
             const catId = getCatId(cat)
             const catName = cat.category_name || cat.name || 'Sem nome'
@@ -4197,6 +4249,13 @@ header("Expires: 0");
         }
       }
     }, [vodCats.length, seriesCats.length, view])
+
+    // Limpar selectedCat quando entrar em Collections (deve mostrar TODAS)
+    useEffect(() => {
+      if (view === 'collections') {
+        setSelectedCat(null)
+      }
+    }, [view])
 
     const [current,setCurrent] = useState(null)
     const [selectedContent, setSelectedContent] = useState(null) // Para página de detalhes
@@ -8257,15 +8316,62 @@ window.resetNetflixMovies = () => {
             movies: col.movies.map(m => ({
               stream_id: m.stream_id,
               name: m.name,
-              category: m.category
+              category: m.category,
+              tmdb_genres: m.tmdb_genres || '', // Gêneros do TMDB (string)
+              genre_ids: m.genre_ids || [] // IDs dos gêneros do TMDB (array)
             }))
           }))
 
-          // Enriquecer primeiras 30 coleções com overview do TMDB (em background)
-          const collectionsToEnrich = collections.slice(0, 30) // Limitar para performance
+          // ===== ENRIQUECER COLEÇÕES COM GÊNEROS DO TMDB =====
+          // Estratégia: buscar gêneros da COLEÇÃO (não dos filmes individuais)
+          // Isso funciona porque as coleções TMDB têm gêneros derivados dos filmes
+          const collectionsToEnrich = collections.slice(0, 200)
 
           Promise.all(
-            collectionsToEnrich.map(async (col, idx) => {
+            collectionsToEnrich.map(async (col) => {
+              try {
+                // Buscar dados da coleção no TMDB
+                const tmdbCollectionData = await getTMDBCollection(col.id)
+
+                // Se a coleção TMDB tem filmes, pegar gêneros do primeiro
+                if (tmdbCollectionData && tmdbCollectionData.parts && tmdbCollectionData.parts.length > 0) {
+                  const firstMovie = tmdbCollectionData.parts[0]
+
+                  if (firstMovie && firstMovie.genre_ids && firstMovie.genre_ids.length > 0) {
+                    // Converter IDs para nomes em português
+                    const genreMap = {
+                      28: 'Ação', 12: 'Aventura', 16: 'Animação', 35: 'Comédia',
+                      80: 'Crime', 99: 'Documentário', 18: 'Drama', 10751: 'Família',
+                      14: 'Fantasia', 36: 'História', 27: 'Terror', 10402: 'Música',
+                      9648: 'Mistério', 10749: 'Romance', 878: 'Ficção Científica',
+                      53: 'Thriller', 10752: 'Guerra', 37: 'Faroeste'
+                    }
+
+                    const genreNames = firstMovie.genre_ids
+                      .map(id => genreMap[id])
+                      .filter(name => name)
+                      .join(', ')
+
+                    // Adicionar gêneros a TODOS os filmes da coleção
+                    col.movies.forEach(movie => {
+                      movie.tmdb_genres = genreNames
+                      movie.genre_ids = firstMovie.genre_ids
+                    })
+                  }
+                }
+              } catch (err) {
+                // Silenciar erros individuais
+              }
+            })
+          ).then(() => {
+            setCollections([...collections]) // Atualizar estado com gêneros
+          })
+
+          // Enriquecer primeiras 30 coleções com overview do TMDB (em background)
+          const collectionsOverview = collections.slice(0, 30) // Limitar para performance
+
+          Promise.all(
+            collectionsOverview.map(async (col, idx) => {
               try {
                 const tmdbData = await getTMDBCollection(col.id)
                 if (tmdbData && tmdbData.overview) {
@@ -10501,17 +10607,65 @@ window.resetNetflixMovies = () => {
               e('span', null, 'Buscando coleções...')
             )
           ) :
-          view === 'collections' && collections.length > 0 ? e(SectionMovies, {
-            key: 'collections-list',
-            name: `🎬 Coleções (${collections.length})`,
-            movies: collections, // Passando coleções como "movies" para reusar SectionMovies
-            sectionId: 'collections',
-            categoryIndex: undefined, // Sem navegação de categorias
-            totalCategories: 0,
-            onNextCategory: () => {},
-            onPrevCategory: () => {},
-            isCollectionsMode: true // Flag para SectionMovies saber que está renderizando coleções
-          }) :
+          view === 'collections' && collections.length > 0 ? (() => {
+            // Filtrar coleções por gênero TMDB se houver categoria selecionada
+            let filteredCollections = collections
+
+            if (selectedCategory) {
+              const selectedGenreId = getCatId(selectedCategory)
+
+              // Mapa de ID para nome do gênero em português e inglês
+              const genreNames = {
+                28: ['ação', 'action'],
+                12: ['aventura', 'adventure'],
+                16: ['animação', 'animation'],
+                35: ['comédia', 'comedy'],
+                80: ['crime'],
+                99: ['documentário', 'documentary'],
+                18: ['drama'],
+                10751: ['família', 'family'],
+                14: ['fantasia', 'fantasy'],
+                36: ['história', 'history'],
+                27: ['terror', 'horror'],
+                10402: ['música', 'music'],
+                9648: ['mistério', 'mystery'],
+                10749: ['romance', 'romantic'],
+                878: ['ficção científica', 'sci-fi', 'science fiction'],
+                53: ['thriller'],
+                10752: ['guerra', 'war'],
+                37: ['faroeste', 'western']
+              }
+
+              const searchGenres = genreNames[selectedGenreId] || []
+
+              filteredCollections = collections.filter(collection => {
+                // Verificar se algum filme da coleção tem o gênero no tmdb_genres (string)
+                const hasGenre = collection.movies && collection.movies.some(movie => {
+                  if (movie.tmdb_genres) {
+                    const movieGenres = movie.tmdb_genres.toLowerCase()
+                    return searchGenres.some(genreName => movieGenres.includes(genreName))
+                  }
+                  return false
+                })
+
+                return hasGenre
+              })
+            }
+
+            return e(SectionMovies, {
+              key: 'collections-list',
+              name: selectedCategory
+                ? `🎬 Coleções de ${selectedCategory.category_name || selectedCategory.name} (${filteredCollections.length})`
+                : `🎬 Coleções (${filteredCollections.length})`,
+              movies: filteredCollections,
+              sectionId: 'collections',
+              categoryIndex: undefined,
+              totalCategories: 0,
+              onNextCategory: () => {},
+              onPrevCategory: () => {},
+              isCollectionsMode: true
+            })
+          })() :
           view === 'collections' && collections.length === 0 && !loadingCollections ? e('div', {
             style: {
               display: 'flex',
@@ -12508,7 +12662,11 @@ window.resetNetflixMovies = () => {
       content = e(NetflixMovies, { key: 'series-show', contentType: 'series', categoryFilter: 'show' })
     }
     else if(view==='collections'){
-      content = e(NetflixMovies, { key: 'vod-collections', contentType: 'vod' })
+      if (selectedCat) {
+        content = e(NetflixMovies, { key: `collections-${getCatId(selectedCat)}`, contentType: 'vod', selectedCategory: selectedCat })
+      } else {
+        content = e(NetflixMovies, { key: 'vod-collections', contentType: 'vod' })
+      }
     }
     else if(view==='adult-content'){
       if (selectedCat) {
@@ -12530,7 +12688,8 @@ window.resetNetflixMovies = () => {
     const showHeader = view !== 'config' && view !== 'player' && view !== 'settings'
     const showCategoryBar = showHeader && (
       view === 'netflix-movies' || view === 'vod-categories' ||
-      view === 'netflix-series' || view === 'series-categories'
+      view === 'netflix-series' || view === 'series-categories' ||
+      view === 'collections'
     )
 
     return e('div', { className: 'app-container' },
