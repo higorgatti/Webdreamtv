@@ -942,6 +942,37 @@ header("Expires: 0");
         height: 40px !important;
       }
     }
+
+    /* Estilo customizado para o slider de volume */
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #8b5cf6;
+      cursor: pointer;
+      box-shadow: 0 0 4px rgba(139, 92, 246, 0.5);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #8b5cf6;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 0 4px rgba(139, 92, 246, 0.5);
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      background: #a78bfa;
+      box-shadow: 0 0 8px rgba(139, 92, 246, 0.8);
+    }
+
+    input[type="range"]::-moz-range-thumb:hover {
+      background: #a78bfa;
+      box-shadow: 0 0 8px rgba(139, 92, 246, 0.8);
+    }
   </style>
 
   <!-- ===== CACHE SYSTEM - IndexedDB Manager ===== -->
@@ -6855,6 +6886,8 @@ function Home(){
       const [availableQualities, setAvailableQualities] = useState([])
       const [loadError, setLoadError] = useState(null) // Estado para erro de carregamento
       const retryCountRef = useRef(0) // Contador de tentativas
+      const [volume, setVolume] = useState(100)
+      const [isMuted, setIsMuted] = useState(false)
 
       // Mapeamento de qualidade para resolução
       const getResolutionFromQuality = (quality) => {
@@ -6935,6 +6968,37 @@ function Home(){
         const qualities = channel.allVariants.map(v => v.quality).filter(Boolean)
         setAvailableQualities(qualities.length > 0 ? qualities : ['Original'])
       }, [channel?.allVariants])
+
+      // Sincronizar volume com o player
+      useEffect(() => {
+        const v = vref.current
+        if (!v) return
+
+        // Carregar volume salvo
+        const savedVolume = localStorage.getItem('dreamtv_volume')
+        if (savedVolume) {
+          const vol = parseInt(savedVolume, 10)
+          setVolume(vol)
+          v.volume = vol / 100
+        }
+
+        v.muted = isMuted
+      }, [channel?.stream_id])
+
+      // Atualizar volume do player quando state mudar
+      useEffect(() => {
+        const v = vref.current
+        if (!v) return
+        v.volume = volume / 100
+        localStorage.setItem('dreamtv_volume', volume.toString())
+      }, [volume])
+
+      // Atualizar mute do player
+      useEffect(() => {
+        const v = vref.current
+        if (!v) return
+        v.muted = isMuted
+      }, [isMuted])
 
       useEffect(()=>{
         const v = vref.current
@@ -7831,6 +7895,63 @@ function Home(){
                   outline: 'none'
                 }
               }, 'Original'),
+
+              // Controle de Volume
+              e('div', {
+                style: {
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 'clamp(6px,0.8vw,10px)',
+                  background: 'rgba(255,255,255,0.15)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  padding: 'clamp(6px,0.8vw,8px) clamp(10px,1.2vw,14px)',
+                  borderRadius: '9999px'
+                }
+              },
+                // Botão Mute
+                e('button', {
+                  onClick: () => setIsMuted(!isMuted),
+                  style: {
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#FFFFFF',
+                    fontSize: 'clamp(16px,1.8vw,20px)',
+                    cursor: 'pointer',
+                    padding: 0,
+                    lineHeight: 1,
+                    outline: 'none'
+                  }
+                }, isMuted ? '🔇' : '🔊'),
+
+                // Slider de Volume
+                e('input', {
+                  type: 'range',
+                  min: 0,
+                  max: 100,
+                  value: volume,
+                  onChange: (e) => setVolume(parseInt(e.target.value, 10)),
+                  style: {
+                    width: 'clamp(60px,8vw,100px)',
+                    height: '4px',
+                    background: `linear-gradient(to right, #8b5cf6 0%, #8b5cf6 ${volume}%, rgba(255,255,255,0.3) ${volume}%, rgba(255,255,255,0.3) 100%)`,
+                    borderRadius: '9999px',
+                    appearance: 'none',
+                    cursor: 'pointer',
+                    outline: 'none'
+                  }
+                }),
+
+                // Porcentagem
+                e('span', {
+                  style: {
+                    color: '#FFFFFF',
+                    fontSize: 'clamp(11px,1.1vw,13px)',
+                    fontWeight: '500',
+                    minWidth: '3ch',
+                    textAlign: 'right'
+                  }
+                }, `${volume}%`)
+              ),
 
               // Botão Full Screen (VERDE DESTACADO)
               e('button', {
@@ -11031,6 +11152,8 @@ window.resetNetflixMovies = () => {
       const [currentLevel, setCurrentLevel] = useState(-1)
       const [isAuto, setIsAuto] = useState(true)
       const [isFavorite, setIsFavorite] = useState(false)
+      const [volume, setVolume] = useState(100)
+      const [isMuted, setIsMuted] = useState(false)
       const hideTimerRef = useRef(null)
 
       // Verificar se canal está nos favoritos ao carregar
@@ -11039,6 +11162,37 @@ window.resetNetflixMovies = () => {
         const favorites = JSON.parse(localStorage.getItem('dreamtv_favorites') || '{}')
         setIsFavorite(!!favorites[channelInfo.stream_id])
       }, [channelInfo?.stream_id])
+
+      // Sincronizar volume com o player
+      useEffect(() => {
+        const video = videoRef?.current
+        if (!video) return
+
+        // Carregar volume salvo
+        const savedVolume = localStorage.getItem('dreamtv_volume')
+        if (savedVolume) {
+          const vol = parseInt(savedVolume, 10)
+          setVolume(vol)
+          video.volume = vol / 100
+        }
+
+        video.muted = isMuted
+      }, [videoRef])
+
+      // Atualizar volume do player quando state mudar
+      useEffect(() => {
+        const video = videoRef?.current
+        if (!video) return
+        video.volume = volume / 100
+        localStorage.setItem('dreamtv_volume', volume.toString())
+      }, [volume, videoRef])
+
+      // Atualizar mute do player
+      useEffect(() => {
+        const video = videoRef?.current
+        if (!video) return
+        video.muted = isMuted
+      }, [isMuted, videoRef])
 
       // Atualizar hora atual a cada segundo
       useEffect(() => {
@@ -11201,10 +11355,15 @@ window.resetNetflixMovies = () => {
         }
       }
 
-      // PlayerHUD desabilitado - overlay não deve aparecer em VOD
-      return null
+      console.log('[PlayerHUD] visible:', visible, 'videoRef:', !!videoRef?.current, 'channelInfo:', channelInfo)
 
-      if (!visible) return null
+      if (!visible) {
+        console.log('[PlayerHUD] ❌ HUD não visível - retornando null')
+        return null
+      }
+
+      console.log('[PlayerHUD] ✅ HUD VISÍVEL - renderizando controles')
+      console.log('[PlayerHUD] Volume atual:', volume, '% | Muted:', isMuted)
 
       const now = channelInfo?.epg?.now || { title: channelInfo?.name || 'Sem informação', start: '--:--', end: '--:--', isLive: false }
       const next = channelInfo?.epg?.next || null
@@ -11342,6 +11501,40 @@ window.resetNetflixMovies = () => {
                 : 'bg-white/10 text-white hover:bg-white/20'
             }`
           }, 'Original'),
+
+          // Separador
+          e('div', { className: 'w-px h-6 bg-white/20' }),
+
+          // Controle de Volume
+          (() => {
+            console.log('[PlayerHUD] 🎚️ Renderizando controle de volume - Volume:', volume, '% | Muted:', isMuted)
+            return e('div', { className: 'flex items-center gap-2' },
+            // Botão Mute
+            e('button', {
+              onClick: () => setIsMuted(!isMuted),
+              className: 'px-3 py-2 rounded-full text-sm font-semibold bg-white/10 text-white hover:bg-white/20 transition-all'
+            }, isMuted ? '🔇' : '🔊'),
+
+            // Slider de Volume
+            e('input', {
+              type: 'range',
+              min: 0,
+              max: 100,
+              value: volume,
+              onChange: (e) => setVolume(parseInt(e.target.value, 10)),
+              className: 'w-24 h-2 bg-white/20 rounded-full appearance-none cursor-pointer',
+              style: {
+                background: `linear-gradient(to right, #8b5cf6 0%, #8b5cf6 ${volume}%, rgba(255,255,255,0.2) ${volume}%, rgba(255,255,255,0.2) 100%)`
+              }
+            }),
+
+            // Valor do volume
+            e('span', { className: 'text-sm text-white font-medium min-w-[3ch]' }, `${volume}%`)
+          )
+          })(),
+
+          // Separador
+          e('div', { className: 'w-px h-6 bg-white/20' }),
 
           // Fullscreen
           e('button', {
