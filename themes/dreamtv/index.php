@@ -1884,7 +1884,7 @@ header("Expires: 0");
   })
 
   // ===== BARRA DE CATEGORIAS DE FILMES E SÉRIES =====
-  function CategoryBar({ vodCats, seriesCats, view, setView, selectedCat, setSelectedCat }) {
+  function CategoryBar({ vodCats, seriesCats, view, setView, selectedCat, setSelectedCat, collections }) {
     // IMPORTANTE: Todos os Hooks devem ser chamados ANTES de qualquer return condicional
     const [showDropdown, setShowDropdown] = useState(false)
 
@@ -2097,8 +2097,35 @@ header("Expires: 0");
             e('div', {
               key: 'all',
               onClick: () => {
+                console.log('[CategoryBar] TODAS clicada')
                 setSelectedCat(null)
                 setShowDropdown(false)
+
+                // Ao selecionar "TODAS", mostrar backdrop da primeira coleção disponível
+                if (collections && collections.length > 0) {
+                  console.log('[CategoryBar] Total de coleções:', collections.length)
+                  const firstCollection = collections[0]
+                  console.log('[CategoryBar] Primeira coleção:', firstCollection.name)
+                  console.log('[CategoryBar] Backdrop da coleção:', firstCollection.backdrop)
+
+                  if (window.updateNetflixMoviesState) {
+                    console.log('[CategoryBar] Atualizando heroBackdrop com a primeira coleção')
+                    window.updateNetflixMoviesState({
+                      heroBackdrop: {
+                        name: firstCollection.name,
+                        overview: firstCollection.overview || `Coleção com ${firstCollection.movies?.length || 0} filmes`,
+                        backdrop: firstCollection.backdrop,
+                        poster: firstCollection.poster,
+                        backdrop_path: null
+                      }
+                    })
+                    console.log('[CategoryBar] Estado atualizado com heroBackdrop da primeira coleção')
+                  } else {
+                    console.log('[CategoryBar] ERRO: updateNetflixMoviesState não disponível')
+                  }
+                } else {
+                  console.log('[CategoryBar] ERRO: Não tem coleções disponíveis')
+                }
               },
               style: {
                 padding: '12px 20px',
@@ -2126,8 +2153,92 @@ header("Expires: 0");
             return e('div', {
               key: catId,
               onClick: () => {
+                console.log('[CategoryBar] Categoria clicada:', cat.category_name || cat.name)
                 setSelectedCat(cat)
                 setShowDropdown(false)
+
+                // Se estamos em Collections, atualizar hero/backdrop para primeira coleção da categoria
+                if (isCollectionsView && collections && collections.length > 0) {
+                  console.log('[CategoryBar] Está em Collections view, total de coleções:', collections.length)
+                  const selectedGenreId = getCatId(cat)
+                  console.log('[CategoryBar] Genre ID selecionado:', selectedGenreId)
+
+                  // Mapa de ID para nome do gênero em português e inglês
+                  const genreNames = {
+                    28: ['ação', 'action'],
+                    12: ['aventura', 'adventure'],
+                    16: ['animação', 'animation'],
+                    35: ['comédia', 'comedy'],
+                    80: ['crime'],
+                    99: ['documentário', 'documentary'],
+                    18: ['drama'],
+                    10751: ['família', 'family'],
+                    14: ['fantasia', 'fantasy'],
+                    36: ['história', 'history'],
+                    27: ['terror', 'horror'],
+                    10402: ['música', 'music'],
+                    9648: ['mistério', 'mystery'],
+                    10749: ['romance'],
+                    878: ['ficção científica', 'science fiction', 'sci-fi'],
+                    53: ['thriller'],
+                    10752: ['guerra', 'war'],
+                    37: ['faroeste', 'western']
+                  }
+
+                  console.log('[CategoryBar] Alternativas de gênero:', genreNames[selectedGenreId])
+
+                  const searchGenres = genreNames[selectedGenreId] || []
+
+                  // Filtrar coleções que têm esse gênero (verificar nos FILMES da coleção)
+                  const filteredCollections = collections.filter(collection => {
+                    // Verificar se algum filme da coleção tem o gênero no tmdb_genres (string)
+                    const hasGenre = collection.movies && collection.movies.some(movie => {
+                      if (movie.tmdb_genres) {
+                        const movieGenres = movie.tmdb_genres.toLowerCase()
+                        const match = searchGenres.some(genreName => movieGenres.includes(genreName))
+                        if (match) {
+                          console.log('[CategoryBar] Coleção encontrada:', collection.name, 'filme:', movie.name, 'gêneros:', movie.tmdb_genres)
+                        }
+                        return match
+                      }
+                      return false
+                    })
+
+                    return hasGenre
+                  })
+
+                  console.log('[CategoryBar] Coleções filtradas:', filteredCollections.length)
+
+                  // Se encontrou coleções com esse gênero, usar backdrop da primeira coleção
+                  if (filteredCollections.length > 0) {
+                    const firstCollection = filteredCollections[0]
+                    console.log('[CategoryBar] Primeira coleção:', firstCollection.name)
+                    console.log('[CategoryBar] Backdrop da coleção:', firstCollection.backdrop)
+                    console.log('[CategoryBar] Poster da coleção:', firstCollection.poster)
+
+                    if (window.updateNetflixMoviesState) {
+                      console.log('[CategoryBar] Atualizando heroBackdrop com a coleção')
+                      window.updateNetflixMoviesState({
+                        heroBackdrop: {
+                          name: firstCollection.name,
+                          overview: firstCollection.overview || `Coleção com ${firstCollection.movies?.length || 0} filmes`,
+                          backdrop: firstCollection.backdrop,
+                          poster: firstCollection.poster,
+                          backdrop_path: null // Já temos a URL completa em backdrop
+                        }
+                      })
+                      console.log('[CategoryBar] Estado atualizado com heroBackdrop da coleção')
+                    } else {
+                      console.log('[CategoryBar] ERRO: updateNetflixMoviesState não disponível')
+                    }
+                  } else {
+                    console.log('[CategoryBar] ERRO: Nenhuma coleção encontrada com esse gênero')
+                  }
+                } else {
+                  console.log('[CategoryBar] NÃO está em Collections view OU não tem coleções')
+                  console.log('[CategoryBar] isCollectionsView:', isCollectionsView)
+                  console.log('[CategoryBar] collections.length:', collections?.length)
+                }
               },
               style: {
                 padding: '12px 20px',
@@ -8626,10 +8737,12 @@ window.resetNetflixMovies = () => {
 
       // ===== NOVO: Setar heroBackdrop da primeira coleção quando abrir Coletâneas =====
       useEffect(() => {
-        // IMPORTANTE: Só setar backdrop se showCollectionsView for EXPLICITAMENTE true
+        // IMPORTANTE: Só setar backdrop inicial se NÃO houver backdrop já setado
         if (showCollectionsView === true && collections.length > 0 && !viewingCollectionMovies) {
           const firstCollection = collections[0]
-          if (firstCollection && window.updateNetflixMoviesState) {
+          // Só setar se NÃO houver backdrop (primeira vez que abre Collections)
+          if (firstCollection && window.updateNetflixMoviesState && !globalState.heroBackdrop) {
+            console.log('[NetflixMovies] Setando backdrop inicial da primeira coleção:', firstCollection.name)
             window.updateNetflixMoviesState({
               heroBackdrop: {
                 name: firstCollection.name,
@@ -10594,7 +10707,9 @@ window.resetNetflixMovies = () => {
         },
           // Featured Movie (fundo completo) ou Hero Backdrop (coleções)
           (() => {
+            console.log('[NetflixMovies] Renderizando hero, heroBackdrop:', globalState.heroBackdrop?.name, 'backdrop:', globalState.heroBackdrop?.backdrop)
             return (globalState.heroBackdrop && !viewingCollectionMovies) ? e('div', {
+              key: globalState.heroBackdrop.backdrop || globalState.heroBackdrop.name, // Force re-render quando backdrop mudar
               style: {
                 position: 'absolute',
                 top: 0,
@@ -13055,6 +13170,9 @@ window.resetNetflixMovies = () => {
       view === 'collections'
     )
 
+    // Obter collections do estado global
+    const collections = window.__netflixMoviesState?.collections || []
+
     return e('div', { className: 'app-container' },
       // Header global Netflix-style (substitui sidebar)
       showHeader && e(Header, { view, setView, globalSearchQuery, setGlobalSearchQuery, onLogout, account, setShowParentalPin, setPendingAdultView }),
@@ -13071,7 +13189,7 @@ window.resetNetflixMovies = () => {
       }),
 
       // Barra de categorias de filmes e séries
-      showCategoryBar && e(CategoryBar, { vodCats, seriesCats, view, setView, selectedCat, setSelectedCat }),
+      showCategoryBar && e(CategoryBar, { vodCats, seriesCats, view, setView, selectedCat, setSelectedCat, collections }),
 
       e('div', {
         className: 'main-content',
