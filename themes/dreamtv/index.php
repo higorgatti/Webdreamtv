@@ -2097,19 +2097,14 @@ header("Expires: 0");
             e('div', {
               key: 'all',
               onClick: () => {
-                console.log('[CategoryBar] TODAS clicada')
                 setSelectedCat(null)
                 setShowDropdown(false)
 
                 // Ao selecionar "TODAS", mostrar backdrop da primeira coleção disponível
                 if (collections && collections.length > 0) {
-                  console.log('[CategoryBar] Total de coleções:', collections.length)
                   const firstCollection = collections[0]
-                  console.log('[CategoryBar] Primeira coleção:', firstCollection.name)
-                  console.log('[CategoryBar] Backdrop da coleção:', firstCollection.backdrop)
 
                   if (window.updateNetflixMoviesState) {
-                    console.log('[CategoryBar] Atualizando heroBackdrop com a primeira coleção')
                     window.updateNetflixMoviesState({
                       heroBackdrop: {
                         name: firstCollection.name,
@@ -2119,12 +2114,7 @@ header("Expires: 0");
                         backdrop_path: null
                       }
                     })
-                    console.log('[CategoryBar] Estado atualizado com heroBackdrop da primeira coleção')
-                  } else {
-                    console.log('[CategoryBar] ERRO: updateNetflixMoviesState não disponível')
                   }
-                } else {
-                  console.log('[CategoryBar] ERRO: Não tem coleções disponíveis')
                 }
               },
               style: {
@@ -2153,15 +2143,12 @@ header("Expires: 0");
             return e('div', {
               key: catId,
               onClick: () => {
-                console.log('[CategoryBar] Categoria clicada:', cat.category_name || cat.name)
                 setSelectedCat(cat)
                 setShowDropdown(false)
 
                 // Se estamos em Collections, atualizar hero/backdrop para primeira coleção da categoria
                 if (isCollectionsView && collections && collections.length > 0) {
-                  console.log('[CategoryBar] Está em Collections view, total de coleções:', collections.length)
                   const selectedGenreId = getCatId(cat)
-                  console.log('[CategoryBar] Genre ID selecionado:', selectedGenreId)
 
                   // Mapa de ID para nome do gênero em português e inglês
                   const genreNames = {
@@ -2185,8 +2172,6 @@ header("Expires: 0");
                     37: ['faroeste', 'western']
                   }
 
-                  console.log('[CategoryBar] Alternativas de gênero:', genreNames[selectedGenreId])
-
                   const searchGenres = genreNames[selectedGenreId] || []
 
                   // Filtrar coleções que têm esse gênero (verificar nos FILMES da coleção)
@@ -2195,11 +2180,7 @@ header("Expires: 0");
                     const hasGenre = collection.movies && collection.movies.some(movie => {
                       if (movie.tmdb_genres) {
                         const movieGenres = movie.tmdb_genres.toLowerCase()
-                        const match = searchGenres.some(genreName => movieGenres.includes(genreName))
-                        if (match) {
-                          console.log('[CategoryBar] Coleção encontrada:', collection.name, 'filme:', movie.name, 'gêneros:', movie.tmdb_genres)
-                        }
-                        return match
+                        return searchGenres.some(genreName => movieGenres.includes(genreName))
                       }
                       return false
                     })
@@ -2207,37 +2188,22 @@ header("Expires: 0");
                     return hasGenre
                   })
 
-                  console.log('[CategoryBar] Coleções filtradas:', filteredCollections.length)
-
                   // Se encontrou coleções com esse gênero, usar backdrop da primeira coleção
                   if (filteredCollections.length > 0) {
                     const firstCollection = filteredCollections[0]
-                    console.log('[CategoryBar] Primeira coleção:', firstCollection.name)
-                    console.log('[CategoryBar] Backdrop da coleção:', firstCollection.backdrop)
-                    console.log('[CategoryBar] Poster da coleção:', firstCollection.poster)
 
                     if (window.updateNetflixMoviesState) {
-                      console.log('[CategoryBar] Atualizando heroBackdrop com a coleção')
                       window.updateNetflixMoviesState({
                         heroBackdrop: {
                           name: firstCollection.name,
                           overview: firstCollection.overview || `Coleção com ${firstCollection.movies?.length || 0} filmes`,
                           backdrop: firstCollection.backdrop,
                           poster: firstCollection.poster,
-                          backdrop_path: null // Já temos a URL completa em backdrop
+                          backdrop_path: null
                         }
                       })
-                      console.log('[CategoryBar] Estado atualizado com heroBackdrop da coleção')
-                    } else {
-                      console.log('[CategoryBar] ERRO: updateNetflixMoviesState não disponível')
                     }
-                  } else {
-                    console.log('[CategoryBar] ERRO: Nenhuma coleção encontrada com esse gênero')
                   }
-                } else {
-                  console.log('[CategoryBar] NÃO está em Collections view OU não tem coleções')
-                  console.log('[CategoryBar] isCollectionsView:', isCollectionsView)
-                  console.log('[CategoryBar] collections.length:', collections?.length)
                 }
               },
               style: {
@@ -4132,7 +4098,6 @@ header("Expires: 0");
       // Salvar a view atual como previousView ANTES de ir para o player
       if(newView === 'player' && view !== 'player') {
         setPreviousView(view)
-        console.log('[setView] Salvando previousView:', view, '-> indo para player')
       }
       setViewRaw(newView)
     }
@@ -5490,11 +5455,8 @@ header("Expires: 0");
 
     // ===== TV AO VIVO =====
     async function openLiveCategory(cat, switchLeft = true){
-      console.log('[CATEGORIA] 📂 Abrindo categoria:', cat?.category_name, 'switchLeft:', switchLeft, 'liveLeftMode:', liveLeftMode)
-
       // ⚠️ BLOQUEIO TOTAL: Se já está na mesma categoria com canal tocando, não fazer NADA
       if(selectedLiveCat && getCatId(selectedLiveCat) === getCatId(cat) && selectedChannel) {
-        console.log('[CATEGORIA] ⏹️ Mesma categoria já selecionada com canal tocando - IGNORANDO totalmente')
         // Apenas mudar o modo para channels se necessário
         if(switchLeft && liveLeftMode !== 'channels') setLiveLeftMode('channels')
         return
@@ -5505,13 +5467,10 @@ header("Expires: 0");
         setSelectedLiveCat(cat)
         const catId = getCatId(cat)
         if(!catId){
-          console.log('[CATEGORIA] ⚠️ Categoria sem ID - limpando estado')
           setLiveStreams([]); setSelectedChannel(null); setEpg([]); return
         }
-        console.log('[CATEGORIA] 📡 Buscando canais da categoria ID:', catId)
         const data = await apiCall('get_live_streams', { category_id: catId })
         const fullList = toArray(data)
-        console.log('[CATEGORIA] 📊 Total de canais recebidos:', fullList.length)
 
         // Agrupar e pegar apenas canais únicos para exibir no menu
         // ✅ getUniqueChannels agora detecta tv_archive=1 de QUALQUER variante
@@ -5523,8 +5482,6 @@ header("Expires: 0");
           hasPlayback: ch.tv_archive === 1 || ch.tv_archive === "1"
         }))
 
-        console.log('[CATEGORIA] 📋 Canais únicos após agrupamento:', uniqueListWithPlayback.length)
-
         setLiveStreams(uniqueListWithPlayback)
 
         if(uniqueListWithPlayback.length>0){
@@ -5533,19 +5490,14 @@ header("Expires: 0");
             ch => (ch.stream_id || ch.id) === (selectedChannel.stream_id || selectedChannel.id)
           )
 
-          console.log('[CATEGORIA] 🔍 Canal atual existe na categoria?', currentChannelStillExists, 'Canal:', selectedChannel?.baseName)
-
           // ⚠️ Se o canal atual existe na categoria, SEMPRE manter ele (não importa o liveLeftMode)
           if(currentChannelStillExists) {
-            console.log('[CATEGORIA] ✅ Canal atual existe nesta categoria - mantendo sem recarregar player')
             // Não fazer nada - manter canal atual e não recarregar player
             // Apenas atualizar a lista de canais e modo
             if(switchLeft) setLiveLeftMode('channels')
             setLoading(false)
             return
           }
-
-          console.log('[CATEGORIA] 🔄 Selecionando primeiro canal da categoria')
 
           const firstChannel = uniqueListWithPlayback[0] // Usar lista COM hasPlayback
           const baseName = firstChannel.baseName
@@ -5717,14 +5669,12 @@ function Home(){
     const fetchTopContent = async () => {
       try {
         const tmdbKey = '7e61dfdf698b31e14082e80a0ca9f9fa'
-        console.log('[Top10] Iniciando busca de filmes e séries...')
 
         // Buscar filmes populares
         const moviesRes = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${tmdbKey}&language=pt-BR&page=1`)
         const moviesData = await moviesRes.json()
         // Filtrar apenas filmes que têm poster
         const moviesWithPosters = moviesData.results.filter(m => m.poster_path)
-        console.log('[Top10] Filmes com poster:', moviesWithPosters.length, 'primeiro:', moviesWithPosters[0]?.title)
         setTopMovies(moviesWithPosters.slice(0, 10))
 
         // Buscar séries populares
@@ -5732,12 +5682,10 @@ function Home(){
         const seriesData = await seriesRes.json()
         // Filtrar apenas séries que têm poster
         const seriesWithPosters = seriesData.results.filter(s => s.poster_path)
-        console.log('[Top10] Séries com poster:', seriesWithPosters.length, 'primeira:', seriesWithPosters[0]?.name)
         setTopSeries(seriesWithPosters.slice(0, 10))
 
         setLoading(false)
       } catch(err) {
-        console.error('[Top10] Erro ao buscar:', err)
         setLoading(false)
       }
     }
@@ -5854,11 +5802,7 @@ function Home(){
                     backgroundColor: '#2a2a2a'
                   },
                   onError: (e) => {
-                    console.error('[Top10] Erro ao carregar imagem:', movie.title, movie.poster_path)
                     e.target.src = 'https://via.placeholder.com/200x300/333/fff?text=Erro+Imagem'
-                  },
-                  onLoad: (e) => {
-                    if(index === 0) console.log('[Top10] Primeira imagem carregou:', movie.title)
                   },
                   onMouseEnter: (e) => e.target.style.transform = 'scale(1.05)',
                   onMouseLeave: (e) => e.target.style.transform = 'scale(1)'
@@ -6485,14 +6429,10 @@ function Home(){
                       key:catId||cat.category_name,
                       id: 'cat-' + catId,
                       onClick:()=>{
-                        console.log('[CATEGORIA-CLICK] 📂 Categoria clicada:', cat.category_name, 'isSelected:', isSelected, 'liveLeftMode:', liveLeftMode, 'selectedChannel:', selectedChannel?.baseName)
-
                         // ⚠️ BLOQUEIO TOTAL: Se já está na mesma categoria com canal tocando, não fazer NADA
                         if(isSelected && selectedChannel) {
-                          console.log('[CATEGORIA-CLICK] ⏹️ Categoria já selecionada com canal tocando - BLOQUEIO TOTAL (não chamar openLiveCategory)')
                           // Apenas trocar o modo se necessário, SEM chamar openLiveCategory
                           if(liveLeftMode !== 'channels') {
-                            console.log('[CATEGORIA-CLICK] 🔄 Mudando apenas o modo para channels')
                             setLiveLeftMode('channels')
                           }
                           return
@@ -6542,11 +6482,8 @@ function Home(){
                     const isSel = selectedChannel && selectedChannel.listItemId && itemId && (selectedChannel.listItemId === itemId)
 
                     const handleChannelClick = async ()=>{
-                      console.log('[CANAL-CLICK] 🎯 Canal clicado:', item.baseName || item.name, 'ID:', item.stream_id || item.id)
-
                       // ⚠️ Se clicar no canal que já está tocando, não fazer nada
                       if(isSel && selectedChannel && (selectedChannel.stream_id || selectedChannel.id) === (item.stream_id || item.id)){
-                        console.log('[CANAL-CLICK] ⏹️ Canal já está selecionado - ignorando clique')
                         return
                       }
 
@@ -7115,53 +7052,36 @@ function Home(){
       useEffect(()=>{
         const v = vref.current
         if(!v) {
-          console.log('[PLAYER] ⚠️ Video ref não encontrado')
           return
         }
-
-        console.log('[PLAYER] 🎬 useEffect disparado - Canal:', channel?.baseName || channel?.name, 'ID:', channel?.stream_id || channel?.id)
 
         // ⚠️ Verificar se é o mesmo canal que já está carregado
         const currentChannelId = channel?.stream_id || channel?.id
         const currentPlaybackUrl = channel?.playback_url || null
 
         if(channel && lastLoadedChannel.id === currentChannelId && lastLoadedChannel.playback_url === currentPlaybackUrl) {
-          console.log('[PLAYER] ⏹️ Mesmo canal já carregado - IGNORANDO reload (ID:', currentChannelId, ')')
-          console.log('[PLAYER] 🔍 Estado do vídeo - paused:', v.paused, 'readyState:', v.readyState, 'currentTime:', v.currentTime)
-          console.log('[PLAYER] 🔍 hlsRef.current existe?', !!hlsRef.current, '| globalHlsInstance existe?', !!globalHlsInstance)
-
           // Restaurar hlsRef da variável global se necessário
           if(!hlsRef.current && globalHlsInstance) {
-            console.log('[PLAYER] 🔄 Restaurando hlsRef da variável global')
             hlsRef.current = globalHlsInstance
           }
 
           // ⚠️ Se o vídeo está sem dados (readyState: 0), significa que o elemento foi recriado
           // Precisamos reconectar o HLS ao novo elemento
           if(hlsRef.current && v.readyState === 0) {
-            console.log('[PLAYER] 🔌 Elemento de vídeo foi recriado - reconectando HLS global')
             try {
               hlsRef.current.attachMedia(v)
-              console.log('[PLAYER] ✅ HLS reconectado - aguardando play')
               // Aguardar um pouco para o HLS reconectar antes de dar play
               setTimeout(() => {
-                v.play().catch(err => console.log('[PLAYER] ❌ Erro ao play após reconexão:', err.message))
+                v.play().catch(err => {})
               }, 100)
-            } catch(err) {
-              console.log('[PLAYER] ❌ Erro ao reconectar HLS:', err.message)
-            }
+            } catch(err) {}
           } else if(v.paused && hlsRef.current) {
             // Vídeo apenas pausado, retomar play
-            console.log('[PLAYER] ▶️ Vídeo estava pausado - retomando play')
-            v.play().catch(err => console.log('[PLAYER] ❌ Erro ao retomar:', err.message))
-          } else {
-            console.log('[PLAYER] ⚠️ hlsRef.current é null e globalHlsInstance também - não é possível reconectar')
+            v.play().catch(err => {})
           }
 
           return
         }
-
-        console.log('[PLAYER] 🔄 Canal diferente detectado - prosseguindo com carregamento')
 
         // Flag para evitar race conditions
         let cancelled = false
@@ -7169,13 +7089,11 @@ function Home(){
 
         // Cleanup anterior
         if(hlsRef.current){
-          console.log('[PLAYER] 🧹 Destruindo HLS anterior')
           try{ hlsRef.current.destroy() }catch{}
           hlsRef.current = null
         }
 
         if(!channel){
-          console.log('[PLAYER] ⛔ Sem canal selecionado - limpando player')
           v.removeAttribute('src'); v.load()
           retryCountRef.current = 0
           lastLoadedChannel = { id: null, playback_url: null }
@@ -7187,18 +7105,13 @@ function Home(){
         loadTimeout = setTimeout(()=>{
           if(cancelled) return
 
-          console.log('[PLAYER] ⏱️ Debounce completo - iniciando carregamento')
-
           // Usar playback_url se disponível (modo playback de programa gravado)
           const url = channel.playback_url || buildURL(cfg.server, ['live', cfg.username, cfg.password, (channel.stream_id||channel.id)+'.m3u8'])
-
-          console.log('[PLAYER] 🔗 URL construída:', url.substring(0, 100) + '...')
 
           const canNative = v.canPlayType('application/vnd.apple.mpegURL')
 
           // FORÇAR uso do HLS.js sempre que disponível (melhor compatibilidade)
           if(window.Hls && window.Hls.isSupported()){
-            console.log('[PLAYER] 🎥 Inicializando HLS.js')
             // ⚡ Configuração otimizada para início RÁPIDO
             const h = new Hls({
               maxBufferLength: 10,        // Reduzido: 30s → 10s (inicia 3x mais rápido!)
@@ -7211,17 +7124,13 @@ function Home(){
             hlsRef.current = h
             // Salvar também na variável global para sobreviver a re-renders
             globalHlsInstance = h
-            console.log('[PLAYER] 💾 HLS salvo em hlsRef e globalHlsInstance')
-            console.log('[PLAYER] 📥 Carregando fonte:', url.substring(0, 50))
             h.loadSource(url)
             h.attachMedia(v)
             h.on(window.Hls.Events.MANIFEST_PARSED, ()=>{
               if(cancelled) return
-              console.log('[PLAYER] ✅ Manifesto parseado com sucesso')
               retryCountRef.current = 0
               // Salvar canal como último carregado com sucesso
               lastLoadedChannel = { id: currentChannelId, playback_url: currentPlaybackUrl }
-              console.log('[PLAYER] 💾 Canal salvo como último carregado (ID:', currentChannelId, ')')
             })
             h.on(window.Hls.Events.ERROR, (event, data)=>{
               if(data.fatal && !cancelled){
@@ -7265,12 +7174,7 @@ function Home(){
           }
 
           if(!cancelled){
-            console.log('[PLAYER] ▶️ Iniciando play...')
-            v.play().then(()=>{
-              console.log('[PLAYER] ✅ Play iniciado com sucesso')
-            }).catch((err)=>{
-              console.log('[PLAYER] ❌ Erro ao iniciar play:', err.message)
-            })
+            v.play().then(()=>{}).catch((err)=>{})
           }
         }, 200) // Aguardar 200ms antes de iniciar
 
@@ -7284,11 +7188,9 @@ function Home(){
           const currentUrl = channel?.playback_url || null
 
           if(currentId === lastLoadedChannel.id && currentUrl === lastLoadedChannel.playback_url) {
-            console.log('[PLAYER] 🧹 Cleanup - Mesmo canal, preservando globalHlsInstance')
             // Limpar apenas a ref local, manter global
             hlsRef.current = null
           } else {
-            console.log('[PLAYER] 🧹 Cleanup - Canal diferente, destruindo HLS')
             if(hlsRef.current){
               try{ hlsRef.current.destroy() }catch{}
               hlsRef.current = null
@@ -7316,7 +7218,6 @@ function Home(){
       }
 
       const switchQuality = (quality)=>{
-        console.log('[SWITCH-QUALITY] 🎚️ Mudando qualidade para:', quality, 'Fullscreen:', !!document.fullscreenElement)
         if(!channel || !channel.allVariants) return
 
         const variant = channel.allVariants.find(v => v.quality === quality)
@@ -7340,18 +7241,15 @@ function Home(){
         if(!v) return
 
         const url = buildURL(cfg.server, ['live', cfg.username, cfg.password, (variant.stream_id||variant.id)+'.m3u8'])
-        console.log('[SWITCH-QUALITY] 🔗 Nova URL:', url.substring(0, 100))
 
         // Atualizar resolução baseada na qualidade selecionada
         setVideoResolution(getResolutionFromQuality(quality))
 
         if(hlsRef.current){
           // Se já tem HLS rodando, apenas trocar a source
-          console.log('[SWITCH-QUALITY] 🔄 Trocando source no HLS existente')
           hlsRef.current.loadSource(url)
         }else{
           // Se for nativo, trocar o src
-          console.log('[SWITCH-QUALITY] 🔄 Trocando src nativo')
           v.src = url
           v.play().catch(()=>{})
         }
@@ -7365,7 +7263,6 @@ function Home(){
         // ✅ Atualizar selectedChannel APENAS quando não estiver em fullscreen
         // Isso evita que o DOM seja alterado durante fullscreen
         if(!document.fullscreenElement) {
-          console.log('[SWITCH-QUALITY] ✅ Não está em fullscreen - atualizando selectedChannel')
           setSelectedChannel({
             ...channel,
             ...variant, // Substituir com dados da nova variante
@@ -7378,7 +7275,6 @@ function Home(){
             playback_program: channel.playback_program
           })
         } else {
-          console.log('[SWITCH-QUALITY] ⏸️ Em fullscreen - armazenando mudança pendente para aplicar ao sair')
           // Armazenar variante para aplicar quando sair do fullscreen
           pendingQualityChangeRef.current = {
             ...channel,
@@ -7433,12 +7329,10 @@ function Home(){
             document.mozFullScreenElement ||
             document.msFullscreenElement
           )
-          console.log('[FULLSCREEN] 📺 Mudança detectada - isFullscreen:', isFS)
           setIsFullscreen(isFS)
 
           // ✅ Se saiu do fullscreen E há mudança de qualidade pendente, aplicar agora
           if(!isFS && pendingQualityChangeRef.current) {
-            console.log('[FULLSCREEN] 🔄 Saiu do fullscreen - aplicando mudança de qualidade pendente')
             setSelectedChannel(pendingQualityChangeRef.current)
             pendingQualityChangeRef.current = null // Limpar pendência
           }
@@ -8625,7 +8519,6 @@ window.resetNetflixMovies = () => {
 
       // Função para construir coleções dinamicamente a partir dos filmes carregados
       const loadCollections = async () => {
-        console.log('[loadCollections] INICIANDO...')
         setLoadingCollections(true)
 
         try {
@@ -8637,20 +8530,14 @@ window.resetNetflixMovies = () => {
             }
           }
 
-          console.log('[loadCollections] Total de filmes:', allMovies.length)
-
           // Usar a função global findCollectionsInMovies
           const foundCollections = await findCollectionsInMovies(allMovies)
 
-          console.log('[loadCollections] Coleções encontradas:', foundCollections.length)
-
           setCollections(foundCollections)
         } catch(err) {
-          console.error('[loadCollections] ERRO:', err)
           setCollections([])
         } finally {
           setLoadingCollections(false)
-          console.log('[loadCollections] FINALIZADO')
         }
       }
 
@@ -8739,7 +8626,6 @@ window.resetNetflixMovies = () => {
           const firstCollection = collections[0]
           // Só setar se NÃO houver backdrop (primeira vez que abre Collections)
           if (firstCollection && window.updateNetflixMoviesState && !globalState.heroBackdrop) {
-            console.log('[NetflixMovies] Setando backdrop inicial da primeira coleção:', firstCollection.name)
             window.updateNetflixMoviesState({
               heroBackdrop: {
                 name: firstCollection.name,
@@ -10704,7 +10590,6 @@ window.resetNetflixMovies = () => {
         },
           // Featured Movie (fundo completo) ou Hero Backdrop (coleções)
           (() => {
-            console.log('[NetflixMovies] Renderizando hero, heroBackdrop:', globalState.heroBackdrop?.name, 'backdrop:', globalState.heroBackdrop?.backdrop)
             return (globalState.heroBackdrop && !viewingCollectionMovies) ? e('div', {
               key: globalState.heroBackdrop.backdrop || globalState.heroBackdrop.name, // Force re-render quando backdrop mudar
               style: {
@@ -11275,22 +11160,15 @@ window.resetNetflixMovies = () => {
         const timeoutId = setTimeout(async () => {
           const query = searchQuery.toLowerCase().trim()
 
-          console.log('[SearchResults] ========================================')
-          console.log('[SearchResults] 🚀 BUSCA PROGRESSIVA iniciada para:', query)
-          console.log('[SearchResults] VOD Categories:', vodCats.length)
-          console.log('[SearchResults] Series Categories:', seriesCats.length)
-
           // Buscar em todas as categorias de VOD (progressivo)
           let vodProcessed = 0
           for (const cat of vodCats) {
             const catId = getCatId(cat)
             if (!catId) {
-              console.log('[SearchResults] ⚠️ Categoria VOD sem ID:', cat)
               continue
             }
 
             vodProcessed++
-            console.log(`[SearchResults] 🎬 Buscando VOD categoria ${vodProcessed}/${vodCats.length}: ${cat.category_name || cat.name}`)
 
             try {
               const url = buildURL(cfg.server, ['player_api.php']) + '?' + new URLSearchParams({
@@ -11316,28 +11194,21 @@ window.resetNetflixMovies = () => {
 
               // 🎯 ATUALIZAR RESULTADOS IMEDIATAMENTE quando encontrar algo
               if (filtered.length > 0) {
-                console.log(`[SearchResults] ⚡ ${filtered.length} filmes encontrados! Atualizando UI...`)
                 setResults(prev => [...prev, ...filtered].slice(0, 20)) // Limitar a 20
               }
 
               // Parar se já tiver 20 resultados
               if (filtered.length >= 20) {
-                console.log('[SearchResults] 🛑 20 resultados atingidos, parando VOD')
                 break
               }
             } catch (err) {
-              console.error('[SearchResults] ❌ Erro categoria VOD:', catId)
             }
           }
-
-          console.log('[SearchResults] 📺 Iniciando busca em SÉRIES...')
 
           // Buscar em todas as categorias de Séries
           for (const cat of seriesCats) {
             const catId = getCatId(cat)
             if (!catId) continue
-
-            console.log(`[SearchResults] 📺 Buscando série: ${cat.category_name || cat.name}`)
 
             try {
               const url = buildURL(cfg.server, ['player_api.php']) + '?' + new URLSearchParams({
@@ -11363,22 +11234,18 @@ window.resetNetflixMovies = () => {
 
               // 🎯 ATUALIZAR RESULTADOS IMEDIATAMENTE quando encontrar algo
               if (filtered.length > 0) {
-                console.log(`[SearchResults] ⚡ ${filtered.length} séries encontradas! Atualizando UI...`)
                 setResults(prev => [...prev, ...filtered].slice(0, 20)) // Limitar a 20
               }
 
               // Parar se já tiver 20 resultados no total
               const currentTotal = document.querySelectorAll('[data-search-result]').length
               if (currentTotal >= 20) {
-                console.log('[SearchResults] 🛑 20 resultados atingidos, parando Séries')
                 break
               }
             } catch (err) {
-              console.error('[SearchResults] ❌ Erro categoria Série:', catId)
             }
           }
 
-          console.log('[SearchResults] ✅ Busca progressiva concluída!')
           setLoading(false)
         }, 300)
 
@@ -12741,7 +12608,6 @@ window.resetNetflixMovies = () => {
 
             // Voltar para a view de onde veio (ou netflix-movies como fallback)
             const targetView = previousView || 'netflix-movies'
-            console.log('[PLAYER] ESC pressionado - voltando para:', targetView)
             setView(targetView)
           }
         }
@@ -12843,7 +12709,6 @@ window.resetNetflixMovies = () => {
           e('button', {
             onClick:()=>{
               const targetView = previousView || 'netflix-movies'
-              console.log('[PLAYER] Botão voltar clicado - voltando para:', targetView)
               setView(targetView)
             },
             className:'text-white hover:text-purple-400 flex items-center gap-2'
