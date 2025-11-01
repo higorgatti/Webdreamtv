@@ -6991,6 +6991,7 @@ function Home(){
       const [currentTime, setCurrentTime] = useState('')
       const [selectedQuality, setSelectedQuality] = useState(null)
       const currentQualityRef = useRef(null) // Ref para não causar re-render ao trocar qualidade
+      const pendingQualityChangeRef = useRef(null) // Ref para armazenar mudança de qualidade pendente durante fullscreen
       const [isFullscreen, setIsFullscreen] = useState(false)
       const [videoResolution, setVideoResolution] = useState('1920×1080')
       const hideTimeoutRef = useRef(null)
@@ -7315,6 +7316,7 @@ function Home(){
       }
 
       const switchQuality = (quality)=>{
+        console.log('[SWITCH-QUALITY] 🎚️ Mudando qualidade para:', quality, 'Fullscreen:', !!document.fullscreenElement)
         if(!channel || !channel.allVariants) return
 
         const variant = channel.allVariants.find(v => v.quality === quality)
@@ -7329,33 +7331,27 @@ function Home(){
           }catch{}
         }
 
-        // ✅ Atualizar selectedChannel com tv_archive da nova variante
-        setSelectedChannel({
-          ...channel,
-          ...variant, // Substituir com dados da nova variante
-          baseName: channel.baseName,
-          allVariants: channel.allVariants,
-          quality: variant.quality,
-          tv_archive: variant.tv_archive || 0, // Usar tv_archive da variante
-          playback_url: channel.playback_url, // Manter playback se estiver ativo
-          playback_mode: channel.playback_mode,
-          playback_program: channel.playback_program
-        })
+        // ⚠️ CRÍTICO: NÃO atualizar selectedChannel aqui para não sair do fullscreen!
+        // O player troca a URL diretamente via HLS, não precisa re-render do pai
+        // A atualização do state é feita apenas quando o usuário SAI do fullscreen
 
         // Trocar a URL diretamente no HLS sem recriar o player (mantém fullscreen)
         const v = vref.current
         if(!v) return
 
         const url = buildURL(cfg.server, ['live', cfg.username, cfg.password, (variant.stream_id||variant.id)+'.m3u8'])
+        console.log('[SWITCH-QUALITY] 🔗 Nova URL:', url.substring(0, 100))
 
         // Atualizar resolução baseada na qualidade selecionada
         setVideoResolution(getResolutionFromQuality(quality))
 
         if(hlsRef.current){
           // Se já tem HLS rodando, apenas trocar a source
+          console.log('[SWITCH-QUALITY] 🔄 Trocando source no HLS existente')
           hlsRef.current.loadSource(url)
         }else{
           // Se for nativo, trocar o src
+          console.log('[SWITCH-QUALITY] 🔄 Trocando src nativo')
           v.src = url
           v.play().catch(()=>{})
         }
@@ -7365,6 +7361,37 @@ function Home(){
 
         // Forçar re-render apenas dos botões (sem reconstruir o player container)
         setTimeout(()=> setSelectedQuality(quality), 100)
+
+        // ✅ Atualizar selectedChannel APENAS quando não estiver em fullscreen
+        // Isso evita que o DOM seja alterado durante fullscreen
+        if(!document.fullscreenElement) {
+          console.log('[SWITCH-QUALITY] ✅ Não está em fullscreen - atualizando selectedChannel')
+          setSelectedChannel({
+            ...channel,
+            ...variant, // Substituir com dados da nova variante
+            baseName: channel.baseName,
+            allVariants: channel.allVariants,
+            quality: variant.quality,
+            tv_archive: variant.tv_archive || 0, // Usar tv_archive da variante
+            playback_url: channel.playback_url, // Manter playback se estiver ativo
+            playback_mode: channel.playback_mode,
+            playback_program: channel.playback_program
+          })
+        } else {
+          console.log('[SWITCH-QUALITY] ⏸️ Em fullscreen - armazenando mudança pendente para aplicar ao sair')
+          // Armazenar variante para aplicar quando sair do fullscreen
+          pendingQualityChangeRef.current = {
+            ...channel,
+            ...variant,
+            baseName: channel.baseName,
+            allVariants: channel.allVariants,
+            quality: variant.quality,
+            tv_archive: variant.tv_archive || 0,
+            playback_url: channel.playback_url,
+            playback_mode: channel.playback_mode,
+            playback_program: channel.playback_program
+          }
+        }
       }
 
       const showToast = (message)=>{
@@ -7406,7 +7433,15 @@ function Home(){
             document.mozFullScreenElement ||
             document.msFullscreenElement
           )
+          console.log('[FULLSCREEN] 📺 Mudança detectada - isFullscreen:', isFS)
           setIsFullscreen(isFS)
+
+          // ✅ Se saiu do fullscreen E há mudança de qualidade pendente, aplicar agora
+          if(!isFS && pendingQualityChangeRef.current) {
+            console.log('[FULLSCREEN] 🔄 Saiu do fullscreen - aplicando mudança de qualidade pendente')
+            setSelectedChannel(pendingQualityChangeRef.current)
+            pendingQualityChangeRef.current = null // Limpar pendência
+          }
         }
 
         document.addEventListener('fullscreenchange', handleFullscreen)
