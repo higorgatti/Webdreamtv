@@ -8004,27 +8004,6 @@ function Home(){
                 }, quality)
               ),
 
-              // Botão Original (AUTO)
-              e('button', {
-                onClick: () => {
-                  if(hlsRef.current) {
-                    hlsRef.current.currentLevel = -1
-                    setSelectedQuality(null)
-                  }
-                },
-                style: {
-                  background: !selectedQuality ? '#22C55E' : 'rgba(255,255,255,0.15)',
-                  color: !selectedQuality ? '#0B1020' : '#FFFFFF',
-                  border: !selectedQuality ? '2px solid #34D399' : '1px solid rgba(255,255,255,0.2)',
-                  padding: 'clamp(6px,0.8vw,8px) clamp(10px,1.2vw,14px)',
-                  borderRadius: '9999px',
-                  fontSize: 'clamp(12px,1.2vw,14px)',
-                  fontWeight: !selectedQuality ? '600' : '500',
-                  cursor: 'pointer',
-                  outline: 'none'
-                }
-              }, 'Original'),
-
               // Controle de Volume
               e('div', {
                 style: {
