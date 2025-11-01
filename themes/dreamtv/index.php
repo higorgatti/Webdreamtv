@@ -7984,23 +7984,6 @@ function Home(){
                 }
               }, isFavorite ? '★' : '☆'),
 
-              // EPG/Info (📋)
-              e('button', {
-                onClick: () => {},
-                style: {
-                  background: 'rgba(255,255,255,0.15)',
-                  color: '#FFFFFF',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  padding: 'clamp(6px,0.8vw,8px) clamp(10px,1.2vw,14px)',
-                  borderRadius: '9999px',
-                  fontSize: 'clamp(14px,1.4vw,16px)',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  outline: 'none',
-                  transition: 'all 0.2s'
-                }
-              }, '📋'),
-
               // Chips de qualidade (FHD, FHD², HD, HD², SD, SD²)
               availableQualities.length > 0 && availableQualities.map(quality =>
                 e('button', {
