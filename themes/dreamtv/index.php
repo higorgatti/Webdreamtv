@@ -1,4 +1,4 @@
-<!-- CACHE-BUST: 2025-11-02 18:20:00 -->
+<!-- CACHE-BUST: 2025-11-03 17:09:58 -->
 <?php
 // LIMPAR OPCACHE DO PHP COMPLETAMENTE
 if (function_exists('opcache_reset')) {
@@ -12898,35 +12898,35 @@ window.resetNetflixMovies = () => {
 
         // Bot�o Voltar
         e('button', {
-          onClick: () => setView('netflix-movies'),
+          onClick: () => setView('netflix-series'),
           style: {
             position: 'fixed',
             top: '100px',
             left: '20px',
             zIndex: 1000,
-            background: 'rgba(0, 0, 0, 0.7)',
+            background: '#141414',
             border: 'none',
             color: '#fff',
-            fontSize: '24px',
-            width: '50px',
-            height: '50px',
-            borderRadius: '50%',
+            fontSize: '16px',
+            padding: '12px 24px',
+            borderRadius: '8px',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            gap: '8px',
             transition: 'all 0.2s ease',
-            backdropFilter: 'blur(10px)'
+            fontWeight: '500'
           },
           onMouseEnter: (e) => {
-            e.target.style.background = 'rgba(244, 117, 33, 0.9)'
-            e.target.style.transform = 'scale(1.1)'
+            e.target.style.background = '#1a1a1a'
+            e.target.style.transform = 'scale(1.05)'
           },
           onMouseLeave: (e) => {
-            e.target.style.background = 'rgba(0, 0, 0, 0.7)'
+            e.target.style.background = '#141414'
             e.target.style.transform = 'scale(1)'
           }
-        }, '←'),
+        }, '← Voltar'),
 
         // Content
         e('div', { className: 'serie-detail-content' },
@@ -12983,7 +12983,7 @@ window.resetNetflixMovies = () => {
             className: 'serie-detail-btn serie-detail-btn-episodes',
             onClick: handleEpisodes
           },
-            '= Epis�dios e mais'
+            '📋 Episódios e mais'
           ),
 
           // Se��o Elenco
