@@ -1,4 +1,4 @@
-<!-- CACHE-BUST: 2025-11-03 14:39:38 -->
+<!-- CACHE-BUST: 2025-11-02 18:20:00 -->
 <?php
 // LIMPAR OPCACHE DO PHP COMPLETAMENTE
 if (function_exists('opcache_reset')) {
@@ -3785,7 +3785,7 @@ header("Expires: 0");
       if (view === 'home') setActiveMenu('home')
       else if (view === 'channels' || view === 'live-categories') setActiveMenu('channels')
       else if (view === 'netflix-movies' || view === 'vod-categories') setActiveMenu('movies')
-      else if (view === 'series-categories' || view === 'netflix-series') setActiveMenu('series')
+      else if (view === 'series-categories' || view === 'netflix-series' || view === 'serie-details' || view === 'episodes') setActiveMenu('series')
       else if (view === 'novelas-categories' || view === 'netflix-novelas') setActiveMenu('novelas')
       else if (view === 'animes-categories' || view === 'netflix-animes') setActiveMenu('animes')
       else if (view === 'desenhos-categories' || view === 'netflix-desenhos') setActiveMenu('desenhos')
