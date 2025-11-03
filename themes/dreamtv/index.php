@@ -1,4 +1,13 @@
-﻿<?php
+<!-- CACHE-BUST: 2025-11-03 14:39:38 -->
+<?php
+// LIMPAR OPCACHE DO PHP COMPLETAMENTE
+if (function_exists('opcache_reset')) {
+    opcache_reset();
+}
+if (function_exists('opcache_invalidate')) {
+    opcache_invalidate(__FILE__, true);
+}
+
 // Desabilitar TODO cache do PHP/Apache
 header("Cache-Control: no-cache, no-store, must-revalidate, max-age=0");
 header("Pragma: no-cache");
@@ -14,19 +23,23 @@ header("Expires: 0");
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <!-- VERSÃO: Favoritos v2.1 - CACHE BUSTED 2025-10-26 11:10:50 -->
+  <!-- VERSÃO: SÉRIE FIX v3.0 - CACHE BUSTED 2025-11-02 18:10:00 -->
   <script>
+    // FORÇAR RELOAD COMPLETO - VERSÃO 3.0
+    const VERSAO_CODIGO = '3.0.<?php echo time(); ?>';
+    console.log('🔄 VERSÃO DO CÓDIGO:', VERSAO_CODIGO);
+
     // Limpar cache ao carregar
   </script>
   <!-- React UMD -->
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <!-- Tailwind CSS instalado via NPM (ver tailwind.config.js) -->
-  <!-- Para produção, compile com: npx tailwindcss -i ./src/input.css -o ./dist/output.css -->
-  <!-- Mantendo CDN apenas para desenvolvimento rápido -->
+  <!-- Para produ��o, compile com: npx tailwindcss -i ./src/input.css -o ./dist/output.css -->
+  <!-- Mantendo CDN apenas para desenvolvimento r�pido -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Players de vídeo disponíveis -->
+  <!-- Players de v�deo dispon�veis -->
   <!-- HLS.js para m3u8 no Chrome/Firefox/Edge -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
 
@@ -78,13 +91,13 @@ header("Expires: 0");
       box-sizing: border-box;
     }
 
-    /* Container principal sempre limitado à viewport */
+    /* Container principal sempre limitado � viewport */
     #root, .star-bg {
       max-width: 100vw;
       overflow-x: hidden;
     }
 
-    /* Header agora está visível - CSS removido */
+    /* Header agora est� vis�vel - CSS removido */
 
     /* ===== LAYOUT COM SIDEBAR FIXA ===== */
     :root {
@@ -98,7 +111,7 @@ header("Expires: 0");
       overflow: hidden;
     }
 
-    /* Sidebar fixa à esquerda */
+    /* Sidebar fixa � esquerda */
     .sidebar {
       position: fixed;
       left: 0;
@@ -115,7 +128,7 @@ header("Expires: 0");
       border-right: 1px solid rgba(168, 85, 247, 0.1);
     }
 
-    /* Botões da sidebar */
+    /* Bot�es da sidebar */
     .sidebar-btn {
       position: relative;
       width: 50px;
@@ -218,7 +231,7 @@ header("Expires: 0");
       -webkit-user-select:none !important;
     }
 
-    /* Viewport wrapper - GRID para centralização robusta sem conflitos */
+    /* Viewport wrapper - GRID para centraliza��o robusta sem conflitos */
     .player-viewport{
       position:relative !important;
       width:100% !important;
@@ -267,7 +280,7 @@ header("Expires: 0");
       background:#000 !important;
     }
 
-    /* Viewport em fullscreen - mantém grid para centralizar */
+    /* Viewport em fullscreen - mant�m grid para centralizar */
     :fullscreen .player-viewport,
     :-webkit-full-screen .player-viewport,
     :-moz-full-screen .player-viewport,
@@ -282,7 +295,7 @@ header("Expires: 0");
       place-items:center !important;
     }
 
-    /* Overlay em FULLSCREEN - garantir que apareça sobre o vídeo */
+    /* Overlay em FULLSCREEN - garantir que apare�a sobre o v�deo */
     :fullscreen > .absolute,
     :-webkit-full-screen > .absolute,
     :-moz-full-screen > .absolute,
@@ -367,14 +380,14 @@ header("Expires: 0");
       position: relative;
     }
 
-    /* Ajustes para telas com sidebar - garantir que conteúdo não sobreponha */
+    /* Ajustes para telas com sidebar - garantir que conte�do n�o sobreponha */
     .main-with-sidebar .star-bg {
       min-height: 100vh;
       width: 100% !important;
       max-width: 100% !important;
     }
 
-    /* Forçar todos os containers dentro do main a respeitar a largura */
+    /* For�ar todos os containers dentro do main a respeitar a largura */
     .main-with-sidebar > * {
       max-width: 100% !important;
       box-sizing: border-box;
@@ -408,21 +421,21 @@ header("Expires: 0");
       cursor: none !important;
     }
 
-    /* Remover hover states em modo TV (não há mouse) */
+    /* Remover hover states em modo TV (n�o h� mouse) */
     body.tv-mode .card:hover,
     body.tv-mode .sidebar-btn:hover,
     body.tv-mode button:hover {
       transform: none !important;
     }
 
-    /* Focus visível para navegação por controle remoto */
+    /* Focus vis�vel para navega��o por controle remoto */
     body.tv-mode *:focus {
       outline: 4px solid #a855f7 !important;
       outline-offset: 4px;
       box-shadow: 0 0 20px rgba(168, 85, 247, 0.6) !important;
     }
 
-    /* Indicador de foco customizado para botões */
+    /* Indicador de foco customizado para bot�es */
     body.tv-mode button:focus,
     body.tv-mode [role="button"]:focus {
       background: rgba(168, 85, 247, 0.3) !important;
@@ -440,7 +453,7 @@ header("Expires: 0");
     body.tv-mode .text-3xl { font-size: 40px !important; }
     body.tv-mode .text-4xl { font-size: 48px !important; }
 
-    /* Espaçamento maior entre elementos clicáveis */
+    /* Espa�amento maior entre elementos clic�veis */
     body.tv-mode button,
     body.tv-mode [role="button"] {
       min-height: 60px !important;
@@ -449,7 +462,7 @@ header("Expires: 0");
       margin: 8px !important;
     }
 
-    /* Cards maiores e mais espaçados */
+    /* Cards maiores e mais espa�ados */
     body.tv-mode .netflix-card-hover {
       margin: 12px !important;
     }
@@ -480,7 +493,7 @@ header("Expires: 0");
       font-size: 18px !important;
     }
 
-    /* Indicador de navegação numérica (para digitação de canal) */
+    /* Indicador de navega��o num�rica (para digita��o de canal) */
     .tv-channel-input {
       position: fixed;
       top: 50%;
@@ -500,7 +513,7 @@ header("Expires: 0");
       min-width: 300px;
     }
 
-    /* Indicador de botão pressionado */
+    /* Indicador de bot�o pressionado */
     @keyframes button-press {
       0% { transform: scale(1); }
       50% { transform: scale(0.95); }
@@ -523,7 +536,7 @@ header("Expires: 0");
       height: 100% !important;
     }
 
-    /* ===== PÁGINA DE DETALHES DE SÉRIE ===== */
+    /* ===== P�GINA DE DETALHES DE S�RIE ===== */
     .serie-detail-page {
       position: relative;
       width: 100%;
@@ -803,7 +816,7 @@ header("Expires: 0");
       }
     }
 
-    /* Celulares médios */
+    /* Celulares m�dios */
     @media (max-width: 640px) {
       :root {
         --sidebar-w: 0px; /* Esconder sidebar em mobile */
@@ -818,7 +831,7 @@ header("Expires: 0");
         transform: translateX(0);
       }
 
-      /* Botão hamburger para abrir sidebar */
+      /* Bot�o hamburger para abrir sidebar */
       .mobile-menu-btn {
         display: block !important;
         position: fixed;
@@ -843,11 +856,11 @@ header("Expires: 0");
       /* Header mobile */
       header {
         padding: 0 10px !important;
-        padding-left: 55px !important; /* Espaço para o botão hamburger */
+        padding-left: 55px !important; /* Espa�o para o bot�o hamburger */
       }
 
       header nav {
-        display: none !important; /* Esconder navegação em mobile */
+        display: none !important; /* Esconder navega��o em mobile */
       }
 
       header input[type="text"] {
@@ -882,7 +895,7 @@ header("Expires: 0");
         font-size: 11px !important;
       }
 
-      /* Menu de perfil ocupa mais espaço */
+      /* Menu de perfil ocupa mais espa�o */
       header > div:last-child > div:last-child {
         width: calc(100vw - 30px) !important;
         right: -5px !important;
@@ -1024,7 +1037,7 @@ header("Expires: 0");
     window.__queueStats = () => ({ running, queued: queue.length, inflight: inflight.size, tokens });
   })();
 
-  // ===== lib/normalizeTitle.js - Normalização de títulos =====
+  // ===== lib/normalizeTitle.js - Normaliza��o de t�tulos =====
   window.prepareForTMDB = function(title) {
     if (!title) return { searchTitle: '', year: null, displayTitle: '', isLegendado: false, langType: 'dublado' };
 
@@ -1039,7 +1052,7 @@ header("Expires: 0");
       .replace(/\b(UHD|FHD|4K|1080p|720p|480p|2160p|HDR|TESTE4K|TESTE|10bit|8bit)\b/gi, '')
       .replace(/\s*\([^\)]*(?:RIP|WEB|BLU|DVD|CAM|HDTV)[^\)]*\)\s*/gi, ' ')
       .replace(/\s*-?\s*\d{4}\s*$/g, '')
-      .replace(/[–—:]/g, ' ')
+      .replace(/[��:]/g, ' ')
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .replace(/\s{2,}/g, ' ')
       .replace(/^[-\s]+|[-\s]+$/g, '')
@@ -1113,7 +1126,7 @@ header("Expires: 0");
   const e = React.createElement
   const { useState, useEffect, useMemo, useRef } = React
 
-  // ===== FORÇA LIMPEZA DE CACHE - Service Worker + Hard Reload =====
+  // ===== FOR�A LIMPEZA DE CACHE - Service Worker + Hard Reload =====
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then(registrations => {
       if(registrations.length > 0) {
@@ -1124,7 +1137,7 @@ header("Expires: 0");
     })
   }
 
-  // ===== LIMPAR CACHE TMDB ANTIGO (com títulos " - 2025") =====
+  // ===== LIMPAR CACHE TMDB ANTIGO (com t�tulos " - 2025") =====
   try {
     const oldCache = localStorage.getItem('tmdb_cache')
     if(oldCache) {
@@ -1149,7 +1162,7 @@ header("Expires: 0");
 
   // ===== SMART TV DETECTION & REMOTE CONTROL SUPPORT =====
 
-  // Detectar se está rodando em Smart TV
+  // Detectar se est� rodando em Smart TV
   const TVDetector = {
     isTV: false,
     platform: null,
@@ -1157,7 +1170,7 @@ header("Expires: 0");
     detect() {
       const ua = navigator.userAgent
 
-      // Detectar plataformas de TV APENAS por User Agent (mais confiável)
+      // Detectar plataformas de TV APENAS por User Agent (mais confi�vel)
       if (/webOS|Web0S/i.test(ua)) {
         this.isTV = true
         this.platform = 'LG webOS'
@@ -1181,8 +1194,8 @@ header("Expires: 0");
         this.platform = 'Chromecast'
       }
 
-      // NÃO detectar por resolução - computadores também têm 1080p/4K
-      // NÃO detectar por gamepad - gamers usam no PC
+      // N�O detectar por resolu��o - computadores tamb�m t�m 1080p/4K
+      // N�O detectar por gamepad - gamers usam no PC
 
       if (this.isTV) {
         const w = window.screen.width
@@ -1207,11 +1220,11 @@ header("Expires: 0");
     ARROW_LEFT: [37, 'ArrowLeft'],
     ARROW_RIGHT: [39, 'ArrowRight'],
 
-    // Ações
+    // A��es
     OK: [13, 'Enter'],
     BACK: [8, 27, 461, 10009, 'Backspace', 'Escape'], // 461=webOS back, 10009=Tizen back
 
-    // Números
+    // N�meros
     NUM_0: [48, 96, '0'],
     NUM_1: [49, 97, '1'],
     NUM_2: [50, 98, '2'],
@@ -1223,13 +1236,13 @@ header("Expires: 0");
     NUM_8: [56, 104, '8'],
     NUM_9: [57, 105, '9'],
 
-    // Botões coloridos (Smart TVs)
+    // Bot�es coloridos (Smart TVs)
     RED: [403, 'Red', 'ColorF0Red'],
     GREEN: [404, 'Green', 'ColorF1Green'],
     YELLOW: [405, 'Yellow', 'ColorF2Yellow'],
     BLUE: [406, 'Blue', 'ColorF3Blue'],
 
-    // Controle de mídia
+    // Controle de m�dia
     PLAY: [415, 'MediaPlayPause', 'Play'],
     PAUSE: [19, 'MediaPause', 'Pause'],
     STOP: [413, 'MediaStop', 'Stop'],
@@ -1241,13 +1254,13 @@ header("Expires: 0");
     MENU: [18, 'Menu'],
     GUIDE: [458, 'Guide'],
 
-    // Verifica se tecla/código corresponde a um comando
+    // Verifica se tecla/c�digo corresponde a um comando
     matches(keyMap, event) {
       return keyMap.includes(event.keyCode) || keyMap.includes(event.key) || keyMap.includes(event.code)
     }
   }
 
-  // Sistema de navegação por foco (para controle remoto)
+  // Sistema de navega��o por foco (para controle remoto)
   const FocusNavigator = {
     currentIndex: 0,
     items: [],
@@ -1263,12 +1276,12 @@ header("Expires: 0");
       const container = document.querySelector(this.containerSelector)
       if (!container) return
 
-      // Coletar todos os elementos focáveis
+      // Coletar todos os elementos foc�veis
       this.items = Array.from(container.querySelectorAll(
         'button:not([disabled]), [role="button"]:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
       ))
 
-      // Se há um item focado, atualizar o índice
+      // Se h� um item focado, atualizar o �ndice
       const focused = document.activeElement
       const index = this.items.indexOf(focused)
       if (index !== -1) {
@@ -1309,7 +1322,7 @@ header("Expires: 0");
     }
   }
 
-  // Executar detecção de TV
+  // Executar detec��o de TV
   const isSmartTV = TVDetector.detect()
 
   // Armazenar globalmente para acesso pelos componentes
@@ -1319,37 +1332,37 @@ header("Expires: 0");
   // ===== Netflix Category Mapping =====
   function mapApiCategoryToNetflix(categoryName){
     const name = (categoryName || '').toLowerCase()
-    if(/aç[aã]o|action/i.test(name)) return 'action'
-    if(/com[eé]dia|comedy/i.test(name)) return 'comedy'
+    if(/a�[a�]o|action/i.test(name)) return 'action'
+    if(/com[e�]dia|comedy/i.test(name)) return 'comedy'
     if(/drama/i.test(name)) return 'drama'
     if(/terror|horror/i.test(name)) return 'horror'
-    if(/fic[çc][aã]o|sci-?fi|fantasy|fantasia/i.test(name)) return 'scifi'
+    if(/fic[�c][a�]o|sci-?fi|fantasy|fantasia/i.test(name)) return 'scifi'
     if(/romance/i.test(name)) return 'romance'
-    if(/document[aá]rio|documentary/i.test(name)) return 'documentary'
-    if(/crian[çc]a|fam[ií]lia|kids|family/i.test(name)) return 'kids'
+    if(/document[a�]rio|documentary/i.test(name)) return 'documentary'
+    if(/crian[�c]a|fam[i�]lia|kids|family/i.test(name)) return 'kids'
     if(/anime/i.test(name)) return 'anime'
-    if(/cl[aá]ssico|classic/i.test(name)) return 'classics'
+    if(/cl[a�]ssico|classic/i.test(name)) return 'classics'
     return null
   }
 
   function getNetflixCategoryDisplayName(categoryKey){
     const names = {
-      'trending': 'Tendências agora',
+      'trending': 'Tend�ncias agora',
       'popular': 'Populares',
       'top10': 'Top 10 no Brasil',
-      'recent': 'Lançados recentemente',
+      'recent': 'Lan�ados recentemente',
       'continue': 'Continuar assistindo',
-      'recommended': 'Porque você assistiu',
-      'action': 'Ação',
-      'comedy': 'Comédia',
+      'recommended': 'Porque voc� assistiu',
+      'action': 'A��o',
+      'comedy': 'Com�dia',
       'drama': 'Drama',
       'horror': 'Terror',
-      'scifi': 'Ficção científica e fantasia',
+      'scifi': 'Fic��o cient�fica e fantasia',
       'romance': 'Romance',
-      'documentary': 'Documentários',
-      'kids': 'Crianças e família',
+      'documentary': 'Document�rios',
+      'kids': 'Crian�as e fam�lia',
       'anime': 'Animes',
-      'classics': 'Clássicos'
+      'classics': 'Cl�ssicos'
     }
     return names[categoryKey] || categoryKey
   }
@@ -1377,10 +1390,10 @@ header("Expires: 0");
   function formatEPGTime(v){
     if(v==null) return '--:--'
 
-    // Se já está no formato HH:mm, retornar direto
+    // Se j� est� no formato HH:mm, retornar direto
     if(typeof v==='string' && /^\d{1,2}:\d{2}$/.test(v)) return v
 
-    // Se é string de data completa (YYYY-MM-DD HH:mm:ss)
+    // Se � string de data completa (YYYY-MM-DD HH:mm:ss)
     if(typeof v==='string' && /^\d{4}-\d{2}-\d{2}/.test(v)){
       const d = new Date(v)
       if(!isNaN(d.getTime())){
@@ -1390,14 +1403,14 @@ header("Expires: 0");
       }
     }
 
-    // Se é timestamp numérico
+    // Se � timestamp num�rico
     const n = Number(v)
     if(!isNaN(n)){
       // Timestamp em segundos ou milissegundos
       const ms = n > 1e12 ? n : (n > 1e10 ? n : n*1000)
       const d = new Date(ms)
 
-      // FORÇAR timezone UTC-3 (São Paulo/Brasília)
+      // FOR�AR timezone UTC-3 (S�o Paulo/Bras�lia)
       const utc = d.getTime() + (d.getTimezoneOffset() * 60000) // Converter para UTC
       const brTime = new Date(utc + (-3 * 3600000)) // UTC-3
 
@@ -1422,7 +1435,7 @@ header("Expires: 0");
     try{
       // Tentar decodificar base64
       const decoded = atob(text)
-      // Verificar se é texto válido (não binário)
+      // Verificar se � texto v�lido (n�o bin�rio)
       if(/^[\x20-\x7E\u00A0-\uFFFF\s]*$/.test(decoded)){
         return decoded
       }
@@ -1436,12 +1449,12 @@ header("Expires: 0");
   function fixEncoding(text){
     if(!text || typeof text !== 'string') return text
 
-    // Se o texto parece normal (caracteres ASCII comuns), não mexe
+    // Se o texto parece normal (caracteres ASCII comuns), n�o mexe
     if(/^[a-zA-Z0-9\s\-\.,!?]+$/.test(text)) return text
 
     try{
       // Corrigir encoding UTF-8 interpretado como Latin-1
-      // Converte "TensÃ£o" → "Tensão"
+      // Converte "Tensão" ? "Tens�o"
       const fixed = decodeURIComponent(escape(text))
 
       // Verificar se ficou melhor ou pior
@@ -1460,26 +1473,26 @@ header("Expires: 0");
     if(!text) return text
     const original = text
 
-    // NÃO processar textos curtos/simples (como "SP2", "HD", etc)
-    // Isso evita quebrar texto que já está correto
+    // N�O processar textos curtos/simples (como "SP2", "HD", etc)
+    // Isso evita quebrar texto que j� est� correto
     if(text.length <= 10 && /^[A-Za-z0-9\s\-]+$/.test(text)){
       return text
     }
 
-    // 1. Decodificar base64 (se aplicável)
+    // 1. Decodificar base64 (se aplic�vel)
     let decoded = decodeBase64(text)
     // 2. Decodificar HTML entities
     decoded = decodeHtml(decoded)
-    // 3. Corrigir encoding UTF-8 (por último) - APENAS se tiver caracteres problemáticos
-    // NÃO aplicar em texto simples ASCII para evitar quebrar "SP2" → "Hy"
-    if(/[ÃÀ-ÿ]/.test(decoded)){
+    // 3. Corrigir encoding UTF-8 (por �ltimo) - APENAS se tiver caracteres problem�ticos
+    // N�O aplicar em texto simples ASCII para evitar quebrar "SP2" ? "Hy"
+    if(/[��-�]/.test(decoded)){
       decoded = fixEncoding(decoded)
     }
 
     return decoded
   }
 
-  // Normalizadores para respostas de painéis que não retornam Arrays puros
+  // Normalizadores para respostas de pain�is que n�o retornam Arrays puros
   function toArray(x){
     if(Array.isArray(x)) return x
     if(x && typeof x==='object'){
@@ -1494,19 +1507,19 @@ header("Expires: 0");
   // ===== Quality Variants System =====
   function extractBaseName(channelName){
     if(!channelName) return ''
-    // Remove sufixos de qualidade: FHD, FHD², HD, HD², SD, SD²
+    // Remove sufixos de qualidade: FHD, FHD�, HD, HD�, SD, SD�
     const cleanName = channelName
-      .replace(/\s*\(?(FHD²|FHD|HD²|HD|SD²|SD)\)?$/i, '')
-      .replace(/\s*\[(FHD²|FHD|HD²|HD|SD²|SD)\]$/i, '')
+      .replace(/\s*\(?(FHD�|FHD|HD�|HD|SD�|SD)\)?$/i, '')
+      .replace(/\s*\[(FHD�|FHD|HD�|HD|SD�|SD)\]$/i, '')
       .trim()
     return cleanName || channelName
   }
 
   function detectQuality(channelName){
     if(!channelName) return null
-    const match = channelName.match(/(FHD²|FHD|HD²|HD|SD²|SD)$/i)
+    const match = channelName.match(/(FHD�|FHD|HD�|HD|SD�|SD)$/i)
     if(match) return match[1].toUpperCase()
-    // Se não tem sufixo, considera Original
+    // Se n�o tem sufixo, considera Original
     return null
   }
 
@@ -1539,7 +1552,7 @@ header("Expires: 0");
     // Retorna apenas um canal por base name (para o menu esquerdo)
     const groups = groupChannelsByBaseName(channels)
     return groups.map(g => {
-      // 🔧 IMPORTANTE: Se QUALQUER variante tem tv_archive=1, mostrar REC
+      // ?? IMPORTANTE: Se QUALQUER variante tem tv_archive=1, mostrar REC
       // Verificar se alguma variante tem playback
       const variantWithArchive = g.variants.find(v => v.tv_archive === 1 || v.tv_archive === "1")
       const hasTvArchive = !!variantWithArchive
@@ -1563,7 +1576,7 @@ header("Expires: 0");
     return group ? group.variants : []
   }
 
-  // ===== Pool de Requisições & Retry =====
+  // ===== Pool de Requisi��es & Retry =====
   let inFlightRequests = 0
   const MAX_CONCURRENT_REQUESTS = 6
 
@@ -1584,7 +1597,7 @@ header("Expires: 0");
       try {
         return await fn()
       } catch (error) {
-        // Não fazer retry em erros de validação ou abort
+        // N�o fazer retry em erros de valida��o ou abort
         if (i === maxRetries || error.name === 'AbortError' || error.message.includes('Expected JSON')) {
           throw error
         }
@@ -1596,13 +1609,13 @@ header("Expires: 0");
   }
 
   // ===== Xtream Codes API Client =====
-  // Cliente completo para API Xtream Codes com controle de concorrência,
-  // retry automático, timeout e cancelamento de requisições.
+  // Cliente completo para API Xtream Codes com controle de concorr�ncia,
+  // retry autom�tico, timeout e cancelamento de requisi��es.
   //
-  // IMPORTANTE: Este módulo NÃO altera layout/UI - apenas camada de dados.
+  // IMPORTANTE: Este m�dulo N�O altera layout/UI - apenas camada de dados.
 
   const XCClient = (() => {
-    // AbortControllers ativos por tipo de operação
+    // AbortControllers ativos por tipo de opera��o
     const activeRequests = {
       vod: null,
       live: null,
@@ -1610,7 +1623,7 @@ header("Expires: 0");
       epg: null
     }
 
-    // Cancelar requisição anterior do mesmo tipo
+    // Cancelar requisi��o anterior do mesmo tipo
     function cancelPrevious(type) {
       if (activeRequests[type]) {
         activeRequests[type].abort()
@@ -1714,8 +1727,8 @@ header("Expires: 0");
         return fetchWithAbort(url, 'vod')
       },
 
-      // IMPORTANTE: API Xtream Codes NÃO suporta category_id para VOD
-      // Esta função existe para compatibilidade, mas faz filtro client-side
+      // IMPORTANTE: API Xtream Codes N�O suporta category_id para VOD
+      // Esta fun��o existe para compatibilidade, mas faz filtro client-side
       async getVodStreamsByCategory(categoryId) {
         const allVods = await this.getVodStreams()
 
@@ -1807,7 +1820,7 @@ header("Expires: 0");
         return fetchWithAbort(url, 'epg', 30000) // 30s timeout para EPG completo
       },
 
-      // Cancelar todas as requisições em andamento
+      // Cancelar todas as requisi��es em andamento
       cancelAll() {
         Object.values(activeRequests).forEach(controller => {
           if (controller) controller.abort()
@@ -1850,7 +1863,7 @@ header("Expires: 0");
           })
         },
         {
-          rootMargin: '50px', // Começa a carregar 50px antes de entrar na tela
+          rootMargin: '50px', // Come�a a carregar 50px antes de entrar na tela
           threshold: 0.01
         }
       )
@@ -1878,12 +1891,12 @@ header("Expires: 0");
       }
     })
   }, (prevProps, nextProps) => {
-    // Só re-render se src mudar
+    // S� re-render se src mudar
     return prevProps.src === nextProps.src &&
            prevProps.className === nextProps.className
   })
 
-  // ===== BARRA DE CATEGORIAS DE FILMES E SÉRIES =====
+  // ===== BARRA DE CATEGORIAS DE FILMES E S�RIES =====
   function CategoryBar({ vodCats, seriesCats, view, setView, selectedCat, setSelectedCat, collections }) {
     // IMPORTANTE: Todos os Hooks devem ser chamados ANTES de qualquer return condicional
     const [showDropdown, setShowDropdown] = useState(false)
@@ -1916,12 +1929,12 @@ header("Expires: 0");
       { category_id: 37, category_name: 'Faroeste' }
     ]
 
-    // Usar categorias apropriadas (collections usa gêneros TMDB)
+    // Usar categorias apropriadas (collections usa g�neros TMDB)
     let categories = isCollectionsView ? tmdbGenres : (isSeriesView ? (seriesCats || []) : (vodCats || []))
 
     // Filtrar categorias baseado na view
     if (isAdultView) {
-      // Na view adulta: mostrar APENAS categorias 18+ de VOD E SÉRIES combinadas
+      // Na view adulta: mostrar APENAS categorias 18+ de VOD E S�RIES combinadas
       const vodAdult = (vodCats || []).filter(cat => {
         const catName = cat.category_name || cat.name || ''
         return catName.trim().startsWith('18+')
@@ -1946,7 +1959,7 @@ header("Expires: 0");
                !catName.includes('show')
       })
     } else if (isSeriesView) {
-      // Na view de séries: REMOVER categorias 18+
+      // Na view de s�ries: REMOVER categorias 18+
       categories = categories.filter(cat => {
         const catName = (cat.category_name || cat.name || '').toLowerCase().trim()
         return !catName.startsWith('18+')
@@ -1964,7 +1977,7 @@ header("Expires: 0");
       'oscar'
     ]
 
-    // Separar categorias prioritárias e outras
+    // Separar categorias priorit�rias e outras
     const priorityCats = []
     const otherCats = []
 
@@ -1979,7 +1992,7 @@ header("Expires: 0");
       // Verificar match exato primeiro
       priorityIndex = priorityNames.findIndex(pName => normalizedName === pName)
 
-      // Se não achou match exato, tentar substring (mas com cuidado)
+      // Se n�o achou match exato, tentar substring (mas com cuidado)
       if (priorityIndex === -1) {
         // Para "lançamentos legendados" e "lancamentos legendados"
         if (normalizedName.includes('legendado')) {
@@ -2008,31 +2021,31 @@ header("Expires: 0");
       }
     })
 
-    // Ordenar categorias prioritárias pela ordem definida
+    // Ordenar categorias priorit�rias pela ordem definida
     priorityCats.sort((a, b) => a.priority - b.priority)
     const sortedPriorityCats = priorityCats.map(item => item.cat)
 
-    // Combinar: prioritárias primeiro, depois as outras
+    // Combinar: priorit�rias primeiro, depois as outras
     const orderedCats = [...sortedPriorityCats, ...otherCats]
 
-    // Inicializar categoria selecionada IMEDIATAMENTE quando categorias estiverem disponíveis
+    // Inicializar categoria selecionada IMEDIATAMENTE quando categorias estiverem dispon�veis
     useEffect(() => {
       if (orderedCats.length > 0) {
-        // Collections não deve auto-selecionar categoria (deve mostrar "Todas")
+        // Collections n�o deve auto-selecionar categoria (deve mostrar "Todas")
         if (!isCollectionsView) {
           setSelectedCat(orderedCats[0])
         }
       }
     }, [categories.length, isMoviesView, isSeriesView, isCollectionsView, isAdultView])
 
-    // AGORA SIM, fazer returns condicionais APÓS todos os hooks
+    // AGORA SIM, fazer returns condicionais AP�S todos os hooks
     if (!isMoviesView && !isSeriesView && !isCollectionsView && !isAdultView) return null
     if (categories.length === 0) return null
 
-    // Se não tem categoria selecionada mas há categorias disponíveis, usar a primeira temporariamente
+    // Se n�o tem categoria selecionada mas h� categorias dispon�veis, usar a primeira temporariamente
     const displayCat = selectedCat || (orderedCats.length > 0 ? orderedCats[0] : null)
     const selectedCatName = selectedCat
-      ? (selectedCat.category_name || selectedCat.name || 'Categoria')
+      ? fixEncoding(selectedCat.category_name || selectedCat.name || 'Categoria')
       : (isCollectionsView ? 'TODAS' : 'Carregando...')
 
     return e('div', {
@@ -2043,7 +2056,7 @@ header("Expires: 0");
         zIndex: 999
       }
     },
-      // Botão "Categorias" com dropdown
+      // Bot�o "Categorias" com dropdown
       e('div', {
         style: {
           position: 'relative'
@@ -2092,7 +2105,7 @@ header("Expires: 0");
             border: '1px solid rgba(255, 255, 255, 0.1)'
           }
         },
-          // Opção "TODAS" apenas para Collections
+          // Op��o "TODAS" apenas para Collections
           ...(isCollectionsView ? [
             e('div', {
               key: 'all',
@@ -2100,7 +2113,7 @@ header("Expires: 0");
                 setSelectedCat(null)
                 setShowDropdown(false)
 
-                // Ao selecionar "TODAS", mostrar backdrop da primeira coleção disponível
+                // Ao selecionar "TODAS", mostrar backdrop da primeira cole��o dispon�vel
                 if (collections && collections.length > 0) {
                   const firstCollection = collections[0]
 
@@ -2137,7 +2150,7 @@ header("Expires: 0");
           // Categorias ordenadas
           ...orderedCats.map(cat => {
             const catId = getCatId(cat)
-            const catName = cat.category_name || cat.name || 'Sem nome'
+            const catName = fixEncoding(cat.category_name || cat.name || 'Sem nome')
             const isSelected = selectedCat && getCatId(selectedCat) === catId
 
             return e('div', {
@@ -2146,7 +2159,7 @@ header("Expires: 0");
                 setSelectedCat(cat)
                 setShowDropdown(false)
 
-                // Se estamos em Collections, atualizar hero/backdrop para primeira coleção da categoria
+                // Se estamos em Collections, atualizar hero/backdrop para primeira cole��o da categoria
                 if (isCollectionsView && collections && collections.length > 0) {
                   const selectedGenreId = getCatId(cat)
 
@@ -2174,9 +2187,9 @@ header("Expires: 0");
 
                   const searchGenres = genreNames[selectedGenreId] || []
 
-                  // Filtrar coleções que têm esse gênero (verificar nos FILMES da coleção)
+                  // Filtrar cole��es que t�m esse g�nero (verificar nos FILMES da cole��o)
                   const filteredCollections = collections.filter(collection => {
-                    // Verificar se algum filme da coleção tem o gênero no tmdb_genres (string)
+                    // Verificar se algum filme da cole��o tem o g�nero no tmdb_genres (string)
                     const hasGenre = collection.movies && collection.movies.some(movie => {
                       if (movie.tmdb_genres) {
                         const movieGenres = movie.tmdb_genres.toLowerCase()
@@ -2188,7 +2201,7 @@ header("Expires: 0");
                     return hasGenre
                   })
 
-                  // Se encontrou coleções com esse gênero, usar backdrop da primeira coleção
+                  // Se encontrou cole��es com esse g�nero, usar backdrop da primeira cole��o
                   if (filteredCollections.length > 0) {
                     const firstCollection = filteredCollections[0]
 
@@ -2239,7 +2252,7 @@ header("Expires: 0");
         const newPin = [...inputPin, num]
         setInputPin(newPin)
 
-        // Auto-verificar quando completar 4 dígitos
+        // Auto-verificar quando completar 4 d�gitos
         if (newPin.length === 4) {
           const pinString = newPin.join('')
           if (pinString === parentalPin) {
@@ -2287,14 +2300,14 @@ header("Expires: 0");
         }
       }, '18+ ADULTOS'),
 
-      // Texto instrução
+      // Texto instru��o
       e('p', {
         style: {
           fontSize: '18px',
           color: '#b3b3b3',
           marginBottom: '60px'
         }
-      }, 'Digite o código pin'),
+      }, 'Digite o c�digo pin'),
 
       // PIN boxes
       e('div', {
@@ -2321,11 +2334,11 @@ header("Expires: 0");
               color: '#fff',
               fontWeight: '700'
             }
-          }, inputPin[i] !== undefined ? '●' : '')
+          }, inputPin[i] !== undefined ? '?' : '')
         )
       ),
 
-      // Teclado numérico
+      // Teclado num�rico
       e('div', {
         style: {
           display: 'flex',
@@ -2385,20 +2398,20 @@ header("Expires: 0");
               e.currentTarget.style.background = 'rgba(220, 38, 38, 0.2)'
               e.currentTarget.style.transform = 'scale(1)'
             }
-          }, '⌫')
+          }, '?')
         )
       ),
 
-      // Código padrão
+      // C�digo padr�o
       e('p', {
         style: {
           fontSize: '14px',
           color: '#666',
           marginBottom: '20px'
         }
-      }, 'Código pin padrão: 0000'),
+      }, 'C�digo pin padr�o: 0000'),
 
-      // Botão voltar
+      // Bot�o voltar
       onCancel && e('button', {
         onClick: onCancel,
         style: {
@@ -2421,7 +2434,7 @@ header("Expires: 0");
     )
   }
 
-  // ===== COMPONENTE: SETTINGS (CONFIGURAÇÕES) =====
+  // ===== COMPONENTE: SETTINGS (CONFIGURA��ES) =====
   function Settings({ account, setView }) {
     const [useTMDB, setUseTMDB] = useLocalStorage('use_tmdb', true)
     const [selectedPlayer, setSelectedPlayer] = useLocalStorage('selected_player', 'Clappr Player (Recommended)')
@@ -2432,7 +2445,7 @@ header("Expires: 0");
     const [showPinChange, setShowPinChange] = useState(false)
     const [newPin, setNewPin] = useState('')
 
-    // Players disponíveis
+    // Players dispon�veis
     const players = [
       'Clappr Player (Recommended)',
       'Video.js Player',
@@ -2442,7 +2455,7 @@ header("Expires: 0");
     ]
     const systems = ['M3U8', 'TS']
 
-    // Função para formatar timestamp Unix para data/hora
+    // Fun��o para formatar timestamp Unix para data/hora
     const formatDateTime = (timestamp) => {
       if (!timestamp) return 'N/A'
       const date = new Date(timestamp * 1000)
@@ -2479,7 +2492,7 @@ header("Expires: 0");
           margin: '0 auto'
         }
       },
-        // Título
+        // T�tulo
         e('h1', {
           style: {
             fontSize: '36px',
@@ -2487,7 +2500,7 @@ header("Expires: 0");
             marginBottom: '40px',
             color: '#fff'
           }
-        }, 'Configurações'),
+        }, 'Configura��es'),
 
         e('div', {
           style: {
@@ -2496,7 +2509,7 @@ header("Expires: 0");
             gap: '40px'
           }
         },
-          // Coluna esquerda - Botões
+          // Coluna esquerda - Bot�es
           e('div', {
             style: {
               display: 'flex',
@@ -2504,7 +2517,7 @@ header("Expires: 0");
               gap: '12px'
             }
           },
-            // Botão: Dados da conta
+            // Bot�o: Dados da conta
             e('button', {
               style: {
                 padding: '18px 24px',
@@ -2525,7 +2538,7 @@ header("Expires: 0");
               }
             }, 'Dados da conta'),
 
-            // Botão: Informações do aplicativo
+            // Bot�o: Informa��es do aplicativo
             e('button', {
               style: {
                 padding: '18px 24px',
@@ -2544,9 +2557,9 @@ header("Expires: 0");
               onMouseLeave: (ev) => {
                 ev.target.style.background = 'rgba(40, 40, 40, 0.8)'
               }
-            }, 'Informações do aplicativo'),
+            }, 'Informa��es do aplicativo'),
 
-            // Botão: Alterar Código Pin
+            // Bot�o: Alterar C�digo Pin
             e('button', {
               onClick: () => {
                 setShowPinChange(!showPinChange)
@@ -2571,9 +2584,9 @@ header("Expires: 0");
               onMouseLeave: (ev) => {
                 ev.target.style.background = showPinChange ? 'rgba(60, 60, 60, 0.8)' : 'rgba(40, 40, 40, 0.8)'
               }
-            }, 'Alterar Código Pin'),
+            }, 'Alterar C�digo Pin'),
 
-            // Botão: Alterar Player
+            // Bot�o: Alterar Player
             e('button', {
               onClick: () => {
                 setShowPlayerOptions(!showPlayerOptions)
@@ -2598,7 +2611,7 @@ header("Expires: 0");
               }
             }, 'Alterar Player'),
 
-            // Botão: Alterar Sistema
+            // Bot�o: Alterar Sistema
             e('button', {
               onClick: () => {
                 setShowSystemOptions(!showSystemOptions)
@@ -2623,7 +2636,7 @@ header("Expires: 0");
               }
             }, 'Alterar Sistema'),
 
-            // Botão: Recarregar o Sistema
+            // Bot�o: Recarregar o Sistema
             e('button', {
               onClick: () => window.location.reload(),
               style: {
@@ -2645,7 +2658,7 @@ header("Expires: 0");
               }
             }, 'Recarregar o Sistema'),
 
-            // Botão: Limpar Armazenamento
+            // Bot�o: Limpar Armazenamento
             e('button', {
               onClick: () => {
                 if (confirm('Deseja limpar todo o armazenamento local? Isso vai fazer logout.')) {
@@ -2733,7 +2746,7 @@ header("Expires: 0");
             )
           ),
 
-          // Coluna direita - Opções de Player/Sistema ou Informações da conta
+          // Coluna direita - Op��es de Player/Sistema ou Informa��es da conta
           e('div', {
             style: {
               background: 'rgba(40, 40, 40, 0.6)',
@@ -2744,7 +2757,7 @@ header("Expires: 0");
               gap: '12px'
             }
           },
-            // Mostrar opções de Player se estiver ativo
+            // Mostrar op��es de Player se estiver ativo
             showPlayerOptions ? players.map(player =>
               e('button', {
                 key: player,
@@ -2775,10 +2788,10 @@ header("Expires: 0");
                 }
               },
                 e('span', null, player),
-                selectedPlayer === player && e('span', { style: { fontSize: '20px' } }, '✓')
+                selectedPlayer === player && e('span', { style: { fontSize: '20px' } }, '?')
               )
             )
-            // Mostrar opções de Sistema se estiver ativo
+            // Mostrar op��es de Sistema se estiver ativo
             : showSystemOptions ? systems.map(system =>
               e('button', {
                 key: system,
@@ -2809,10 +2822,10 @@ header("Expires: 0");
                 }
               },
                 e('span', null, system),
-                selectedSystem === system && e('span', { style: { fontSize: '20px' } }, '✓')
+                selectedSystem === system && e('span', { style: { fontSize: '20px' } }, '?')
               )
             )
-            // Mostrar painel de alteração de PIN se estiver ativo
+            // Mostrar painel de altera��o de PIN se estiver ativo
             : showPinChange ? [
               e('div', {
                 style: {
@@ -2829,14 +2842,14 @@ header("Expires: 0");
                     marginBottom: '15px',
                     fontWeight: '600'
                   }
-                }, 'Alterar Código PIN'),
+                }, 'Alterar C�digo PIN'),
                 e('p', {
                   style: {
                     color: '#b3b3b3',
                     fontSize: '14px',
                     marginBottom: '20px'
                   }
-                }, 'Digite um novo código PIN de 4 dígitos'),
+                }, 'Digite um novo c�digo PIN de 4 d�gitos'),
                 e('input', {
                   type: 'password',
                   maxLength: 4,
@@ -2845,7 +2858,7 @@ header("Expires: 0");
                     const value = ev.target.value.replace(/\D/g, '')
                     setNewPin(value)
                   },
-                  placeholder: 'Novo PIN (4 dígitos)',
+                  placeholder: 'Novo PIN (4 d�gitos)',
                   style: {
                     width: '100%',
                     padding: '15px',
@@ -2872,7 +2885,7 @@ header("Expires: 0");
                         setShowPinChange(false)
                         setNewPin('')
                       } else {
-                        alert('O PIN deve ter exatamente 4 dígitos!')
+                        alert('O PIN deve ter exatamente 4 d�gitos!')
                       }
                     },
                     style: {
@@ -2932,7 +2945,7 @@ header("Expires: 0");
                 }
               }, '⚠️ Importante: Este PIN é usado para controle parental na categoria 18+. Guarde-o em local seguro.')
             ]
-            // Caso contrário, mostrar informações da conta
+            // Caso contr�rio, mostrar informa��es da conta
             : [
             // Status
             e('div', {
@@ -2947,7 +2960,7 @@ header("Expires: 0");
               e('span', { style: { color: '#4CAF50', fontSize: '16px', fontWeight: '600' } }, 'Active')
             ),
 
-            // Nome de usuário
+            // Nome de usu�rio
             e('div', {
               style: {
                 display: 'flex',
@@ -2956,7 +2969,7 @@ header("Expires: 0");
                 borderBottom: '1px solid rgba(255,255,255,0.1)'
               }
             },
-              e('span', { style: { color: '#aaa', fontSize: '16px' } }, 'Nome de usuário'),
+              e('span', { style: { color: '#aaa', fontSize: '16px' } }, 'Nome de usu�rio'),
               e('span', { style: { color: '#fff', fontSize: '16px', fontWeight: '600' } }, account?.username || 'N/A')
             ),
 
@@ -2973,7 +2986,7 @@ header("Expires: 0");
               e('span', { style: { color: '#fff', fontSize: '16px' } }, formatDateTime(account?.created_at))
             ),
 
-            // Data de expiração
+            // Data de expira��o
             e('div', {
               style: {
                 display: 'flex',
@@ -2982,7 +2995,7 @@ header("Expires: 0");
                 borderBottom: '1px solid rgba(255,255,255,0.1)'
               }
             },
-              e('span', { style: { color: '#aaa', fontSize: '16px' } }, 'Data de expiração'),
+              e('span', { style: { color: '#aaa', fontSize: '16px' } }, 'Data de expira��o'),
               e('span', { style: { color: '#fff', fontSize: '16px' } }, formatDateTime(account?.exp_date))
             ),
 
@@ -3000,7 +3013,7 @@ header("Expires: 0");
           )
         ),
 
-        // Footer com versão
+        // Footer com vers�o
         e('div', {
           style: {
             position: 'fixed',
@@ -3013,7 +3026,7 @@ header("Expires: 0");
           }
         },
           e('span', null, 'IPTV'),
-          e('span', null, 'Versão: 1.6.0')
+          e('span', null, 'Vers�o: 1.6.0')
         )
       )
     )
@@ -3028,40 +3041,40 @@ header("Expires: 0");
     // Lista de avatares de personagens - usar imagens locais
     const avatars = [
       // Animes
-      { id: 'naruto', name: 'Naruto', url: 'avatars/naruto.png', emoji: '🍥', gradient: 'linear-gradient(135deg, #f39c12, #e67e22)' },
-      { id: 'luffy', name: 'Luffy', url: 'avatars/luffy.png', emoji: '👒', gradient: 'linear-gradient(135deg, #e74c3c, #c0392b)' },
-      { id: 'goku', name: 'Goku', url: 'avatars/goku.png', emoji: '🐉', gradient: 'linear-gradient(135deg, #f39c12, #d35400)' },
-      { id: 'deku', name: 'Deku', url: 'avatars/deku.png', emoji: '💚', gradient: 'linear-gradient(135deg, #2ecc71, #27ae60)' },
-      { id: 'tanjiro', name: 'Tanjiro', url: 'avatars/tanjiro.png', emoji: '🗡️', gradient: 'linear-gradient(135deg, #16a085, #1abc9c)' },
-      { id: 'eren', name: 'Eren', url: 'avatars/eren.png', emoji: '⚔️', gradient: 'linear-gradient(135deg, #8e44ad, #9b59b6)' },
-      { id: 'saitama', name: 'Saitama', url: 'avatars/saitama.png', emoji: '👊', gradient: 'linear-gradient(135deg, #f1c40f, #f39c12)' },
-      { id: 'itachi', name: 'Itachi', url: 'avatars/itachi.png', emoji: '🔴', gradient: 'linear-gradient(135deg, #c0392b, #e74c3c)' },
-      { id: 'levi', name: 'Levi', url: 'avatars/levi.png', emoji: '⚡', gradient: 'linear-gradient(135deg, #34495e, #2c3e50)' },
-      { id: 'vegeta', name: 'Vegeta', url: 'avatars/vegeta.png', emoji: '👑', gradient: 'linear-gradient(135deg, #2980b9, #3498db)' },
-      // Heróis
-      { id: 'ironman', name: 'Iron Man', url: 'avatars/ironman.png', emoji: '🤖', gradient: 'linear-gradient(135deg, #e74c3c, #f39c12)' },
-      { id: 'batman', name: 'Batman', url: 'avatars/batman.png', emoji: '🦇', gradient: 'linear-gradient(135deg, #2c3e50, #34495e)' },
-      { id: 'joker', name: 'Joker', url: 'avatars/joker.png', emoji: '🃏', gradient: 'linear-gradient(135deg, #9b59b6, #8e44ad)' },
-      { id: 'spiderman', name: 'Spider-Man', url: 'avatars/spiderman.png', emoji: '🕷️', gradient: 'linear-gradient(135deg, #e74c3c, #c0392b)' },
-      { id: 'thanos', name: 'Thanos', url: 'avatars/thanos.png', emoji: '💎', gradient: 'linear-gradient(135deg, #9b59b6, #8e44ad)' },
-      { id: 'deadpool', name: 'Deadpool', url: 'avatars/deadpool.png', emoji: '⚔️', gradient: 'linear-gradient(135deg, #c0392b, #e74c3c)' }
+      { id: 'naruto', name: 'Naruto', url: 'avatars/naruto.png', emoji: '??', gradient: 'linear-gradient(135deg, #f39c12, #e67e22)' },
+      { id: 'luffy', name: 'Luffy', url: 'avatars/luffy.png', emoji: '??', gradient: 'linear-gradient(135deg, #e74c3c, #c0392b)' },
+      { id: 'goku', name: 'Goku', url: 'avatars/goku.png', emoji: '??', gradient: 'linear-gradient(135deg, #f39c12, #d35400)' },
+      { id: 'deku', name: 'Deku', url: 'avatars/deku.png', emoji: '??', gradient: 'linear-gradient(135deg, #2ecc71, #27ae60)' },
+      { id: 'tanjiro', name: 'Tanjiro', url: 'avatars/tanjiro.png', emoji: '???', gradient: 'linear-gradient(135deg, #16a085, #1abc9c)' },
+      { id: 'eren', name: 'Eren', url: 'avatars/eren.png', emoji: '??', gradient: 'linear-gradient(135deg, #8e44ad, #9b59b6)' },
+      { id: 'saitama', name: 'Saitama', url: 'avatars/saitama.png', emoji: '??', gradient: 'linear-gradient(135deg, #f1c40f, #f39c12)' },
+      { id: 'itachi', name: 'Itachi', url: 'avatars/itachi.png', emoji: '??', gradient: 'linear-gradient(135deg, #c0392b, #e74c3c)' },
+      { id: 'levi', name: 'Levi', url: 'avatars/levi.png', emoji: '?', gradient: 'linear-gradient(135deg, #34495e, #2c3e50)' },
+      { id: 'vegeta', name: 'Vegeta', url: 'avatars/vegeta.png', emoji: '??', gradient: 'linear-gradient(135deg, #2980b9, #3498db)' },
+      // Her�is
+      { id: 'ironman', name: 'Iron Man', url: 'avatars/ironman.png', emoji: '??', gradient: 'linear-gradient(135deg, #e74c3c, #f39c12)' },
+      { id: 'batman', name: 'Batman', url: 'avatars/batman.png', emoji: '??', gradient: 'linear-gradient(135deg, #2c3e50, #34495e)' },
+      { id: 'joker', name: 'Joker', url: 'avatars/joker.png', emoji: '??', gradient: 'linear-gradient(135deg, #9b59b6, #8e44ad)' },
+      { id: 'spiderman', name: 'Spider-Man', url: 'avatars/spiderman.png', emoji: '???', gradient: 'linear-gradient(135deg, #e74c3c, #c0392b)' },
+      { id: 'thanos', name: 'Thanos', url: 'avatars/thanos.png', emoji: '??', gradient: 'linear-gradient(135deg, #9b59b6, #8e44ad)' },
+      { id: 'deadpool', name: 'Deadpool', url: 'avatars/deadpool.png', emoji: '??', gradient: 'linear-gradient(135deg, #c0392b, #e74c3c)' }
     ]
 
-    // Função para formatar data de vencimento
+    // Fun��o para formatar data de vencimento
     const formatExpDate = (timestamp) => {
       if (!timestamp) return 'Sem data'
       const date = new Date(timestamp * 1000)
       return date.toLocaleDateString('pt-BR')
     }
 
-    // Função para selecionar avatar
+    // Fun��o para selecionar avatar
     const handleAvatarSelect = (avatar) => {
       setSelectedAvatar(avatar)
       setShowAvatarSelector(false)
       setShowProfileMenu(false)
     }
 
-    // Determinar qual menu está ativo
+    // Determinar qual menu est� ativo
     const getActiveMenu = () => {
       if (view === 'home') return 'home'
       if (view === 'live-categories' || view === 'channels') return 'channels'
@@ -3109,7 +3122,7 @@ header("Expires: 0");
         e('span', { style: { color: '#fff' } }, 'TV')
       ),
 
-      // Menu de navegação
+      // Menu de navega��o
       e('nav', {
         style: {
           display: 'flex',
@@ -3249,7 +3262,7 @@ header("Expires: 0");
             if (window.updateNetflixMoviesState) {
               window.updateNetflixMoviesState({
                 showCollectionsView: true,
-                heroBackdrop: null  // Limpar heroBackdrop ao entrar em coleções
+                heroBackdrop: null  // Limpar heroBackdrop ao entrar em cole��es
               })
             }
           },
@@ -3261,7 +3274,7 @@ header("Expires: 0");
             transition: 'color 0.2s',
             textDecoration: 'none'
           }
-        }, 'Coletâneas'),
+        }, 'Coleções'),
 
         e('a', {
           onClick: () => {
@@ -3297,7 +3310,7 @@ header("Expires: 0");
         )
       ),
 
-      // Área direita - Campo de busca e configurações
+      // �rea direita - Campo de busca e configura��es
       e('div', {
         style: {
           display: 'flex',
@@ -3336,7 +3349,7 @@ header("Expires: 0");
             position: 'relative'
           }
         },
-          // Avatar clicável
+          // Avatar clic�vel
           e('div', {
             onClick: () => setShowProfileMenu(!showProfileMenu),
             style: {
@@ -3403,7 +3416,7 @@ header("Expires: 0");
                   overflow: 'hidden'
                 }
               }, !selectedAvatar && (account?.username || 'H').charAt(0).toUpperCase()),
-              // Info do usuário
+              // Info do usu�rio
               e('div', {
                 style: {
                   flex: 1
@@ -3416,7 +3429,7 @@ header("Expires: 0");
                     fontWeight: '600',
                     marginBottom: '4px'
                   }
-                }, account?.username || 'Usuário'),
+                }, account?.username || 'Usu�rio'),
                 e('div', {
                   style: {
                     color: '#f47521',
@@ -3427,11 +3440,11 @@ header("Expires: 0");
                     gap: '4px'
                   }
                 },
-                  e('span', { style: { fontSize: '14px' } }, '📅'),
+                  e('span', { style: { fontSize: '14px' } }, '??'),
                   'Vence: ' + formatExpDate(account?.exp_date)
                 )
               ),
-              // Ícone de editar
+              // �cone de editar
               e('div', {
                 onClick: () => {
                   setShowProfileMenu(false)
@@ -3449,10 +3462,10 @@ header("Expires: 0");
                 onMouseLeave: (e) => {
                   e.currentTarget.style.color = '#b3b3b3'
                 }
-              }, '✏️')
+              }, '??')
             ),
 
-            // Opções do menu
+            // Op��es do menu
             e('div', {
               style: {
                 padding: '8px 0'
@@ -3481,11 +3494,11 @@ header("Expires: 0");
                   e.currentTarget.style.background = 'transparent'
                 }
               },
-                e('span', { style: { fontSize: '18px' } }, '🔄'),
+                e('span', { style: { fontSize: '18px' } }, '??'),
                 'Trocar de Perfil'
               ),
 
-              // Configurações
+              // Configura��es
               e('div', {
                 onClick: () => {
                   setView('settings')
@@ -3508,8 +3521,8 @@ header("Expires: 0");
                   e.currentTarget.style.background = 'transparent'
                 }
               },
-                e('span', { style: { fontSize: '18px' } }, '⚙️'),
-                'Configurações'
+                e('span', { style: { fontSize: '18px' } }, '??'),
+                'Configura��es'
               ),
 
               // Separador
@@ -3544,11 +3557,11 @@ header("Expires: 0");
                   e.currentTarget.style.background = 'transparent'
                 }
               },
-                e('span', { style: { fontSize: '18px' } }, '🔖'),
+                e('span', { style: { fontSize: '18px' } }, '??'),
                 'Fila'
               ),
 
-              // Histórico
+              // Hist�rico
               e('div', {
                 onClick: () => {
                   alert('Funcionalidade em breve!')
@@ -3571,8 +3584,8 @@ header("Expires: 0");
                   e.currentTarget.style.background = 'transparent'
                 }
               },
-                e('span', { style: { fontSize: '18px' } }, '🕐'),
-                'Histórico'
+                e('span', { style: { fontSize: '18px' } }, '??'),
+                'Hist�rico'
               ),
 
               // Separador
@@ -3584,7 +3597,7 @@ header("Expires: 0");
                 }
               }),
 
-              // Notificações
+              // Notifica��es
               e('div', {
                 onClick: () => {
                   alert('Funcionalidade em breve!')
@@ -3607,8 +3620,8 @@ header("Expires: 0");
                   e.currentTarget.style.background = 'transparent'
                 }
               },
-                e('span', { style: { fontSize: '18px' } }, '🔔'),
-                'Notificações'
+                e('span', { style: { fontSize: '18px' } }, '??'),
+                'Notifica��es'
               ),
 
               // Separador
@@ -3645,14 +3658,14 @@ header("Expires: 0");
                   e.currentTarget.style.background = 'transparent'
                 }
               },
-                e('span', { style: { fontSize: '18px' } }, '🚪'),
+                e('span', { style: { fontSize: '18px' } }, '??'),
                 'Sair'
               )
             )
           )
         ),
 
-        // Modal de seleção de avatares
+        // Modal de sele��o de avatares
         showAvatarSelector && e('div', {
           onClick: () => setShowAvatarSelector(false),
           style: {
@@ -3681,7 +3694,7 @@ header("Expires: 0");
               overflowY: 'auto'
             }
           },
-            // Título
+            // T�tulo
             e('div', {
               style: {
                 display: 'flex',
@@ -3715,7 +3728,7 @@ header("Expires: 0");
                 onMouseLeave: (e) => {
                   e.currentTarget.style.color = '#b3b3b3'
                 }
-              }, '×')
+              }, '�')
             ),
 
             // Grid de avatares
@@ -3767,7 +3780,7 @@ header("Expires: 0");
     const [activeMenu, setActiveMenu] = useState('home')
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-    // Atualizar ícone ativo baseado na view atual
+    // Atualizar �cone ativo baseado na view atual
     useEffect(() => {
       if (view === 'home') setActiveMenu('home')
       else if (view === 'channels' || view === 'live-categories') setActiveMenu('channels')
@@ -3781,13 +3794,13 @@ header("Expires: 0");
       else if (view === 'config') setActiveMenu('config')
     }, [view])
 
-    // Usando emoji para ícones (sem dependência de bibliotecas externas)
+    // Usando emoji para �cones (sem depend�ncia de bibliotecas externas)
 
     const menuItems = [
-      { id: 'home', icon: '🏠', title: 'Home', action: () => setView('home') },
-      { id: 'channels', icon: '📺', title: 'TV Ao Vivo', action: () => setView('live-categories') },
-      { id: 'movies', icon: '🎬', title: 'Filmes', action: () => {
-        // Desativar modo coleções ao voltar para filmes
+      { id: 'home', icon: '??', title: 'Home', action: () => setView('home') },
+      { id: 'channels', icon: '??', title: 'TV Ao Vivo', action: () => setView('live-categories') },
+      { id: 'movies', icon: '??', title: 'Filmes', action: () => {
+        // Desativar modo cole��es ao voltar para filmes
         if (window.updateNetflixMoviesState) {
           // Pegar o primeiro filme da categoria atual
           const firstSection = window.__netflixMoviesState?.sectionsMovies?.[0]
@@ -3796,16 +3809,16 @@ header("Expires: 0");
 
           window.updateNetflixMoviesState({
             showCollectionsView: false,
-            heroBackdrop: null, // Limpar backdrop de coleções
-            viewingCollectionMovies: false, // Sair do modo de visualização de coleção
+            heroBackdrop: null, // Limpar backdrop de cole��es
+            viewingCollectionMovies: false, // Sair do modo de visualiza��o de cole��o
             currentCategoryIndex: 0, // Voltar para primeira categoria
             featuredMovieId: firstMovieId || window.__netflixMoviesState?.featuredMovieId // Setar primeiro filme
           })
         }
         setView('netflix-movies')
       }},
-      { id: 'series', icon: '🎭', title: 'Séries', action: () => {
-        // Desativar modo coleções
+      { id: 'series', icon: '📺', title: 'Séries', action: () => {
+        // Desativar modo cole��es
         if (window.updateNetflixMoviesState) {
           const firstSection = window.__netflixMoviesState?.sectionsMovies?.[0]
           const firstMovie = firstSection?.movies?.[0]
@@ -3821,8 +3834,8 @@ header("Expires: 0");
         }
         setView('netflix-series')
       }},
-      { id: 'novelas', icon: '📖', title: 'Novelas', action: () => {
-        // Desativar modo coleções
+      { id: 'novelas', icon: '??', title: 'Novelas', action: () => {
+        // Desativar modo cole��es
         if (window.updateNetflixMoviesState) {
           const firstSection = window.__netflixMoviesState?.sectionsMovies?.[0]
           const firstMovie = firstSection?.movies?.[0]
@@ -3838,8 +3851,8 @@ header("Expires: 0");
         }
         setView('netflix-novelas')
       }},
-      { id: 'animes', icon: '🌟', title: 'Animes', action: () => {
-        // Desativar modo coleções
+      { id: 'animes', icon: '??', title: 'Animes', action: () => {
+        // Desativar modo cole��es
         if (window.updateNetflixMoviesState) {
           const firstSection = window.__netflixMoviesState?.sectionsMovies?.[0]
           const firstMovie = firstSection?.movies?.[0]
@@ -3855,8 +3868,8 @@ header("Expires: 0");
         }
         setView('netflix-animes')
       }},
-      { id: 'desenhos', icon: '🎨', title: 'Desenhos', action: () => {
-        // Desativar modo coleções
+      { id: 'desenhos', icon: '??', title: 'Desenhos', action: () => {
+        // Desativar modo cole��es
         if (window.updateNetflixMoviesState) {
           const firstSection = window.__netflixMoviesState?.sectionsMovies?.[0]
           const firstMovie = firstSection?.movies?.[0]
@@ -3872,16 +3885,16 @@ header("Expires: 0");
         }
         setView('netflix-desenhos')
       }},
-      { id: 'collections', icon: '📚', title: 'Coletâneas', action: () => {
-        // ===== NÃO RESETAR: Precisamos dos filmes já carregados para construir coleções =====
-        // Apenas ativar o modo de coleções (o useEffect vai carregar automaticamente)
+      { id: 'collections', icon: '📚', title: 'Coleções', action: () => {
+        // ===== N�O RESETAR: Precisamos dos filmes j� carregados para construir cole��es =====
+        // Apenas ativar o modo de cole��es (o useEffect vai carregar automaticamente)
         setView('collections')
         if (window.updateNetflixMoviesState) {
           window.updateNetflixMoviesState({ showCollectionsView: true })
         }
       }},
-      { id: 'show', icon: '🎤', title: 'Show', action: () => {
-        // Desativar modo coleções
+      { id: 'show', icon: '??', title: 'Show', action: () => {
+        // Desativar modo cole��es
         if (window.updateNetflixMoviesState) {
           const firstSection = window.__netflixMoviesState?.sectionsMovies?.[0]
           const firstMovie = firstSection?.movies?.[0]
@@ -3917,23 +3930,23 @@ header("Expires: 0");
         }, e('span', { style: { fontSize: '24px' } }, item.icon))
       ),
 
-      // Configurações no final
+      // Configura��es no final
       e('button', {
         className: `sidebar-btn ${activeMenu === 'config' ? 'active' : ''}`,
-        'data-tooltip': 'Configurações',
+        'data-tooltip': 'Configura��es',
         onClick: () => setView('config'),
         style: { marginTop: 'auto' }
-      }, e('span', { style: { fontSize: '24px' } }, '⚙️'))
+      }, e('span', { style: { fontSize: '24px' } }, '??'))
     )
   }
 
-  // ===== BOTÃO HAMBURGER PARA MOBILE =====
+  // ===== BOT�O HAMBURGER PARA MOBILE =====
   function MobileMenuButton({ onClick }) {
     return e('button', {
       className: 'mobile-menu-btn',
       onClick: onClick,
-      style: { display: 'none' } // Será exibido apenas em mobile via CSS
-    }, '☰')
+      style: { display: 'none' } // Ser� exibido apenas em mobile via CSS
+    }, '?')
   }
 
   // ===== HOOK CUSTOMIZADO PARA CONTROLE REMOTO =====
@@ -3948,11 +3961,11 @@ header("Expires: 0");
         const target = event.target
         const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable
         if (isInput) {
-          // Não interceptar eventos de teclado quando estiver em inputs
+          // N�o interceptar eventos de teclado quando estiver em inputs
           return
         }
 
-        // SETAS - Navegação
+        // SETAS - Navega��o
         if (RemoteKeyMap.matches(RemoteKeyMap.ARROW_UP, event)) {
           event.preventDefault()
           handlers.onUp?.()
@@ -3991,12 +4004,12 @@ header("Expires: 0");
           return
         }
 
-        // NÚMEROS 0-9 - Navegação direta por canal
+        // N�MEROS 0-9 - Navega��o direta por canal
         for (let num = 0; num <= 9; num++) {
           if (RemoteKeyMap.matches(RemoteKeyMap[`NUM_${num}`], event)) {
             event.preventDefault()
 
-            // Acumular números digitados
+            // Acumular n�meros digitados
             const newInput = channelInput + num
             setChannelInput(newInput)
 
@@ -4015,7 +4028,7 @@ header("Expires: 0");
           }
         }
 
-        // BOTÕES COLORIDOS
+        // BOT�ES COLORIDOS
         if (RemoteKeyMap.matches(RemoteKeyMap.RED, event)) {
           event.preventDefault()
           handlers.onRed?.()
@@ -4040,7 +4053,7 @@ header("Expires: 0");
           return
         }
 
-        // CONTROLE DE MÍDIA
+        // CONTROLE DE M�DIA
         if (RemoteKeyMap.matches(RemoteKeyMap.PLAY, event)) {
           event.preventDefault()
           handlers.onPlayPause?.()
@@ -4081,18 +4094,26 @@ header("Expires: 0");
     return { channelInput }
   }
 
-  // Variável global para rastrear o último canal carregado no player
+  // Vari�vel global para rastrear o �ltimo canal carregado no player
   let lastLoadedChannel = { id: null, playback_url: null }
-  // Variável global para preservar a instância do HLS entre re-renders
+  // Vari�vel global para preservar a inst�ncia do HLS entre re-renders
   let globalHlsInstance = null
+  // Cache global para dados de s�ries (evitar re-fetch)
+  const seriesCache = {}
+  // Set global para rastrear s�ries que est�o sendo ou j� foram carregadas
+  const seriesLoadingState = new Set()
+  // Set global para rastrear s�ries que j� tiveram estado atualizado (evitar m�ltiplas atualiza��es)
+  const seriesStateUpdated = new Set()
 
   function App(){
+    console.log('[App] 🔄 RENDERIZANDO')
+
     const [view,setViewRaw] = useState('config')
     const [showParentalPin, setShowParentalPin] = useState(false)
     const [pendingAdultView, setPendingAdultView] = useState(false)
     const [previousView, setPreviousView] = useState(null) // Para lembrar de onde veio antes do player
 
-    // Wrapper para logar todas as mudanças de view
+    // Wrapper para logar todas as mudan�as de view
     const setView = (newView) => {
       console.trace('[setView] Stack trace:')
       // Salvar a view atual como previousView ANTES de ir para o player
@@ -4111,33 +4132,33 @@ header("Expires: 0");
     const [tmdbKey,setTmdbKey] = useLocalStorage('tmdb_api_key', '7e61dfdf698b31e14082e80a0ca9f9fa')
     const [tmdbCache,setTmdbCache] = useLocalStorage('tmdb_cache', {})
 
-    // ===== SISTEMA DE CACHE EM MEMÓRIA PARA TMDB (PERFORMANCE) =====
+    // ===== SISTEMA DE CACHE EM MEM�RIA PARA TMDB (PERFORMANCE) =====
     // Cache em RAM para evitar parsing JSON do localStorage a cada leitura
     const tmdbMemCache = useRef({
       search: {},     // Cache de buscas por nome
       details: {},    // Cache de detalhes por ID
-      images: new Set() // Set de URLs de imagens já carregadas
+      images: new Set() // Set de URLs de imagens j� carregadas
     })
 
     // ===== RATE LIMITER INTELIGENTE PARA TMDB =====
-    // TMDB tem limite de ~40 requisições por 10 segundos
+    // TMDB tem limite de ~40 requisi��es por 10 segundos
     const tmdbRateLimiter = useRef({
-      queue: [],           // Fila de requisições pendentes
+      queue: [],           // Fila de requisi��es pendentes
       processing: false,   // Flag de processamento
-      requestTimes: [],    // Timestamps das últimas requisições
-      maxRequests: 35,     // Máximo de requisições (seguro: 35/10s)
+      requestTimes: [],    // Timestamps das �ltimas requisi��es
+      maxRequests: 35,     // M�ximo de requisi��es (seguro: 35/10s)
       timeWindow: 10000    // Janela de tempo (10 segundos)
     })
 
-    // ===== BATCHING DE REQUISIÇÕES TMDB =====
-    // Agrupa múltiplas requisições em lotes para evitar rate limit
+    // ===== BATCHING DE REQUISI��ES TMDB =====
+    // Agrupa m�ltiplas requisi��es em lotes para evitar rate limit
     const tmdbBatcher = useRef({
       pending: new Map(),  // Map de promises pendentes (evita duplicatas)
       timeout: null,       // Timeout para processar batch
-      batchDelay: 100      // Delay para agrupar requisições (100ms)
+      batchDelay: 100      // Delay para agrupar requisi��es (100ms)
     })
 
-    // Sincronizar configuração com XCClient
+    // Sincronizar configura��o com XCClient
     useEffect(() => {
       window.__xcConfig = {
         username: cfg.username || '',
@@ -4145,13 +4166,13 @@ header("Expires: 0");
       }
     }, [cfg.username, cfg.password])
 
-    // ===== INTEGRAÇÃO DE CONTROLE REMOTO PARA SMART TV =====
+    // ===== INTEGRA��O DE CONTROLE REMOTO PARA SMART TV =====
     const { channelInput } = useRemoteControl({
       onUp: () => {
         // Navegar para cima nas listas
         const focused = document.activeElement
         if (!focused || focused === document.body) {
-          // Focar primeiro elemento navegável
+          // Focar primeiro elemento naveg�vel
           const firstFocusable = document.querySelector('button, [role="button"], a[href]')
           firstFocusable?.focus()
         }
@@ -4166,11 +4187,11 @@ header("Expires: 0");
       },
       onLeft: () => {
         // Navegar para esquerda (pode ser EPG ou sidebar)
-        // Deixar navegação nativa do browser
+        // Deixar navega��o nativa do browser
       },
       onRight: () => {
         // Navegar para direita (pode ser EPG ou detalhes)
-        // Deixar navegação nativa do browser
+        // Deixar navega��o nativa do browser
       },
       onSelect: () => {
         // Simular clique no elemento focado
@@ -4191,26 +4212,26 @@ header("Expires: 0");
       },
       onChannelNumber: (number) => {
         // Ir direto para o canal digitado
-        // TODO: Implementar lógica de seleção direta de canal
+        // TODO: Implementar l�gica de sele��o direta de canal
       },
       onRed: () => {
-        // Botão vermelho: Favoritos
+        // Bot�o vermelho: Favoritos
         // TODO: Implementar tela de favoritos
       },
       onGreen: () => {
-        // Botão verde: Guia EPG completo
+        // Bot�o verde: Guia EPG completo
         setView('live-categories')
       },
       onYellow: () => {
-        // Botão amarelo: Configurações
+        // Bot�o amarelo: Configura��es
         setView('config')
       },
       onBlue: () => {
-        // Botão azul: Busca
+        // Bot�o azul: Busca
         // TODO: Implementar tela de busca global
       },
       onPlayPause: () => {
-        // Controlar reprodução do vídeo
+        // Controlar reprodu��o do v�deo
         const video = document.querySelector('video')
         if (video) {
           if (video.paused) {
@@ -4221,7 +4242,7 @@ header("Expires: 0");
         }
       },
       onStop: () => {
-        // Parar reprodução e voltar
+        // Parar reprodu��o e voltar
         if (view === 'player') {
           setView('home')
         }
@@ -4234,7 +4255,7 @@ header("Expires: 0");
         }
       },
       onForward: () => {
-        // Avançar 10 segundos
+        // Avan�ar 10 segundos
         const video = document.querySelector('video')
         if (video) {
           video.currentTime = Math.min(video.duration, video.currentTime + 10)
@@ -4251,7 +4272,7 @@ header("Expires: 0");
     const [liveStreams,setLiveStreams] = useState([])
     const [selectedChannel,setSelectedChannel] = useState(null)
     const [epg,setEpg] = useState([])
-    const [selectedDay,setSelectedDay] = useState(0) // 0 = hoje, 1 = amanhã, etc.
+    const [selectedDay,setSelectedDay] = useState(0) // 0 = hoje, 1 = amanh�, etc.
     const [selectedEpgId,setSelectedEpgId] = useState(null) // ID do programa EPG selecionado
     const [liveLeftMode,setLiveLeftMode] = useState('categories')
     const autoOpenLiveRef = useRef(false)
@@ -4263,12 +4284,12 @@ header("Expires: 0");
     const [channelVariants,setChannelVariants] = useLocalStorage('channel_quality_prefs', {})
     const [toast,setToast] = useState(null)
 
-    // Genérico
+    // Gen�rico
     const [selectedCat,setSelectedCat] = useState(null)
     const [items,setItems] = useState([])
     const [query,setQuery] = useState('')
 
-    // Inicializar selectedCat com primeira categoria prioritária quando vodCats ou seriesCats carregar
+    // Inicializar selectedCat com primeira categoria priorit�ria quando vodCats ou seriesCats carregar
     useEffect(() => {
       const isMoviesView = view === 'netflix-movies'
       const isSeriesView = view === 'netflix-series'
@@ -4293,14 +4314,14 @@ header("Expires: 0");
                  !catName.includes('show')
         })
       } else if (isSeriesView) {
-        // Na view de séries: REMOVER categorias 18+
+        // Na view de s�ries: REMOVER categorias 18+
         categories = categories.filter(cat => {
           const catName = (cat.category_name || cat.name || '').toLowerCase().trim()
           return !catName.startsWith('18+')
         })
       }
 
-      // Sempre selecionar primeira categoria quando entrar na view (mesmo que já tenha selectedCat de antes)
+      // Sempre selecionar primeira categoria quando entrar na view (mesmo que j� tenha selectedCat de antes)
       if (categories.length > 0 && (isMoviesView || isSeriesView || isAdultView)) {
         // Aplicar mesma lógica de prioridade do CategoryBar
         const priorityNames = [
@@ -4365,7 +4386,7 @@ header("Expires: 0");
     }, [view])
 
     const [current,setCurrent] = useState(null)
-    const [selectedContent, setSelectedContent] = useState(null) // Para página de detalhes
+    const [selectedContent, setSelectedContent] = useState(null) // Para p�gina de detalhes
 
     // Trailer modal (global)
     const [trailerUrl, setTrailerUrl] = useState(null)
@@ -4376,7 +4397,7 @@ header("Expires: 0");
       const ct = (res.headers.get('content-type')||'').toLowerCase()
       if(ct.includes('application/json')) return res.json()
       const text = await res.text()
-      try{ return JSON.parse(text) }catch{ throw new Error('Resposta não-JSON da API') }
+      try{ return JSON.parse(text) }catch{ throw new Error('Resposta n�o-JSON da API') }
     }
 
     async function fetchJsonAuto(url){
@@ -4390,12 +4411,12 @@ header("Expires: 0");
         throw new Error(`[HTTP ${res.status}] ${text.slice(0, 200)}`)
       }
 
-      // Validar que é JSON e não HTML
+      // Validar que � JSON e n�o HTML
       if(!contentType.includes('application/json') && !contentType.includes('text/plain')) {
         throw new Error(`Expected JSON, got: ${contentType || 'unknown'} | body: ${text.slice(0, 200)}`)
       }
 
-      // Verificar se não é HTML (fallback do SPA)
+      // Verificar se n�o � HTML (fallback do SPA)
       if(text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
         throw new Error('Received HTML instead of JSON - check proxy configuration')
       }
@@ -4407,27 +4428,27 @@ header("Expires: 0");
       }
     }
 
-    // Cache para requisições da API (evitar loops)
+    // Cache para requisi��es da API (evitar loops)
     const apiCache = {}
     const CACHE_DURATION = 5 * 60 * 1000 // 5 minutos
 
     async function apiCall(action, params){
-      if(!cfg.server || !cfg.username || !cfg.password){ throw new Error('Configuração incompleta') }
+      if(!cfg.server || !cfg.username || !cfg.password){ throw new Error('Configura��o incompleta') }
 
       // Criar chave de cache baseada na action e params
       const cacheKey = `${action}_${JSON.stringify(params || {})}`
       const now = Date.now()
 
-      // Verificar se existe no cache e ainda é válido
+      // Verificar se existe no cache e ainda � v�lido
       if(apiCache[cacheKey] && (now - apiCache[cacheKey].timestamp) < CACHE_DURATION){
         return apiCache[cacheKey].data
       }
 
-      // Usar api.php local (proxy) ao invés de chamar servidor remoto diretamente
+      // Usar api.php local (proxy) ao inv�s de chamar servidor remoto diretamente
       const usp = new URLSearchParams({ username:cfg.username, password:cfg.password, action, ...(params||{}) })
       const url = 'api.php?' + usp.toString()
 
-      // Usar pool de requisições + retry
+      // Usar pool de requisi��es + retry
       return await withRequestPool(async () => {
         return await withRetry(async () => {
           try {
@@ -4438,7 +4459,7 @@ header("Expires: 0");
 
             return data
           } catch(error) {
-            // get_vod_info com 502/500 não é crítico (pode buscar direto no TMDB)
+            // get_vod_info com 502/500 n�o � cr�tico (pode buscar direto no TMDB)
             if(action === 'get_vod_info' && (error.message.includes('502') || error.message.includes('500'))) {
             } else {
             }
@@ -4448,7 +4469,7 @@ header("Expires: 0");
       })
     }
 
-    // Compat: alguns painéis exigem 'series' ao invés de 'series_id' em get_series_info
+    // Compat: alguns pain�is exigem 'series' ao inv�s de 'series_id' em get_series_info
     async function apiCallSeriesInfo(seriesId){
       let data = null
       try{ data = await apiCall('get_series_info', { series_id: seriesId }) }catch{}
@@ -4456,11 +4477,11 @@ header("Expires: 0");
       if(!hasEpisodes){
         try{ const alt = await apiCall('get_series_info', { series: seriesId }); if(alt) data = alt }catch{}
       }
-      if(!data) throw new Error('Falha ao obter informações da série')
+      if(!data) throw new Error('Falha ao obter informa��es da s�rie')
       return data
     }
 
-    // TMDB API - OTIMIZADO COM CACHE EM MEMÓRIA + RATE LIMITING
+    // TMDB API - OTIMIZADO COM CACHE EM MEM�RIA + RATE LIMITING
     async function searchTMDB(title, type = 'movie'){
       let apiKey = localStorage.getItem('tmdb_api_key')
       if(!apiKey || apiKey === '""' || apiKey === '') {
@@ -4470,29 +4491,29 @@ header("Expires: 0");
       apiKey = apiKey.replace(/"/g, '')
       const cacheKey = `${type}_${title}`
 
-      // ===== NOVO: Verificar cache em memória primeiro =====
+      // ===== NOVO: Verificar cache em mem�ria primeiro =====
       const cached = getMemCache('search', cacheKey)
       if (cached) return cached
 
-      // ===== NOVO: Usar batching para evitar requisições duplicadas =====
+      // ===== NOVO: Usar batching para evitar requisi��es duplicadas =====
       return batchedTMDBRequest(`search_${cacheKey}`, async () => {
         try{
-          // ===== SANITIZER AGRESSIVO: Remove sufixos comuns de títulos VOD =====
+          // ===== SANITIZER AGRESSIVO: Remove sufixos comuns de t�tulos VOD =====
           let cleanTitle = title
             .replace(/\s*\([LDlD]\)/gi, '')    // Remove (L) (D) de legendado/dublado
-            .replace(/\s*\((HD|FHD|4K|CAM|WEB-DL|BluRay|BRRip|DVDRip)\)/gi, '') // Qualidade entre parênteses
-            .replace(/\b(UHD|FHD|4K|1080p|720p|HDR|TESTE4K|TESTE|2160p)\b/gi, '') // Qualidade sem parênteses
+            .replace(/\s*\((HD|FHD|4K|CAM|WEB-DL|BluRay|BRRip|DVDRip)\)/gi, '') // Qualidade entre par�nteses
+            .replace(/\b(UHD|FHD|4K|1080p|720p|HDR|TESTE4K|TESTE|2160p)\b/gi, '') // Qualidade sem par�nteses
             .replace(/\(.*?\)/g, '')           // Remove (qualquer coisa restante)
             .replace(/\s*-\s*\d{4}$/g, '')     // Remove " - 2025" do final
             .replace(/\s*\d{4}\s*$/g, '')      // Remove "2025" do final
             .replace(/\s*-\s*$/, '')           // Remove " - " do final
-            .replace(/[–—:]/g, ' ')            // Travessões e dois-pontos viram espaço
+            .replace(/[��:]/g, ' ')            // Travess�es e dois-pontos viram espa�o
             .normalize('NFD')                  // Normaliza acentos
-            .replace(/[\u0300-\u036f]/g, '')   // Remove diacríticos (acentos)
-            .replace(/\s{2,}/g, ' ')           // Normaliza espaços múltiplos (2+)
+            .replace(/[\u0300-\u036f]/g, '')   // Remove diacr�ticos (acentos)
+            .replace(/\s{2,}/g, ' ')           // Normaliza espa�os m�ltiplos (2+)
             .trim()
 
-          // Se ficou vazio após limpeza, não buscar
+          // Se ficou vazio ap�s limpeza, n�o buscar
           if(!cleanTitle || cleanTitle.length < 2) {
             return null
           }
@@ -4515,7 +4536,7 @@ header("Expires: 0");
             tmdb_id: data.results[0].id
           } : null
 
-          // ===== NOVO: Salvar em cache de memória + localStorage =====
+          // ===== NOVO: Salvar em cache de mem�ria + localStorage =====
           setMemCache('search', cacheKey, result)
           return result
         }catch(err){
@@ -4524,18 +4545,18 @@ header("Expires: 0");
       })
     }
 
-    // ===== FUNÇÕES DE PERFORMANCE TMDB =====
+    // ===== FUN��ES DE PERFORMANCE TMDB =====
 
-    // Rate Limiter com Concorrência: Garante que não ultrapassamos 35 req/10s E máximo 6 simultâneas
+    // Rate Limiter com Concorr�ncia: Garante que n�o ultrapassamos 35 req/10s E m�ximo 6 simult�neas
     async function rateLimitedFetch(url, requestType = 'unknown') {
       const limiter = tmdbRateLimiter.current
 
-      // Inicializar contador de requisições simultâneas
+      // Inicializar contador de requisi��es simult�neas
       if (!limiter.running) limiter.running = 0
       if (!limiter.queue) limiter.queue = []
       const MAX_CONCURRENT = 6
 
-      // Se já estamos no máximo de concorrência, enfileirar
+      // Se j� estamos no m�ximo de concorr�ncia, enfileirar
       if (limiter.running >= MAX_CONCURRENT) {
         return new Promise((resolve, reject) => {
           limiter.queue.push(() => rateLimitedFetch(url, requestType).then(resolve).catch(reject))
@@ -4555,10 +4576,10 @@ header("Expires: 0");
         return rateLimitedFetch(url, requestType) // Tentar novamente
       }
 
-      // Incrementar contador de requisições simultâneas
+      // Incrementar contador de requisi��es simult�neas
       limiter.running++
 
-      // Registrar requisição no rate limit
+      // Registrar requisi��o no rate limit
       limiter.requestTimes.push(Date.now())
 
       try {
@@ -4568,26 +4589,26 @@ header("Expires: 0");
         // Decrementar contador
         limiter.running--
 
-        // Processar próximo item da fila
+        // Processar pr�ximo item da fila
         if (limiter.queue.length > 0 && limiter.running < MAX_CONCURRENT) {
           const next = limiter.queue.shift()
-          setTimeout(() => next(), 0) // Processar na próxima tick
+          setTimeout(() => next(), 0) // Processar na pr�xima tick
         }
       }
     }
 
-    // Batching: Agrupa requisições duplicadas (evita buscar mesmo filme 2x)
+    // Batching: Agrupa requisi��es duplicadas (evita buscar mesmo filme 2x)
     function batchedTMDBRequest(key, fetchFunction) {
       const batcher = tmdbBatcher.current
 
-      // Se já existe uma promise pendente para esta key, retornar ela
+      // Se j� existe uma promise pendente para esta key, retornar ela
       if (batcher.pending.has(key)) {
         return batcher.pending.get(key)
       }
 
       // Criar nova promise
       const promise = fetchFunction().finally(() => {
-        // Remover da fila após completar
+        // Remover da fila ap�s completar
         batcher.pending.delete(key)
       })
 
@@ -4596,7 +4617,7 @@ header("Expires: 0");
       return promise
     }
 
-    // Cache em memória: Verifica cache RAM antes de localStorage
+    // Cache em mem�ria: Verifica cache RAM antes de localStorage
     function getMemCache(type, key) {
       const cache = tmdbMemCache.current
 
@@ -4611,7 +4632,7 @@ header("Expires: 0");
       // Tentar localStorage como fallback
       const cacheKey = type === 'search' ? key : `details_${key}`
       if (tmdbCache[cacheKey]) {
-        // Copiar para memória para próximas leituras
+        // Copiar para mem�ria para pr�ximas leituras
         if (type === 'search') {
           cache.search[key] = tmdbCache[cacheKey]
         } else {
@@ -4623,7 +4644,7 @@ header("Expires: 0");
       return null
     }
 
-    // Salvar em ambos os caches (memória + localStorage)
+    // Salvar em ambos os caches (mem�ria + localStorage)
     function setMemCache(type, key, value) {
       const cache = tmdbMemCache.current
 
@@ -4638,25 +4659,25 @@ header("Expires: 0");
     }
 
     // ===== LAZY LOADING INTELIGENTE DE IMAGENS =====
-    // Pré-carrega imagens de forma controlada para evitar overhead
+    // Pr�-carrega imagens de forma controlada para evitar overhead
     const imagePreloader = useRef({
-      loaded: new Set(),    // URLs já carregadas
+      loaded: new Set(),    // URLs j� carregadas
       loading: new Set(),   // URLs sendo carregadas no momento
       queue: [],           // Fila de URLs para carregar
       processing: false,   // Flag de processamento
-      maxConcurrent: 6     // Máximo de imagens simultâneas
+      maxConcurrent: 6     // M�ximo de imagens simult�neas
     })
 
-    // Pré-carrega uma imagem (retorna promise)
+    // Pr�-carrega uma imagem (retorna promise)
     function preloadImage(url) {
       const preloader = imagePreloader.current
 
       if (!url || preloader.loaded.has(url)) {
-        return Promise.resolve() // Já carregada
+        return Promise.resolve() // J� carregada
       }
 
       if (preloader.loading.has(url)) {
-        // Já está sendo carregada, aguardar
+        // J� est� sendo carregada, aguardar
         return new Promise((resolve) => {
           const checkInterval = setInterval(() => {
             if (preloader.loaded.has(url) || !preloader.loading.has(url)) {
@@ -4688,7 +4709,7 @@ header("Expires: 0");
       })
     }
 
-    // Pré-carrega múltiplas imagens em lotes controlados
+    // Pr�-carrega m�ltiplas imagens em lotes controlados
     async function preloadImagesInBatches(urls) {
       const preloader = imagePreloader.current
       const validUrls = urls.filter(url => url && !preloader.loaded.has(url))
@@ -4704,14 +4725,14 @@ header("Expires: 0");
         // Carregar lote em paralelo
         await Promise.allSettled(batch.map(url => preloadImage(url)))
 
-        // Pequeno delay entre lotes para não sobrecarregar
+        // Pequeno delay entre lotes para n�o sobrecarregar
         if (i + preloader.maxConcurrent < validUrls.length) {
           await new Promise(resolve => setTimeout(resolve, 200))
         }
       }
     }
 
-    // Buscar detalhes completos do TMDB (gêneros, duração, etc.) em pt-BR - OTIMIZADO
+    // Buscar detalhes completos do TMDB (g�neros, dura��o, etc.) em pt-BR - OTIMIZADO
     async function getTMDBDetails(tmdb_id, type = 'movie'){
       let apiKey = localStorage.getItem('tmdb_api_key')
       if(!apiKey || apiKey === '""' || apiKey === '') {
@@ -4726,21 +4747,21 @@ header("Expires: 0");
 
       const cacheKey = `${type}_${tmdb_id}`
 
-      // ===== NOVO: Verificar cache em memória primeiro =====
+      // ===== NOVO: Verificar cache em mem�ria primeiro =====
       const cached = getMemCache('details', cacheKey)
       if (cached && cached.belongs_to_collection !== undefined) {
-        // Verificar se cast está no formato antigo (string) - se sim, invalidar cache
+        // Verificar se cast est� no formato antigo (string) - se sim, invalidar cache
         const hasOldCastFormat = typeof cached.cast === 'string'
         if(!hasOldCastFormat) {
           return cached
         }
-        // Se tem formato antigo, não retornar - continuar para busca nova
+        // Se tem formato antigo, n�o retornar - continuar para busca nova
       }
 
-      // ===== NOVO: Usar batching para evitar requisições duplicadas =====
+      // ===== NOVO: Usar batching para evitar requisi��es duplicadas =====
       return batchedTMDBRequest(`details_${cacheKey}`, async () => {
         try{
-          // ===== BUSCAR DETALHES + CRÉDITOS (elenco e diretor) =====
+          // ===== BUSCAR DETALHES + CR�DITOS (elenco e diretor) =====
           const url = `https://api.themoviedb.org/3/${type}/${tmdb_id}?api_key=${apiKey}&language=pt-BR&append_to_response=credits`
 
           // ===== NOVO: Usar rate limiter =====
@@ -4772,22 +4793,22 @@ header("Expires: 0");
             original_language: data.original_language?.toUpperCase() || null, // ===== NOVO: Idioma =====
             status: data.status || null, // ===== NOVO: Status (Released, etc) =====
             tmdb_id: data.id,
-            belongs_to_collection: data.belongs_to_collection || null // Informação da coleção
+            belongs_to_collection: data.belongs_to_collection || null // Informa��o da cole��o
           }
 
-          // ===== OTIMIZAÇÃO: Fallback para EN-US se PT-BR não tiver overview =====
+          // ===== OTIMIZA��O: Fallback para EN-US se PT-BR n�o tiver overview =====
           if(!result.overview){
             try {
               const urlEn = `https://api.themoviedb.org/3/${type}/${tmdb_id}?api_key=${apiKey}&language=en-US`
               const resEn = await rateLimitedFetch(urlEn, `details-en:${tmdb_id}`)
               const dataEn = await resEn.json()
-              result.overview = dataEn.overview || 'Sem descrição disponível.'
+              result.overview = dataEn.overview || 'Sem descri��o dispon�vel.'
             } catch(errEn) {
-              result.overview = 'Sem descrição disponível.'
+              result.overview = 'Sem descri��o dispon�vel.'
             }
           }
 
-          // ===== NOVO: Salvar em cache de memória + localStorage =====
+          // ===== NOVO: Salvar em cache de mem�ria + localStorage =====
           setMemCache('details', cacheKey, result)
           return result
         }catch(err){
@@ -4808,7 +4829,7 @@ header("Expires: 0");
 
       const cacheKey = `trailer_${type}_${tmdb_id}`
 
-      // ===== NOVO: Verificar cache em memória primeiro =====
+      // ===== NOVO: Verificar cache em mem�ria primeiro =====
       const cached = getMemCache('details', cacheKey)
       if(cached) {
         return cached
@@ -4828,7 +4849,7 @@ header("Expires: 0");
             (v.type === 'Trailer' || v.type === 'Teaser')
           )
 
-          // Fallback para en-US se não encontrar em pt-BR
+          // Fallback para en-US se n�o encontrar em pt-BR
           if(!trailer) {
             const urlEn = `https://api.themoviedb.org/3/${type}/${tmdb_id}/videos?api_key=${apiKey}&language=en-US`
             // ===== NOVO: Rate limiting =====
@@ -4860,13 +4881,13 @@ header("Expires: 0");
       })
     }
 
-    // ===== COLEÇÕES TMDB =====
-    // Identificar e agrupar coleções a partir dos filmes locais
+    // ===== COLE��ES TMDB =====
+    // Identificar e agrupar cole��es a partir dos filmes locais
     async function findCollectionsInMovies(movies) {
       const collectionsMap = new Map()
 
       for(const movie of movies) {
-        // Se o filme já foi enriquecido e tem collection_id
+        // Se o filme j� foi enriquecido e tem collection_id
         if(movie.tmdb_collection && movie.tmdb_collection.id) {
           const collectionId = movie.tmdb_collection.id
 
@@ -4890,7 +4911,7 @@ header("Expires: 0");
       return result
     }
 
-    // Buscar informações completas de uma coleção
+    // Buscar informa��es completas de uma cole��o
     async function getTMDBCollection(collection_id) {
       let apiKey = localStorage.getItem('tmdb_api_key')
       if(!apiKey || apiKey === '""' || apiKey === '') {
@@ -4918,10 +4939,10 @@ header("Expires: 0");
           overview: data.overview,
           poster: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : null,
           backdrop: data.backdrop_path ? `https://image.tmdb.org/t/p/original${data.backdrop_path}` : null,
-          parts: data.parts || [] // Array de filmes da coleção
+          parts: data.parts || [] // Array de filmes da cole��o
         }
 
-        // Fallback para en-US se pt-BR não tiver overview
+        // Fallback para en-US se pt-BR n�o tiver overview
         if(!result.overview) {
           const urlEn = `https://api.themoviedb.org/3/collection/${collection_id}?api_key=${apiKey}&language=en-US`
           const resEn = await fetch(urlEn)
@@ -4937,7 +4958,7 @@ header("Expires: 0");
       }
     }
 
-    // ===== ENRIQUECIMENTO AUTOMÁTICO DE FILMES =====
+    // ===== ENRIQUECIMENTO AUTOM�TICO DE FILMES =====
     // Busca TMDB ID do servidor primeiro, depois fallback para busca por nome
     async function enrichMovieWithTMDB(movie, contentType = 'movie') {
       let apiKey = localStorage.getItem('tmdb_api_key')
@@ -4947,11 +4968,11 @@ header("Expires: 0");
       // Remove aspas se tiver
       apiKey = apiKey.replace(/"/g, '')
 
-      // Detectar tipo de conteúdo (série ou filme) automaticamente
+      // Detectar tipo de conte�do (s�rie ou filme) automaticamente
       const tmdbType = contentType === 'series' || movie.series_id ? 'tv' : 'movie'
 
       // ===== GUARD: Verificar cache de enriquecimento PRIMEIRO =====
-      // ===== CORREÇÃO: Incluir nome do filme na chave quando stream_id for undefined =====
+      // ===== CORRE��O: Incluir nome do filme na chave quando stream_id for undefined =====
       const streamId = movie.stream_id || movie.id
       const movieName = movie.name || movie.title || ''
       const cacheKey = streamId && streamId !== 'undefined' ? streamId : `name_${movieName}`
@@ -4962,17 +4983,17 @@ header("Expires: 0");
 
       if (window.__enrichmentCache.has(cacheKey)) {
         const cached = window.__enrichmentCache.get(cacheKey)
-        // Verificar se cast está no formato antigo (string) - se sim, invalidar cache
+        // Verificar se cast est� no formato antigo (string) - se sim, invalidar cache
         const hasOldCastFormat = typeof cached.tmdb_cast === 'string'
         if(hasOldCastFormat) {
           window.__enrichmentCache.delete(cacheKey)
-          // NÃO retornar - continuar para busca nova
+          // N�O retornar - continuar para busca nova
         } else {
           return cached
         }
       }
 
-      // ===== NOVO: Usar prepareForTMDB para normalização =====
+      // ===== NOVO: Usar prepareForTMDB para normaliza��o =====
       const originalName = movie.name || movie.title
       const titleInfo = prepareForTMDB(originalName)
 
@@ -4985,10 +5006,10 @@ header("Expires: 0");
         searchName: titleInfo.searchTitle          // Nome para buscar no TMDB (limpo)
       }
 
-      // Se já tem dados TMDB completos, retorna e cacheia
+      // Se j� tem dados TMDB completos, retorna e cacheia
       // EXCETO se tmdb_cast for string (formato antigo) - nesse caso busca novamente
       if(movie.tmdb_overview && movie.tmdb_poster && movie.tmdb_backdrop) {
-        // Verificar se cast está no formato novo (array) ou antigo (string)
+        // Verificar se cast est� no formato novo (array) ou antigo (string)
         const hasOldCastFormat = typeof movie.tmdb_cast === 'string'
 
         if(!hasOldCastFormat) {
@@ -4999,12 +5020,12 @@ header("Expires: 0");
         // Se tem formato antigo, continuar para busca nova
       }
 
-      // ===== OTIMIZAÇÃO: Verificar cache por nome PRIMEIRO (mais rápido) =====
+      // ===== OTIMIZA��O: Verificar cache por nome PRIMEIRO (mais r�pido) =====
       const cleanName = titleInfo.searchTitle.toLowerCase().replace(/[^\w\s]/g, '').trim()
       const cachedSearch = getMemCache('search', cleanName)
 
       if (cachedSearch) {
-        // Verificar se cast está no formato novo (array) ou antigo (string)
+        // Verificar se cast est� no formato novo (array) ou antigo (string)
         const hasOldCastFormat = typeof cachedSearch.cast === 'string'
 
         if(!hasOldCastFormat) {
@@ -5033,10 +5054,10 @@ header("Expires: 0");
       try {
         let tmdbId = movie.tmdb_id // Pode vir do cache ou do servidor
 
-        // ===== DESABILITADO: get_vod_info muito lento e não retorna JSON =====
-        // Ir direto para busca TMDB por nome (mais rápido e confiável)
+        // ===== DESABILITADO: get_vod_info muito lento e n�o retorna JSON =====
+        // Ir direto para busca TMDB por nome (mais r�pido e confi�vel)
 
-        // Estratégia 1: Se tem TMDB ID (do servidor ou cache), busca detalhes completos
+        // Estrat�gia 1: Se tem TMDB ID (do servidor ou cache), busca detalhes completos
         if(tmdbId) {
           const details = await getTMDBDetails(tmdbId, tmdbType)
 
@@ -5064,7 +5085,7 @@ header("Expires: 0");
           }
         }
 
-        // Estratégia 2 (principal): Busca por nome (sem "(L)" para legendado)
+        // Estrat�gia 2 (principal): Busca por nome (sem "(L)" para legendado)
         const searchResult = await searchTMDB(titleInfo.searchTitle, tmdbType)
 
         if(searchResult) {
@@ -5093,7 +5114,7 @@ header("Expires: 0");
             return enriched
           }
 
-          // Fallback: se detalhes falharem, usar dados básicos da busca
+          // Fallback: se detalhes falharem, usar dados b�sicos da busca
           const enriched = {
             ...movieWithLangType,
             tmdb_id: searchResult.tmdb_id,
@@ -5107,7 +5128,7 @@ header("Expires: 0");
           return enriched
         }
 
-        // Silenciar - não poluir console (filme não encontrado no TMDB é normal)
+        // Silenciar - n�o poluir console (filme n�o encontrado no TMDB � normal)
         window.__enrichmentCache.set(cacheKey, movieWithLangType)
         return movieWithLangType
 
@@ -5119,7 +5140,7 @@ header("Expires: 0");
     }
 
     async function fetchAccountInfo(){
-      if(!cfg.server || !cfg.username || !cfg.password){ throw new Error('Configuração incompleta') }
+      if(!cfg.server || !cfg.username || !cfg.password){ throw new Error('Configura��o incompleta') }
       const qs = new URLSearchParams({ username:cfg.username, password:cfg.password })
       const url1 = buildURL(cfg.server, ['player_api.php']) + '?' + qs.toString() + '&action=get_account_info'
       const url2 = buildURL(cfg.server, ['player_api.php']) + '?' + qs.toString()
@@ -5130,11 +5151,11 @@ header("Expires: 0");
       if(/cors|network|falha de rede/i.test(msg)) return 'O painel bloqueou requisições do navegador (CORS) OU o DNS/porta está errado/fora do ar.'
       if(/401|403/.test(msg)) return 'Usuário/senha incorretos ou bloqueados.'
       if(/404/.test(msg)) return 'Endpoint /player_api.php não encontrado nesse DNS/porta.'
-      if(/Resposta não-JSON|Resposta inválida/i.test(msg)) return 'Formato de resposta inesperado para a API.'
+      if(/Resposta n�o-JSON|Resposta inv�lida/i.test(msg)) return 'Formato de resposta inesperado para a API.'
       return 'Não foi possível autenticar com essas credenciais/URL.'
     }
 
-    // Carregamento pontual por seção
+    // Carregamento pontual por se��o
     async function loadCatsByType(type){
       try{
         if(type==='live'){
@@ -5164,10 +5185,10 @@ header("Expires: 0");
       }catch{ /* silencioso: se falhar, mostramos 0 ou cat.total */ }
     }
 
-    // Só busca quando a view entrar E se ainda não tiver sido pré-carregado
+    // S� busca quando a view entrar E se ainda n�o tiver sido pr�-carregado
     useEffect(()=>{
-      // Com o preload, as categorias já estarão carregadas na maioria dos casos
-      // Só carrega se realmente estiver vazio (fallback)
+      // Com o preload, as categorias j� estar�o carregadas na maioria dos casos
+      // S� carrega se realmente estiver vazio (fallback)
       if(view==='live-categories' && liveCats.length===0) {
         autoOpenLiveRef.current = false
         loadCatsByType('live')
@@ -5186,7 +5207,7 @@ header("Expires: 0");
       if(view==='desenhos-categories' && seriesCats.length===0) loadCatsByType('series')
       if(view==='show-categories' && vodCats.length===0) loadCatsByType('vod')
       if(view==='adult-content') {
-        // Carregar AMBAS categorias VOD e SERIES para conteúdo adulto
+        // Carregar AMBAS categorias VOD e SERIES para conte�do adulto
         if(vodCats.length===0) loadCatsByType('vod')
         if(seriesCats.length===0) loadCatsByType('series')
       }
@@ -5195,7 +5216,7 @@ header("Expires: 0");
       }
     }, [view])
 
-    // Ao carregar as categorias do Live, abrimos a 1ª e, se necessário, buscamos contagens
+    // Ao carregar as categorias do Live, abrimos a 1� e, se necess�rio, buscamos contagens
     useEffect(()=>{
       if(view==='live-categories' && liveCats.length>0){
         if(!selectedLiveCat && !autoOpenLiveRef.current){
@@ -5209,22 +5230,22 @@ header("Expires: 0");
     // reset da flag ao sair da view
     useEffect(()=>{ if(view!=='live-categories') autoOpenLiveRef.current = false }, [view])
 
-    useEffect(()=>{ // autoload se já tiver config
+    useEffect(()=>{ // autoload se j� tiver config
       if(cfg.server && cfg.username && cfg.password){
         setError('')
         fetchAccountInfo().then(info=> {
           setAccount(info.user_info||info)
           setView('home')
 
-          // Pré-carregar categorias em background após auto-login
+          // Pr�-carregar categorias em background ap�s auto-login
           preloadAllCategories()
-          // DESABILITADO: pré-carregamento de conteúdo (causava loop infinito)
+          // DESABILITADO: pr�-carregamento de conte�do (causava loop infinito)
           // preloadTopVodContent()
         }).catch(err=> setError(explainLoginError(err.message||String(err))))
       }
     },[])
 
-    // Pré-carregar TODAS as categorias em paralelo com cache localStorage
+    // Pr�-carregar TODAS as categorias em paralelo com cache localStorage
     async function preloadAllCategories(){
       const CACHE_KEY = 'categories_cache_v1'
       const CACHE_DURATION = 60 * 60 * 1000 // 1 hora em ms
@@ -5247,7 +5268,7 @@ header("Expires: 0");
           }
         }
 
-        // Cache expirado ou não existe - buscar da API
+        // Cache expirado ou n�o existe - buscar da API
         await fetchAndCacheCategories()
 
       }catch(err){
@@ -5309,7 +5330,7 @@ header("Expires: 0");
       }
     }
 
-    // Pré-carregar conteúdo das 3 primeiras categorias de VOD em background
+    // Pr�-carregar conte�do das 3 primeiras categorias de VOD em background
     async function preloadTopVodContent(){
       try{
         // Pegar as 3 primeiras categorias de VOD
@@ -5358,9 +5379,9 @@ header("Expires: 0");
         setAccount(info.user_info||info)
         setView('home')
 
-        // Pré-carregar categorias em background após login
+        // Pr�-carregar categorias em background ap�s login
         preloadAllCategories()
-        // DESABILITADO: pré-carregamento de conteúdo (causava loop infinito)
+        // DESABILITADO: pr�-carregamento de conte�do (causava loop infinito)
         // preloadTopVodContent()
       }catch(err){
         setError(explainLoginError(err.message||String(err)))
@@ -5380,7 +5401,7 @@ header("Expires: 0");
         }else if(type==='vod'){
           const data = await apiCall('get_vod_streams', { category_id: getCatId(cat) })
           setItems(toArray(data))
-        }else{ // series -> lista de séries
+        }else{ // series -> lista de s�ries
           const data = await apiCall('get_series', { category_id: getCatId(cat) })
           setItems(toArray(data))
         }
@@ -5390,28 +5411,28 @@ header("Expires: 0");
 
     // ===== PLAYBACK / CATCH-UP API (MOCK - SUBSTITUIR POR SUA API REAL) =====
 
-    // Retorna os dias que têm gravações disponíveis para um canal
+    // Retorna os dias que t�m grava��es dispon�veis para um canal
     function getRecordedDays(channelId){
       // TODO: Chamar sua API real
       // Exemplo: GET /api/recordings/days?channel_id=123
-      // Por enquanto, retorna últimos 4 dias como mock (3 dias atrás até hoje)
+      // Por enquanto, retorna �ltimos 4 dias como mock (3 dias atr�s at� hoje)
       const days = []
       for(let offset = -3; offset <= 0; offset++){ // -3, -2, -1, 0
         const d = new Date()
-        d.setDate(d.getDate() + offset) // + offset porque offset é negativo
+        d.setDate(d.getDate() + offset) // + offset porque offset � negativo
         d.setHours(0,0,0,0)
         days.push(d)
       }
       return days
     }
 
-    // Constrói URL de playback para um programa gravado
+    // Constr�i URL de playback para um programa gravado
     function getPlaybackUrl(channelId, startUtc, endUtc){
       if(!channelId || !startUtc) {
         return null
       }
 
-      // Converter timestamps Unix para segundos se necessário
+      // Converter timestamps Unix para segundos se necess�rio
       const start = typeof startUtc === 'number' ? startUtc : parseInt(startUtc)
       const end = endUtc ? (typeof endUtc === 'number' ? endUtc : parseInt(endUtc)) : start + 3600
       const durationInSeconds = end - start
@@ -5435,19 +5456,19 @@ header("Expires: 0");
       return url
     }
 
-    // Verifica se um programa está gravado/disponível
+    // Verifica se um programa est� gravado/dispon�vel
     function isProgramRecorded(program, channel, selectedDayOffset){
       // Verificar se o canal tem tv_archive habilitado
       const hasTvArchive = channel && (channel.tv_archive === 1 || channel.tv_archive === "1")
 
       if(!hasTvArchive){
-        return false // Canal não tem playback
+        return false // Canal n�o tem playback
       }
 
       // Apenas programas passados ou atuais podem ser reproduzidos
-      // Programas futuros não têm gravação ainda
+      // Programas futuros n�o t�m grava��o ainda
       if(selectedDayOffset >= -7 && selectedDayOffset <= 0){
-        return true // Canal tem playback e programa está disponível (últimos 7 dias)
+        return true // Canal tem playback e programa est� dispon�vel (�ltimos 7 dias)
       }
 
       return false // Muito antigo ou futuro
@@ -5455,9 +5476,9 @@ header("Expires: 0");
 
     // ===== TV AO VIVO =====
     async function openLiveCategory(cat, switchLeft = true){
-      // ⚠️ BLOQUEIO TOTAL: Se já está na mesma categoria com canal tocando, não fazer NADA
+      // ?? BLOQUEIO TOTAL: Se j� est� na mesma categoria com canal tocando, n�o fazer NADA
       if(selectedLiveCat && getCatId(selectedLiveCat) === getCatId(cat) && selectedChannel) {
-        // Apenas mudar o modo para channels se necessário
+        // Apenas mudar o modo para channels se necess�rio
         if(switchLeft && liveLeftMode !== 'channels') setLiveLeftMode('channels')
         return
       }
@@ -5472,11 +5493,11 @@ header("Expires: 0");
         const data = await apiCall('get_live_streams', { category_id: catId })
         const fullList = toArray(data)
 
-        // Agrupar e pegar apenas canais únicos para exibir no menu
-        // ✅ getUniqueChannels agora detecta tv_archive=1 de QUALQUER variante
+        // Agrupar e pegar apenas canais �nicos para exibir no menu
+        // ? getUniqueChannels agora detecta tv_archive=1 de QUALQUER variante
         const uniqueList = getUniqueChannels(fullList)
 
-        // Usar tv_archive da API Xtream Codes (1 = tem playback, 0 ou null = não tem)
+        // Usar tv_archive da API Xtream Codes (1 = tem playback, 0 ou null = n�o tem)
         const uniqueListWithPlayback = uniqueList.map(ch => ({
           ...ch,
           hasPlayback: ch.tv_archive === 1 || ch.tv_archive === "1"
@@ -5485,14 +5506,14 @@ header("Expires: 0");
         setLiveStreams(uniqueListWithPlayback)
 
         if(uniqueListWithPlayback.length>0){
-          // Verificar se já tem um canal selecionado da mesma categoria
+          // Verificar se j� tem um canal selecionado da mesma categoria
           const currentChannelStillExists = selectedChannel && uniqueListWithPlayback.some(
             ch => (ch.stream_id || ch.id) === (selectedChannel.stream_id || selectedChannel.id)
           )
 
-          // ⚠️ Se o canal atual existe na categoria, SEMPRE manter ele (não importa o liveLeftMode)
+          // ?? Se o canal atual existe na categoria, SEMPRE manter ele (n�o importa o liveLeftMode)
           if(currentChannelStillExists) {
-            // Não fazer nada - manter canal atual e não recarregar player
+            // N�o fazer nada - manter canal atual e n�o recarregar player
             // Apenas atualizar a lista de canais e modo
             if(switchLeft) setLiveLeftMode('channels')
             setLoading(false)
@@ -5503,11 +5524,11 @@ header("Expires: 0");
           const baseName = firstChannel.baseName
 
 
-          // Buscar última qualidade preferida para este canal
+          // Buscar �ltima qualidade preferida para este canal
           const preferredQuality = channelVariants[baseName]
           const variants = getVariantsForChannel(fullList, baseName)
 
-          // Tentar encontrar a qualidade preferida, senão usar o primeiro
+          // Tentar encontrar a qualidade preferida, sen�o usar o primeiro
           let channelToPlay = variants.find(v => v.quality === preferredQuality) || variants[0] || firstChannel
 
 
@@ -5520,7 +5541,7 @@ header("Expires: 0");
             tv_archive: firstChannel.tv_archive, // Preservar tv_archive original
             playback_url: null, // Sempre iniciar no vivo
             playback_mode: false,
-            // ✅ Manter referência ao item da lista
+            // ? Manter refer�ncia ao item da lista
             listItemId: firstChannel.stream_id || firstChannel.id
           }
 
@@ -5547,10 +5568,10 @@ header("Expires: 0");
 
         let data
         if(dateOffset === 0){
-          // Hoje: usar get_short_epg (mais rápido)
+          // Hoje: usar get_short_epg (mais r�pido)
           data = await apiCall('get_short_epg', { stream_id: streamId, limit: 100 })
         } else {
-          // Outros dias: usar get_simple_data_table com data específica
+          // Outros dias: usar get_simple_data_table com data espec�fica
           data = await apiCall('get_simple_data_table', {
             stream_id: streamId,
             type: 'live'
@@ -5565,7 +5586,7 @@ header("Expires: 0");
         }
 
         const norm = toArray(list).map((it,idx)=>{
-          // Pegar o título de vários campos possíveis
+          // Pegar o t�tulo de v�rios campos poss�veis
           const rawTitle = it.title || it.name || it.has_archive || ''
           const rawDesc = it.description || it.desc || ''
 
@@ -5573,13 +5594,13 @@ header("Expires: 0");
           const decodedTitle = decodeEpgText(rawTitle)
           const decodedDesc = decodeEpgText(rawDesc)
 
-          // Tentar pegar horários de vários campos possíveis
+          // Tentar pegar hor�rios de v�rios campos poss�veis
           const startTime = it.start || it.start_time || it.start_timestamp
           const endTime = it.end || it.end_time || it.stop_timestamp || it.end_timestamp || it.stop
 
           return {
             id: it.id || it.event_id || idx,
-            title: decodedTitle || 'Sem programação disponível',
+            title: decodedTitle || 'Sem programa��o dispon�vel',
             start: formatEPGTime(startTime),
             end: formatEPGTime(endTime),
             description: decodedDesc,
@@ -5591,17 +5612,17 @@ header("Expires: 0");
 
         // FILTRAR apenas programas do dia selecionado
         const filtered = norm.filter(prog => {
-          if(!prog.start_timestamp) return true // Se não tem timestamp, incluir
+          if(!prog.start_timestamp) return true // Se n�o tem timestamp, incluir
 
           const progDate = new Date(prog.start_timestamp * 1000)
           progDate.setHours(0, 0, 0, 0)
 
           const isSameDay = progDate.getTime() === targetDate.getTime()
 
-          return dateOffset === 0 || isSameDay // Se é hoje, pega tudo. Senão, filtra por dia
+          return dateOffset === 0 || isSameDay // Se � hoje, pega tudo. Sen�o, filtra por dia
         })
 
-        // Ordenar EPG por horário (do mais antigo ao mais recente)
+        // Ordenar EPG por hor�rio (do mais antigo ao mais recente)
         filtered.sort((a, b) => {
           const timeA = a.start_timestamp || 0
           const timeB = b.start_timestamp || 0
@@ -5627,19 +5648,19 @@ header("Expires: 0");
           const ext = (item.container_extension || 'mp4').replace(/\.+/,'')
           url = buildURL(cfg.server, ['movie', cfg.username, cfg.password, id + '.' + ext])
           isHls = /m3u8/i.test(ext)
-        }else{ // séries: precisamos buscar episódios primeiro
+        }else{ // s�ries: precisamos buscar epis�dios primeiro
           const sInfo = await apiCallSeriesInfo(id)
           const seasons = (sInfo.episodes && typeof sInfo.episodes === 'object') ? sInfo.episodes : {}
           const firstSeason = Object.keys(seasons).sort((a,b)=>Number(a)-Number(b))[0]
           const eps = seasons[firstSeason] || []
           const ep = eps[0]
-          if(!ep) throw new Error('Sem episódios disponíveis para esta série')
+          if(!ep) throw new Error('Sem epis�dios dispon�veis para esta s�rie')
           const epId = ep.id || ep.episode_id || ep.stream_id || id
           const ext = (ep.container_extension || 'mp4').replace(/\.+/,'')
           url = buildURL(cfg.server, ['series', cfg.username, cfg.password, epId + '.' + ext])
           isHls = /m3u8/i.test(ext)
         }
-        setCurrent({ name: item.name || item.title || 'Reprodução', url, isHls })
+        setCurrent({ name: item.name || item.title || 'Reprodu��o', url, isHls })
         setView('player')
       }catch(err){ setError(err.message) }
     }
@@ -5657,7 +5678,7 @@ header("Expires: 0");
     }
 
 // ===== NOVA HOME MODERNA ESTILO NETFLIX =====
-// Esta é a nova versão da função Home() para substituir a atual no index.php
+// Esta � a nova vers�o da fun��o Home() para substituir a atual no index.php
 
 function Home(){
   const [topMovies, setTopMovies] = useState([])
@@ -5673,14 +5694,14 @@ function Home(){
         // Buscar filmes populares
         const moviesRes = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${tmdbKey}&language=pt-BR&page=1`)
         const moviesData = await moviesRes.json()
-        // Filtrar apenas filmes que têm poster
+        // Filtrar apenas filmes que t�m poster
         const moviesWithPosters = moviesData.results.filter(m => m.poster_path)
         setTopMovies(moviesWithPosters.slice(0, 10))
 
-        // Buscar séries populares
+        // Buscar s�ries populares
         const seriesRes = await fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${tmdbKey}&language=pt-BR&page=1`)
         const seriesData = await seriesRes.json()
-        // Filtrar apenas séries que têm poster
+        // Filtrar apenas s�ries que t�m poster
         const seriesWithPosters = seriesData.results.filter(s => s.poster_path)
         setTopSeries(seriesWithPosters.slice(0, 10))
 
@@ -5731,7 +5752,7 @@ function Home(){
         }
       }, 'Top 10 filmes hoje'),
 
-      // Container do carrossel com botões
+      // Container do carrossel com bot�es
       e('div', {
         style: {
           position: 'relative',
@@ -5762,7 +5783,7 @@ function Home(){
                 position: 'relative'
               }
             },
-              // Número grande à esquerda
+              // N�mero grande � esquerda
               e('div', {
                 style: {
                   fontSize: '280px',
@@ -5773,7 +5794,7 @@ function Home(){
                   marginRight: '-80px',
                   zIndex: 1,
                   fontFamily: 'Arial, sans-serif',
-                  pointerEvents: 'none' // Permite clicar através do número
+                  pointerEvents: 'none' // Permite clicar atrav�s do n�mero
                 }
               }, (index + 1).toString()),
 
@@ -5856,7 +5877,7 @@ function Home(){
           },
           onMouseEnter: (e) => e.target.style.opacity = '1',
           onMouseLeave: (e) => e.target.style.opacity = '0.8'
-        }, '‹'),
+        }, '◀'),
 
         // Botão próximo
         e('button', {
@@ -5883,7 +5904,7 @@ function Home(){
           },
           onMouseEnter: (e) => e.target.style.opacity = '1',
           onMouseLeave: (e) => e.target.style.opacity = '0.8'
-        }, '›')
+        }, '▶')
       )
     ),
 
@@ -5902,14 +5923,14 @@ function Home(){
         }
       }, 'Top 10 séries hoje'),
 
-      // Container do carrossel com botões
+      // Container do carrossel com bot�es
       e('div', {
         style: {
           position: 'relative',
           paddingRight: '40px'
         }
       },
-        // Carrossel de séries
+        // Carrossel de s�ries
         e('div', {
           id: 'series-carousel',
           style: {
@@ -5933,7 +5954,7 @@ function Home(){
                 position: 'relative'
               }
             },
-              // Número grande à esquerda
+              // N�mero grande � esquerda
               e('div', {
                 style: {
                   fontSize: '280px',
@@ -5944,7 +5965,7 @@ function Home(){
                   marginRight: '-60px',
                   zIndex: 1,
                   fontFamily: 'Arial, sans-serif',
-                  pointerEvents: 'none' // Permite clicar através do número
+                  pointerEvents: 'none' // Permite clicar atrav�s do n�mero
                 }
               }, (index + 1).toString()),
 
@@ -5955,7 +5976,7 @@ function Home(){
                   zIndex: 2
                 }
               },
-                // Poster da série
+                // Poster da s�rie
                 e('img', {
                   src: serie.poster_path
                     ? `https://image.tmdb.org/t/p/w500${serie.poster_path}`
@@ -6020,7 +6041,7 @@ function Home(){
           },
           onMouseEnter: (e) => e.target.style.opacity = '1',
           onMouseLeave: (e) => e.target.style.opacity = '0.8'
-        }, '‹'),
+        }, '◀'),
 
         // Botão próximo
         e('button', {
@@ -6047,7 +6068,7 @@ function Home(){
           },
           onMouseEnter: (e) => e.target.style.opacity = '1',
           onMouseLeave: (e) => e.target.style.opacity = '0.8'
-        }, '›')
+        }, '▶')
       )
     )
   )
@@ -6060,7 +6081,7 @@ function Home(){
       const [focusedChannelIdx, setFocusedChannelIdx] = useState(0)
       const [isFavorite, setIsFavorite] = useState(false)
 
-      // Verificar se canal selecionado está nos favoritos
+      // Verificar se canal selecionado est� nos favoritos
       useEffect(() => {
         if (!selectedChannel?.stream_id && !selectedChannel?.id) {
           setIsFavorite(false)
@@ -6105,53 +6126,53 @@ function Home(){
         window.dispatchEvent(new CustomEvent('favorites-updated'))
       }
 
-      // Helper: Decodificar Base64 se necessário (títulos EPG podem vir codificados)
+      // Helper: Decodificar Base64 se necess�rio (t�tulos EPG podem vir codificados)
       const decodeMaybeBase64 = (str) => {
-        if(!str || typeof str !== 'string') return 'Sem título'
+        if(!str || typeof str !== 'string') return 'Sem t�tulo'
 
-        // Se já parece texto normal (tem espaços, acentos, letras), retorna direto
+        // Se j� parece texto normal (tem espa�os, acentos, letras), retorna direto
         if(/[\s\u00C0-\u00FF]/.test(str) || !/[A-Za-z0-9+/=]/.test(str)){
           return str
         }
 
-        // ESTRATÉGIA 1: Tentar decodificar Base64 simples
+        // ESTRAT�GIA 1: Tentar decodificar Base64 simples
         try {
           const decoded = atob(str)
-          // Verificar se é texto válido UTF-8
+          // Verificar se � texto v�lido UTF-8
           if(decoded && /^[\x20-\x7E\u00C0-\u00FF]+$/.test(decoded)){
             return decoded
           }
 
-          // ESTRATÉGIA 2: Tentar converter bytes para UTF-8 corretamente
+          // ESTRAT�GIA 2: Tentar converter bytes para UTF-8 corretamente
           try {
             const utf8Decoded = decodeURIComponent(escape(decoded))
             if(utf8Decoded && utf8Decoded.length > 0 && !/[\x00-\x1F]/.test(utf8Decoded)){
               return utf8Decoded
             }
           } catch(e2) {
-            // Falhou UTF-8, tenta próxima estratégia
+            // Falhou UTF-8, tenta pr�xima estrat�gia
           }
 
-          // ESTRATÉGIA 3: Dupla decodificação Base64
+          // ESTRAT�GIA 3: Dupla decodifica��o Base64
           try {
             const doubleDecoded = atob(decoded)
             if(doubleDecoded && /^[\x20-\x7E\u00C0-\u00FF]+$/.test(doubleDecoded)){
               return doubleDecoded
             }
           } catch(e3) {
-            // Falhou dupla decodificação
+            // Falhou dupla decodifica��o
           }
 
-          // Se passou por atob() mas não validou, retorna original
+          // Se passou por atob() mas n�o validou, retorna original
           return str
 
         } catch(e) {
-          // Não é Base64 válido, retorna original
+          // N�o � Base64 v�lido, retorna original
           return str
         }
       }
 
-      // Helper: Detectar se um programa EPG está "NO AR AGORA"
+      // Helper: Detectar se um programa EPG est� "NO AR AGORA"
       const isProgramCurrent = (prog) => {
         if(!prog || !prog.start || !prog.end) return false
         try {
@@ -6166,19 +6187,19 @@ function Home(){
           const endParts = prog.end.split(':')
           const endMinutes = parseInt(endParts[0]) * 60 + parseInt(endParts[1])
 
-          // Programa atual está entre start e end
+          // Programa atual est� entre start e end
           return currentMinutes >= startMinutes && currentMinutes < endMinutes
         } catch(e) {
           return false
         }
       }
 
-      // Atalhos de teclado para navegação em categorias e canais
+      // Atalhos de teclado para navega��o em categorias e canais
       useEffect(()=>{
         if(!isLive) return
 
         const handleKeyDown = (e)=>{
-          // Navegação nas CATEGORIAS
+          // Navega��o nas CATEGORIAS
           if(liveLeftMode==='categories' && liveCats.length>0){
             if(e.key==='ArrowDown'){
               e.preventDefault()
@@ -6190,7 +6211,7 @@ function Home(){
               e.preventDefault()
               const cat = liveCats[focusedCatIdx]
               if(cat){
-                setFocusedChannelIdx(0) // ✅ Reset foco ao abrir categoria
+                setFocusedChannelIdx(0) // ? Reset foco ao abrir categoria
                 openLiveCategory(cat, true)
               }
             }else if(e.key==='ArrowLeft' || e.key==='Escape'){
@@ -6198,7 +6219,7 @@ function Home(){
               setView('home')
             }
           }
-          // Navegação nos CANAIS
+          // Navega��o nos CANAIS
           else if(liveLeftMode==='channels' && liveStreams.length>0){
             if(e.key==='ArrowDown'){
               e.preventDefault()
@@ -6224,8 +6245,8 @@ function Home(){
                     let channelToPlay = variants.find(v => v.quality === preferredQuality) || variants[0] || channel
 
                     // Preservar hasPlayback e tv_archive do canal original
-                    // ✅ LIMPAR playback_url ao trocar de canal (volta ao vivo)
-                    // ✅ Usar tv_archive da variante que está sendo reproduzida (channelToPlay)
+                    // ? LIMPAR playback_url ao trocar de canal (volta ao vivo)
+                    // ? Usar tv_archive da variante que est� sendo reproduzida (channelToPlay)
                     setSelectedChannel({
                       ...channelToPlay,
                       baseName,
@@ -6234,12 +6255,12 @@ function Home(){
                       tv_archive: channelToPlay.tv_archive || channel.tv_archive, // Usar tv_archive da variante atual
                       playback_url: null, // Limpa playback ao trocar canal
                       playback_mode: false,
-                      // ✅ Manter referência ao item da lista
+                      // ? Manter refer�ncia ao item da lista
                       listItemId: channel.stream_id || channel.id
                     })
                     await loadEpg(channelToPlay.stream_id || channelToPlay.id, selectedDay)
 
-                    // ⚠️ FULLSCREEN AUTOMÁTICO DESABILITADO - usuário controla via botão F
+                    // ?? FULLSCREEN AUTOM�TICO DESABILITADO - usu�rio controla via bot�o F
                     // setTimeout(()=>{
                     //   const container = document.getElementById('playerContainer')
                     //   if(container && !document.fullscreenElement){
@@ -6276,7 +6297,7 @@ function Home(){
         return ()=> window.removeEventListener('keydown', handleKeyDown)
       }, [isLive, liveLeftMode, liveCats, liveStreams, focusedCatIdx, focusedChannelIdx])
 
-      // Listener para abrir categoria 18+ após validação de PIN
+      // Listener para abrir categoria 18+ ap�s valida��o de PIN
       useEffect(()=>{
         if(!isLive) return
 
@@ -6291,7 +6312,7 @@ function Home(){
         return ()=> window.removeEventListener('openAdultLiveCategory', handleOpenAdultCategory)
       }, [isLive])
 
-      // Scroll automático para item focado (APENAS dentro do container, sem afetar a página)
+      // Scroll autom�tico para item focado (APENAS dentro do container, sem afetar a p�gina)
       useEffect(()=>{
         if(liveLeftMode==='categories' && liveCats.length>0){
           const cat = liveCats[focusedCatIdx]
@@ -6300,18 +6321,18 @@ function Home(){
             if(el && el.parentElement){
               const container = el.parentElement
 
-              // Calcular posições relativas ao container
+              // Calcular posi��es relativas ao container
               const elOffsetTop = el.offsetTop
               const elOffsetBottom = elOffsetTop + el.offsetHeight
               const containerScrollTop = container.scrollTop
               const containerHeight = container.clientHeight
 
-              // Rolar apenas se necessário
+              // Rolar apenas se necess�rio
               if(elOffsetBottom > containerScrollTop + containerHeight){
-                // Elemento está abaixo da área visível
+                // Elemento est� abaixo da �rea vis�vel
                 container.scrollTo({ top: elOffsetBottom - containerHeight, behavior:'smooth' })
               }else if(elOffsetTop < containerScrollTop){
-                // Elemento está acima da área visível
+                // Elemento est� acima da �rea vis�vel
                 container.scrollTo({ top: elOffsetTop, behavior:'smooth' })
               }
             }
@@ -6323,18 +6344,18 @@ function Home(){
             if(el && el.parentElement){
               const container = el.parentElement
 
-              // Calcular posições relativas ao container
+              // Calcular posi��es relativas ao container
               const elOffsetTop = el.offsetTop
               const elOffsetBottom = elOffsetTop + el.offsetHeight
               const containerScrollTop = container.scrollTop
               const containerHeight = container.clientHeight
 
-              // Rolar apenas se necessário
+              // Rolar apenas se necess�rio
               if(elOffsetBottom > containerScrollTop + containerHeight){
-                // Elemento está abaixo da área visível
+                // Elemento est� abaixo da �rea vis�vel
                 container.scrollTo({ top: elOffsetBottom - containerHeight, behavior:'smooth' })
               }else if(elOffsetTop < containerScrollTop){
-                // Elemento está acima da área visível
+                // Elemento est� acima da �rea vis�vel
                 container.scrollTo({ top: elOffsetTop, behavior:'smooth' })
               }
             }
@@ -6342,7 +6363,7 @@ function Home(){
         }
       }, [focusedCatIdx, focusedChannelIdx, liveLeftMode])
 
-      // Reset índices ao trocar modo
+      // Reset �ndices ao trocar modo
       useEffect(()=>{
         if(liveLeftMode==='categories') setFocusedCatIdx(0)
         else setFocusedChannelIdx(0)
@@ -6363,7 +6384,7 @@ function Home(){
                   className:'flex items-center gap-3 text-white font-semibold',
                   style: { pointerEvents: 'none' }
                 },
-                  e('span', { className:'text-xl' }, '▦'),
+                  e('span', { className:'text-xl' }, liveLeftMode==='categories' ? '▦' : '📺'),
                   liveLeftMode==='categories' ? 'Todos' : (selectedLiveCat?.category_name || 'Categoria')
                 ),
                 e('span', {
@@ -6378,7 +6399,7 @@ function Home(){
                   style: { paddingBottom: '400px', minHeight: 0 },
                   onWheel: (e) => {
                     // Permitir scroll vertical natural com mouse wheel
-                    // Não fazer preventDefault para que o scroll funcione normalmente
+                    // N�o fazer preventDefault para que o scroll funcione normalmente
                   }
                 },
                   // Categoria Favoritos (sempre primeiro)
@@ -6429,9 +6450,9 @@ function Home(){
                       key:catId||cat.category_name,
                       id: 'cat-' + catId,
                       onClick:()=>{
-                        // ⚠️ BLOQUEIO TOTAL: Se já está na mesma categoria com canal tocando, não fazer NADA
+                        // ?? BLOQUEIO TOTAL: Se j� est� na mesma categoria com canal tocando, n�o fazer NADA
                         if(isSelected && selectedChannel) {
-                          // Apenas trocar o modo se necessário, SEM chamar openLiveCategory
+                          // Apenas trocar o modo se necess�rio, SEM chamar openLiveCategory
                           if(liveLeftMode !== 'channels') {
                             setLiveLeftMode('channels')
                           }
@@ -6439,7 +6460,7 @@ function Home(){
                         }
 
                         if (isAdultCategory) {
-                          // Armazenar categoria e índice pendentes
+                          // Armazenar categoria e �ndice pendentes
                           window.__pendingLiveCategory = { cat, idx }
                           setShowParentalPin(true)
                         } else {
@@ -6452,17 +6473,17 @@ function Home(){
                     },
                       e('div', {
                         className:'flex items-center justify-between',
-                        style: { pointerEvents: 'none' } // Permite clicks em toda a área do button
+                        style: { pointerEvents: 'none' } // Permite clicks em toda a �rea do button
                       },
                         e('div', { className:'flex items-center gap-2' },
-                          isAdultCategory && e('span', { style: { fontSize: '16px' } }, '🔒'),
-                          e('span', { className:'truncate font-semibold' }, cat.category_name||'Sem nome')
+                          isAdultCategory && e('span', { style: { fontSize: '16px' } }, '🔞'),
+                          e('span', { className:'truncate font-semibold' }, fixEncoding(cat.category_name||'Sem nome'))
                         ),
                         e('span', { className:'opacity-80 ml-3' }, String(count))
                       )
                     )
                   }),
-                  e('div', { className:'text-center text-xs text-gray-400 mt-3 py-2' }, '↑↓ Navegar | → Enter Abrir | ← ESC Voltar')
+                  e('div', { className:'text-center text-xs text-gray-400 mt-3 py-2' }, '↑↓ Navegar | ↵ Enter Abrir | ← ESC Voltar')
                 )
               :
                 e('div', {
@@ -6470,24 +6491,24 @@ function Home(){
                   style: { paddingBottom: '400px', minHeight: 0 },
                   onWheel: (e) => {
                     // Permitir scroll vertical natural com mouse wheel
-                    // Não fazer preventDefault para que o scroll funcione normalmente
+                    // N�o fazer preventDefault para que o scroll funcione normalmente
                   }
                 },
                   toArray(liveStreams).map((item, idx)=> {
                       const key = item.stream_id || item.id || item.name
                       const isFocused = idx === focusedChannelIdx
 
-                    // ✅ Comparar por listItemId para destaque correto
+                    // ? Comparar por listItemId para destaque correto
                     const itemId = item.stream_id || item.id
                     const isSel = selectedChannel && selectedChannel.listItemId && itemId && (selectedChannel.listItemId === itemId)
 
                     const handleChannelClick = async ()=>{
-                      // ⚠️ Se clicar no canal que já está tocando, não fazer nada
+                      // ?? Se clicar no canal que j� est� tocando, n�o fazer nada
                       if(isSel && selectedChannel && (selectedChannel.stream_id || selectedChannel.id) === (item.stream_id || item.id)){
                         return
                       }
 
-                      // ✅ Atualizar foco do teclado para o canal clicado
+                      // ? Atualizar foco do teclado para o canal clicado
                       setFocusedChannelIdx(idx)
 
                       // Carregar variantes
@@ -6507,7 +6528,7 @@ function Home(){
                           allVariants: variants,
                           hasPlayback: item.hasPlayback,
                           tv_archive: item.tv_archive,
-                          // ✅ Manter referência ao item clicado na lista (para destacar correto)
+                          // ? Manter refer�ncia ao item clicado na lista (para destacar correto)
                           listItemId: item.stream_id || item.id
                         }
 
@@ -6538,21 +6559,21 @@ function Home(){
                       id: 'channel-' + (item.stream_id||item.id),
                       onClick: handleChannelClick,
                       onDoubleClick: handleChannelDoubleClick,
-                      // ✅ CORRIGIDO: Apenas isSel para destaque de seleção
+                      // ? CORRIGIDO: Apenas isSel para destaque de sele��o
                       className:'w-full rounded-lg px-3 py-3 text-left frost hover:border-purple-400/40 transition-all ' + (isSel || isFocused ? ' border-2 border-white/80 bg-white/10 text-white' : ' text-white/90')
                     },
                       e('div', { className:'flex items-center gap-3' },
                         // ID removido - mostrar apenas logo e nome
                         item.stream_icon ? e('img', { src:item.stream_icon, className:'w-8 h-8 object-contain rounded', alt:'' }) : e('div', { className:'w-8 h-8 rounded bg-zinc-600 grid place-items-center text-xs' }, 'TV'),
-                        e('div', { className:'flex-1 truncate font-semibold' }, item.baseName || item.name || 'Sem título'),
-                        // Badge FAV dourada se canal está nos favoritos
+                        e('div', { className:'flex-1 truncate font-semibold' }, item.baseName || item.name || 'Sem t�tulo'),
+                        // Badge FAV dourada se canal est� nos favoritos
                         (() => {
                           const favorites = JSON.parse(localStorage.getItem('dreamtv_favorites') || '{}')
                           const channelId = item.stream_id || item.id
                           return favorites[channelId] && e('div', {
                             className: 'px-2 py-[2px] rounded text-[11px] font-bold',
                             style: { backgroundColor: '#FFD700', color: '#000000' }
-                          }, '★')
+                          }, '?')
                         })(),
                         // Badge REC vermelho se canal tem playback
                         item.hasPlayback && e('div', {
@@ -6571,8 +6592,8 @@ function Home(){
                 e(LiveVideo, { channel:selectedChannel, epg:epg, onDbl:()=>toggleFullscreen('#liveVideo'), type: 'live', isFavorite: isFavorite, toggleFavorite: toggleFavorite })
               ),
               e('div', { className:'space-y-2 max-h-[500px] overflow-y-auto scrollbar-hide pr-2 pb-4' },
-                (epg && epg.length>0 ? epg : Array.from({length:4}).map((_,i)=>({ id:'empty'+i, title:'Programa não encontrado', start:'--:--', end:'--:--' }))).map((pg,i)=>{
-                  // Determinar se é passado, atual ou futuro usando TIMESTAMPS (mais preciso)
+                (epg && epg.length>0 ? epg : Array.from({length:4}).map((_,i)=>({ id:'empty'+i, title:'Programa n�o encontrado', start:'--:--', end:'--:--' }))).map((pg,i)=>{
+                  // Determinar se � passado, atual ou futuro usando TIMESTAMPS (mais preciso)
                   const now = new Date()
                   const startTime = pg.start_timestamp ? new Date(pg.start_timestamp * 1000) : null
                   const endTime = pg.stop_timestamp ? new Date(pg.stop_timestamp * 1000) : null
@@ -6582,7 +6603,7 @@ function Home(){
                   let isFuture = false
 
                   if (startTime && endTime) {
-                    // Verificar se programa está AO VIVO AGORA
+                    // Verificar se programa est� AO VIVO AGORA
                     if (now >= startTime && now < endTime) {
                       isCurrent = true
                     } else if (now >= endTime) {
@@ -6591,7 +6612,7 @@ function Home(){
                       isFuture = true
                     }
                   } else {
-                    // Fallback: usar função antiga baseada em HH:mm
+                    // Fallback: usar fun��o antiga baseada em HH:mm
                     isCurrent = isProgramCurrent(pg)
                     if (!isCurrent) {
                       isPast = false
@@ -6601,26 +6622,26 @@ function Home(){
 
                   const isRecorded = isProgramRecorded(pg, selectedChannel, selectedDay)
 
-                  // Formatar horários usando formatEPGTime
+                  // Formatar hor�rios usando formatEPGTime
                   const startFormatted = formatEPGTime(pg.start_timestamp || pg.start)
                   const endFormatted = formatEPGTime(pg.stop_timestamp || pg.end)
 
-                  // Decodificar título (Base64 se necessário)
-                  const programTitle = decodeMaybeBase64(pg.title) || 'Programa não encontrado'
+                  // Decodificar t�tulo (Base64 se necess�rio)
+                  const programTitle = decodeMaybeBase64(pg.title) || 'Programa n�o encontrado'
 
                   // 3 ESTADOS VISUAIS:
-                  // 1. ATUAL (ao vivo agora) → texto VERDE + bolinha verde preenchida
-                  // 2. PASSADO → texto cinza claro + bolinha branca vazia
-                  // 3. FUTURO → texto cinza escuro + bolinha branca vazia
-                  // 4. EM PLAYBACK → texto roxo + bolinha roxa preenchida
+                  // 1. ATUAL (ao vivo agora) ? texto VERDE + bolinha verde preenchida
+                  // 2. PASSADO ? texto cinza claro + bolinha branca vazia
+                  // 3. FUTURO ? texto cinza escuro + bolinha branca vazia
+                  // 4. EM PLAYBACK ? texto roxo + bolinha roxa preenchida
 
                   let textColor, dotStyle, isClickable, cursorClass, borderColor
 
-                  // Verificar se este programa está sendo reproduzido em playback
+                  // Verificar se este programa est� sendo reproduzido em playback
                   const isPlayingPlayback = selectedChannel?.playback_mode && selectedChannel?.playback_program === pg.title
 
                   if(isPlayingPlayback){
-                    // EM PLAYBACK - ASSISTINDO GRAVAÇÃO (ROXO BRILHANTE)
+                    // EM PLAYBACK - ASSISTINDO GRAVA��O (ROXO BRILHANTE)
                     textColor = 'text-purple-400'
                     dotStyle = 'bg-purple-400' // Bolinha roxa preenchida e brilhante
                     borderColor = 'border-purple-400/40'
@@ -6665,7 +6686,7 @@ function Home(){
                       return
                     }
 
-                    // VERIFICAÇÃO ADICIONAL: Não permitir playback de programas futuros
+                    // VERIFICA��O ADICIONAL: N�o permitir playback de programas futuros
                     const startUtc = pg.start_timestamp || pg.start
                     const now = Math.floor(Date.now() / 1000)
                     if(startUtc > now){
@@ -6678,7 +6699,7 @@ function Home(){
                     const url = getPlaybackUrl(channelId, startUtc, endUtc)
 
                     if(url){
-                      // ✅ Tocar playback no MESMO player do live (não muda de view)
+                      // ? Tocar playback no MESMO player do live (n�o muda de view)
                       setSelectedChannel({
                         ...selectedChannel,
                         playback_url: url, // Define URL de playback
@@ -6693,15 +6714,15 @@ function Home(){
                     onClick: handleClick,
                     className:`px-3 py-3 flex items-center gap-3 transition-colors ${cursorClass} rounded-lg frost border ${borderColor}`
                   },
-                    // Bolinha indicadora (sempre visível)
+                    // Bolinha indicadora (sempre vis�vel)
                     e('span', {
                       className:`w-2.5 h-2.5 rounded-full flex-shrink-0 ${dotStyle}`
                     }),
-                    // Horário à esquerda
+                    // Hor�rio � esquerda
                     e('span', { className:`text-sm font-medium whitespace-nowrap ${textColor}` },
                       `${startFormatted} - ${endFormatted}`
                     ),
-                    // Nome do programa alinhado à DIREITA
+                    // Nome do programa alinhado � DIREITA
                     e('span', {
                       className:`text-sm ${isCurrent ? 'font-semibold' : 'font-normal'} ${textColor} ml-auto text-right`,
                       style: { maxWidth: '60%' }
@@ -6720,14 +6741,14 @@ function Home(){
                 const hasPlayback = selectedChannel?.hasPlayback || false
 
                 // Mostrar 7 dias: 3 antes + HOJE + 3 depois (para playback e EPG)
-                // Exemplo: dia 11 hoje → mostra dias 08, 09, 10, [11], 12, 13, 14
+                // Exemplo: dia 11 hoje ? mostra dias 08, 09, 10, [11], 12, 13, 14
                 const dayOffsets = [-3, -2, -1, 0, 1, 2, 3]
 
                 const diasInfo = dayOffsets.map(off => `${dayNum(off)} ${dayWeek(off)}`).join(', ')
                 return dayOffsets.map((offset)=> {
                   const isSelected = selectedDay === offset
 
-                  // Verificar se o dia tem gravações disponíveis
+                  // Verificar se o dia tem grava��es dispon�veis
                   const recordedDays = channelId ? getRecordedDays(channelId) : []
                   const targetDate = new Date()
                   targetDate.setDate(targetDate.getDate() + offset) // + offset porque dayNum() usa soma
@@ -6737,23 +6758,23 @@ function Home(){
                     const rd = new Date(d)
                     rd.setHours(0,0,0,0)
                     return rd.getTime() === targetDate.getTime()
-                  }) : false // Sem playback = não disponível
+                  }) : false // Sem playback = n�o dispon�vel
 
-                  // Verificar se é dia futuro ou passado
+                  // Verificar se � dia futuro ou passado
                   const isFutureDay = offset > 0
                   const isPastDay = offset < 0
 
                   // Desabilitar se:
                   // 1. Dia futuro (sempre bloqueado)
-                  // 2. Dia passado SEM playback (não tem gravação)
-                  // 3. Dia passado COM playback mas sem gravação disponível
+                  // 2. Dia passado SEM playback (n�o tem grava��o)
+                  // 3. Dia passado COM playback mas sem grava��o dispon�vel
                   const isDisabled = isFutureDay || (isPastDay && !hasPlayback) || (hasPlayback && !isAvailable)
 
                   const handleDayClick = ()=>{
                     if(isDisabled) return // Bloqueado
 
                     setSelectedDay(offset)
-                    setSelectedEpgId(null) // Limpar seleção EPG ao trocar dia
+                    setSelectedEpgId(null) // Limpar sele��o EPG ao trocar dia
 
                     // Recarregar EPG do canal para o dia selecionado
                     if(channelId){
@@ -6761,11 +6782,11 @@ function Home(){
                     }
                   }
 
-                  // Tooltip dinâmico
+                  // Tooltip din�mico
                   let tooltipText = ''
-                  if(isFutureDay) tooltipText = 'Data futura não disponível'
+                  if(isFutureDay) tooltipText = 'Data futura n�o dispon�vel'
                   else if(isPastDay && !hasPlayback) tooltipText = 'Canal sem playback'
-                  else if(hasPlayback && !isAvailable) tooltipText = 'Sem gravações disponíveis'
+                  else if(hasPlayback && !isAvailable) tooltipText = 'Sem grava��es dispon�veis'
 
                   return e('div', {
                     key:offset,
@@ -6790,7 +6811,7 @@ function Home(){
 
       // Filmes/Séries genéricos
       let cats = view==='movie-categories'? vodCats : seriesCats
-      let title = view==='movie-categories'? 'Filmes — Categorias' : 'Séries — Categorias'
+      let title = view==='movie-categories'? 'Filmes - Categorias' : 'Séries - Categorias'
       let type = view==='movie-categories'? 'vod' : 'series'
 
       // Filtrar categorias de Filmes - remover shows, internacional, nacional
@@ -6818,7 +6839,7 @@ function Home(){
           const name = (cat.category_name || '').toLowerCase()
           return name.includes('novela')
         })
-        title = 'Novelas — Categorias'
+        title = 'Novelas � Categorias'
         type = 'series'
       }
 
@@ -6828,7 +6849,7 @@ function Home(){
           const name = (cat.category_name || '').toLowerCase()
           return name.includes('crunchyroll')
         })
-        title = 'Animes — Categorias'
+        title = 'Animes � Categorias'
         type = 'series'
       }
 
@@ -6838,7 +6859,7 @@ function Home(){
           const name = (cat.category_name || '').toLowerCase()
           return name.includes('desenho')
         })
-        title = 'Desenhos — Categorias'
+        title = 'Desenhos � Categorias'
         type = 'series'
       }
 
@@ -6848,7 +6869,7 @@ function Home(){
           const name = (cat.category_name || '').toLowerCase()
           return name.includes('show') || name.includes('internacional') || name.includes('nacional')
         })
-        title = 'Show — Categorias'
+        title = 'Show � Categorias'
         type = 'vod'
       }
 
@@ -6880,7 +6901,7 @@ function Home(){
         return ()=> window.removeEventListener('keydown', handleKeyDown)
       }, [view, cats, focusedIdx, type])
 
-      // Scroll automático
+      // Scroll autom�tico
       useEffect(()=>{
         if((view==='movie-categories' || view==='series-categories' || view==='novelas-categories' || view==='animes-categories' || view==='desenhos-categories' || view==='show-categories') && cats && cats.length>0){
           const cat = cats[focusedIdx]
@@ -6894,7 +6915,7 @@ function Home(){
       return e('div', { className:'star-bg h-screen p-6 overflow-hidden' },
         e(TopBar),
         e('div', { className:'flex items-center gap-3 mb-4' },
-          e('button', { onClick:()=>setView('home'), className:'text-white text-xl hover:text-purple-400' }, '←'),
+          e('button', { onClick:()=>setView('home'), className:'text-white text-xl hover:text-purple-400' }, '?'),
           e('h2', { className:'text-white text-2xl font-bold' }, title)
         ),
         cats && cats.length>0 ? e('div', { className:'grid grid-cols-1 gap-3 max-w-2xl' },
@@ -6907,13 +6928,13 @@ function Home(){
               className:'frost rounded-lg p-4 flex items-center justify-between text-left text-white hover:border-purple-400/50 transition-all ' + (isFocused ? ' ring-2 ring-purple-400 bg-purple-500/20' : '')
             },
               e('div', { className:'flex items-center gap-4' },
-                e('div', { className:'w-12 h-12 bg-zinc-700 rounded-lg grid place-items-center' }, e('span', { className:'text-2xl' }, '📁')),
-                e('span', { className:'text-lg font-medium truncate' }, cat.category_name || 'Sem nome')
+                e('div', { className:'w-12 h-12 bg-zinc-700 rounded-lg grid place-items-center' }, e('span', { className:'text-2xl' }, '🎬')),
+                e('span', { className:'text-lg font-medium truncate' }, fixEncoding(cat.category_name || 'Sem nome'))
               ),
               e('span', { className:'text-gray-300 text-lg font-bold' }, String(cat.total || 0))
             )
           }),
-          e('div', { className:'text-center text-xs text-gray-400 mt-3 py-2' }, '↑↓ Navegar | → Enter Abrir | ← ESC Voltar')
+          e('div', { className:'text-center text-xs text-gray-400 mt-3 py-2' }, '↑↓ Navegar | ↵ Enter Abrir | ← ESC Voltar')
         ) : e('div', { className:'text-center text-gray-400 mt-12 flex flex-col items-center gap-4' },
           'Sem categorias',
           error ? e('div', { className:'text-red-300 text-sm' }, 'Erro: ', error, debug? e('div', {className:'hint text-gray-400 mt-1'}, 'URL: ', maskUrlCredentials(debug.url||'')) : null) : null
@@ -6927,10 +6948,10 @@ function Home(){
       const [showOverlay, setShowOverlay] = useState(true)
       const [currentTime, setCurrentTime] = useState('')
       const [selectedQuality, setSelectedQuality] = useState(null)
-      const currentQualityRef = useRef(null) // Ref para não causar re-render ao trocar qualidade
-      const pendingQualityChangeRef = useRef(null) // Ref para armazenar mudança de qualidade pendente durante fullscreen
+      const currentQualityRef = useRef(null) // Ref para n�o causar re-render ao trocar qualidade
+      const pendingQualityChangeRef = useRef(null) // Ref para armazenar mudan�a de qualidade pendente durante fullscreen
       const [isFullscreen, setIsFullscreen] = useState(false)
-      const [videoResolution, setVideoResolution] = useState('1920×1080')
+      const [videoResolution, setVideoResolution] = useState('1920�1080')
       const hideTimeoutRef = useRef(null)
       const [availableQualities, setAvailableQualities] = useState([])
       const [loadError, setLoadError] = useState(null) // Estado para erro de carregamento
@@ -6938,33 +6959,33 @@ function Home(){
       const [volume, setVolume] = useState(100)
       const [isMuted, setIsMuted] = useState(false)
 
-      // Mapeamento de qualidade para resolução
+      // Mapeamento de qualidade para resolu��o
       const getResolutionFromQuality = (quality) => {
         const qualityUpper = (quality || '').toUpperCase()
-        if(qualityUpper.includes('FHD')) return '1920×1080'
-        if(qualityUpper.includes('HD')) return '1280×720'
-        if(qualityUpper.includes('SD')) return '854×480'
-        return '1920×1080' // Default
+        if(qualityUpper.includes('FHD')) return '1920�1080'
+        if(qualityUpper.includes('HD')) return '1280�720'
+        if(qualityUpper.includes('SD')) return '854�480'
+        return '1920�1080' // Default
       }
 
-      // ========== FUNÇÕES HELPER ==========
+      // ========== FUN��ES HELPER ==========
 
-      // Formatar título da pílula evitando redundância (ex: "GLOBO SP HD HD" -> "GLOBO SP HD")
+      // Formatar t�tulo da p�lula evitando redund�ncia (ex: "GLOBO SP HD HD" -> "GLOBO SP HD")
       const formatPillTitle = (name, activeQuality) => {
         if(!name) return 'CANAL'
         const nameUpper = name.toUpperCase()
-        // Se o nome já termina com o sufixo de qualidade, não repetir
+        // Se o nome j� termina com o sufixo de qualidade, n�o repetir
         if(activeQuality && nameUpper.endsWith(activeQuality.toUpperCase())){
           return nameUpper
         }
         return activeQuality ? `${nameUpper} ${activeQuality.toUpperCase()}` : nameUpper
       }
 
-      // Decodificar Base64 se necessário (títulos EPG podem vir codificados)
+      // Decodificar Base64 se necess�rio (t�tulos EPG podem vir codificados)
       const decodeMaybeBase64 = (str) => {
-        if(!str || typeof str !== 'string') return 'Sem título'
+        if(!str || typeof str !== 'string') return 'Sem t�tulo'
 
-        // Se já parece texto normal (tem espaços, acentos, letras), retorna direto
+        // Se j� parece texto normal (tem espa�os, acentos, letras), retorna direto
         if(/[\s\u00C0-\u00FF]/.test(str) || !/[A-Za-z0-9+/=]/.test(str)){
           return str
         }
@@ -6973,7 +6994,7 @@ function Home(){
         try {
           const decoded = atob(str)
 
-          // Verificar se é texto válido ASCII/UTF-8 simples
+          // Verificar se � texto v�lido ASCII/UTF-8 simples
           if(decoded && /^[\x20-\x7E]+$/.test(decoded)){
             // Texto ASCII puro (como "SP2") - retorna direto
             return decoded
@@ -6987,21 +7008,21 @@ function Home(){
                 return utf8Decoded
               }
             } catch(e2) {
-              // Falhou conversão UTF-8, retorna decoded simples
+              // Falhou convers�o UTF-8, retorna decoded simples
               return decoded
             }
           }
 
-          // Se decodificou mas não é texto válido, retorna original
+          // Se decodificou mas n�o � texto v�lido, retorna original
           return str
 
         } catch(e) {
-          // Não é Base64 válido, retorna original
+          // N�o � Base64 v�lido, retorna original
           return str
         }
       }
 
-      // ========== FIM FUNÇÕES HELPER ==========
+      // ========== FIM FUN��ES HELPER ==========
 
       // Definir qualidade inicial com base no canal
       useEffect(()=>{
@@ -7011,7 +7032,7 @@ function Home(){
         }
       }, [channel?.stream_id, channel?.id])
 
-      // Detectar variantes disponíveis
+      // Detectar variantes dispon�veis
       useEffect(()=>{
         if(!channel || !channel.allVariants) return
         const qualities = channel.allVariants.map(v => v.quality).filter(Boolean)
@@ -7055,17 +7076,17 @@ function Home(){
           return
         }
 
-        // ⚠️ Verificar se é o mesmo canal que já está carregado
+        // ?? Verificar se � o mesmo canal que j� est� carregado
         const currentChannelId = channel?.stream_id || channel?.id
         const currentPlaybackUrl = channel?.playback_url || null
 
         if(channel && lastLoadedChannel.id === currentChannelId && lastLoadedChannel.playback_url === currentPlaybackUrl) {
-          // Restaurar hlsRef da variável global se necessário
+          // Restaurar hlsRef da vari�vel global se necess�rio
           if(!hlsRef.current && globalHlsInstance) {
             hlsRef.current = globalHlsInstance
           }
 
-          // ⚠️ Se o vídeo está sem dados (readyState: 0), significa que o elemento foi recriado
+          // ?? Se o v�deo est� sem dados (readyState: 0), significa que o elemento foi recriado
           // Precisamos reconectar o HLS ao novo elemento
           if(hlsRef.current && v.readyState === 0) {
             try {
@@ -7076,7 +7097,7 @@ function Home(){
               }, 100)
             } catch(err) {}
           } else if(v.paused && hlsRef.current) {
-            // Vídeo apenas pausado, retomar play
+            // V�deo apenas pausado, retomar play
             v.play().catch(err => {})
           }
 
@@ -7100,41 +7121,41 @@ function Home(){
           return
         }
 
-        // Debounce: aguardar 200ms antes de iniciar o vídeo
-        // Isso evita múltiplas inicializações quando o estado muda rapidamente
+        // Debounce: aguardar 200ms antes de iniciar o v�deo
+        // Isso evita m�ltiplas inicializa��es quando o estado muda rapidamente
         loadTimeout = setTimeout(()=>{
           if(cancelled) return
 
-          // Usar playback_url se disponível (modo playback de programa gravado)
+          // Usar playback_url se dispon�vel (modo playback de programa gravado)
           const url = channel.playback_url || buildURL(cfg.server, ['live', cfg.username, cfg.password, (channel.stream_id||channel.id)+'.m3u8'])
 
           const canNative = v.canPlayType('application/vnd.apple.mpegURL')
 
-          // FORÇAR uso do HLS.js sempre que disponível (melhor compatibilidade)
+          // FOR�AR uso do HLS.js sempre que dispon�vel (melhor compatibilidade)
           if(window.Hls && window.Hls.isSupported()){
-            // ⚡ Configuração otimizada para início RÁPIDO
+            // ? Configura��o otimizada para in�cio R�PIDO
             const h = new Hls({
-              maxBufferLength: 10,        // Reduzido: 30s → 10s (inicia 3x mais rápido!)
-              maxMaxBufferLength: 20,      // Buffer máximo: 20s
-              startPosition: -1,           // Começar do início
+              maxBufferLength: 10,        // Reduzido: 30s ? 10s (inicia 3x mais r�pido!)
+              maxMaxBufferLength: 20,      // Buffer m�ximo: 20s
+              startPosition: -1,           // Come�ar do in�cio
               autoStartLoad: true,         // Carregar imediatamente
               enableWorker: true,          // Usar Web Worker (performance)
-              lowLatencyMode: false        // Desabilitar baixa latência (mais rápido para VOD)
+              lowLatencyMode: false        // Desabilitar baixa lat�ncia (mais r�pido para VOD)
             })
             hlsRef.current = h
-            // Salvar também na variável global para sobreviver a re-renders
+            // Salvar tamb�m na vari�vel global para sobreviver a re-renders
             globalHlsInstance = h
             h.loadSource(url)
             h.attachMedia(v)
             h.on(window.Hls.Events.MANIFEST_PARSED, ()=>{
               if(cancelled) return
               retryCountRef.current = 0
-              // Salvar canal como último carregado com sucesso
+              // Salvar canal como �ltimo carregado com sucesso
               lastLoadedChannel = { id: currentChannelId, playback_url: currentPlaybackUrl }
             })
             h.on(window.Hls.Events.ERROR, (event, data)=>{
               if(data.fatal && !cancelled){
-                // Tentar retry automático (máximo 2 tentativas)
+                // Tentar retry autom�tico (m�ximo 2 tentativas)
                 if(retryCountRef.current < 2){
                   retryCountRef.current++
                   setTimeout(()=>{
@@ -7164,7 +7185,7 @@ function Home(){
                     }
                   }, 1000)
                 }else{
-                  // Após 2 tentativas, sem mais retries
+                  // Ap�s 2 tentativas, sem mais retries
                 }
               }
             })
@@ -7182,7 +7203,7 @@ function Home(){
           cancelled = true
           if(loadTimeout) clearTimeout(loadTimeout)
 
-          // ⚠️ NÃO destruir o HLS se é o mesmo canal (será reutilizado)
+          // ?? N�O destruir o HLS se � o mesmo canal (ser� reutilizado)
           // Apenas limpar hlsRef.current, mas manter globalHlsInstance
           const currentId = channel?.stream_id || channel?.id
           const currentUrl = channel?.playback_url || null
@@ -7209,7 +7230,7 @@ function Home(){
         const currentIdx = channel.allVariants.findIndex(v => v.quality === selectedQuality)
         if(currentIdx === -1) return
 
-        // Tentar próxima qualidade
+        // Tentar pr�xima qualidade
         const nextVariant = channel.allVariants[currentIdx + 1] || channel.allVariants[0]
         if(nextVariant && nextVariant.quality !== selectedQuality){
           showToast(`Falha na qualidade ${selectedQuality}. Mudando para ${nextVariant.quality}...`)
@@ -7223,7 +7244,7 @@ function Home(){
         const variant = channel.allVariants.find(v => v.quality === quality)
         if(!variant) return
 
-        // Salvar preferência DIRETO no localStorage (sem state para não causar re-render do pai)
+        // Salvar prefer�ncia DIRETO no localStorage (sem state para n�o causar re-render do pai)
         if(channel.baseName){
           try{
             const current = JSON.parse(localStorage.getItem('channel_quality_prefs') || '{}')
@@ -7232,21 +7253,21 @@ function Home(){
           }catch{}
         }
 
-        // ⚠️ CRÍTICO: NÃO atualizar selectedChannel aqui para não sair do fullscreen!
-        // O player troca a URL diretamente via HLS, não precisa re-render do pai
-        // A atualização do state é feita apenas quando o usuário SAI do fullscreen
+        // ?? CR�TICO: N�O atualizar selectedChannel aqui para n�o sair do fullscreen!
+        // O player troca a URL diretamente via HLS, n�o precisa re-render do pai
+        // A atualiza��o do state � feita apenas quando o usu�rio SAI do fullscreen
 
-        // Trocar a URL diretamente no HLS sem recriar o player (mantém fullscreen)
+        // Trocar a URL diretamente no HLS sem recriar o player (mant�m fullscreen)
         const v = vref.current
         if(!v) return
 
         const url = buildURL(cfg.server, ['live', cfg.username, cfg.password, (variant.stream_id||variant.id)+'.m3u8'])
 
-        // Atualizar resolução baseada na qualidade selecionada
+        // Atualizar resolu��o baseada na qualidade selecionada
         setVideoResolution(getResolutionFromQuality(quality))
 
         if(hlsRef.current){
-          // Se já tem HLS rodando, apenas trocar a source
+          // Se j� tem HLS rodando, apenas trocar a source
           hlsRef.current.loadSource(url)
         }else{
           // Se for nativo, trocar o src
@@ -7254,13 +7275,13 @@ function Home(){
           v.play().catch(()=>{})
         }
 
-        // Atualizar qualidade na ref (não causa re-render, mantém fullscreen)
+        // Atualizar qualidade na ref (n�o causa re-render, mant�m fullscreen)
         currentQualityRef.current = quality
 
-        // Forçar re-render apenas dos botões (sem reconstruir o player container)
+        // For�ar re-render apenas dos bot�es (sem reconstruir o player container)
         setTimeout(()=> setSelectedQuality(quality), 100)
 
-        // ✅ Atualizar selectedChannel APENAS quando não estiver em fullscreen
+        // ? Atualizar selectedChannel APENAS quando n�o estiver em fullscreen
         // Isso evita que o DOM seja alterado durante fullscreen
         if(!document.fullscreenElement) {
           setSelectedChannel({
@@ -7295,7 +7316,7 @@ function Home(){
         setTimeout(()=> setToast(null), 3000)
       }
 
-      // Atualizar horário atual
+      // Atualizar hor�rio atual
       useEffect(()=>{
         const updateTime = ()=>{
           const now = new Date()
@@ -7331,10 +7352,10 @@ function Home(){
           )
           setIsFullscreen(isFS)
 
-          // ✅ Se saiu do fullscreen E há mudança de qualidade pendente, aplicar agora
+          // ? Se saiu do fullscreen E h� mudan�a de qualidade pendente, aplicar agora
           if(!isFS && pendingQualityChangeRef.current) {
             setSelectedChannel(pendingQualityChangeRef.current)
-            pendingQualityChangeRef.current = null // Limpar pendência
+            pendingQualityChangeRef.current = null // Limpar pend�ncia
           }
         }
 
@@ -7352,14 +7373,14 @@ function Home(){
       }, [])
       
 
-      // Navegação por teclado: atalhos do HUD
+      // Navega��o por teclado: atalhos do HUD
       useEffect(()=>{
         if(!channel) return
 
         const handleKey = (e)=>{
           if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
 
-          // Enter/OK: toggle HUD ou fullscreen se não estiver em fullscreen
+          // Enter/OK: toggle HUD ou fullscreen se n�o estiver em fullscreen
           if(e.key === 'Enter'){
             e.preventDefault()
             e.stopPropagation()
@@ -7405,7 +7426,7 @@ function Home(){
             }
           }
 
-          // ← / →: navegação entre canais (placeholder)
+          // ? / ?: navega��o entre canais (placeholder)
           if(e.key === 'ArrowLeft'){
             e.preventDefault()
           }
@@ -7421,7 +7442,7 @@ function Home(){
         }
       }, [channel, isFullscreen, showOverlay])
 
-      // Auto-hide do overlay após 4s de inatividade (APENAS EM LIVE, NÃO EM VOD)
+      // Auto-hide do overlay ap�s 4s de inatividade (APENAS EM LIVE, N�O EM VOD)
       useEffect(()=>{
         if(!isFullscreen || !showOverlay || type === 'vod') return
 
@@ -7430,12 +7451,12 @@ function Home(){
           clearTimeout(hideTimeoutRef.current)
         }
 
-        // Configurar novo timeout para esconder após 4s
+        // Configurar novo timeout para esconder ap�s 4s
         hideTimeoutRef.current = setTimeout(()=>{
           setShowOverlay(false)
         }, 4000)
 
-        // Função para reexibir overlay ao mover mouse/tecla
+        // Fun��o para reexibir overlay ao mover mouse/tecla
         const handleActivity = ()=>{
           setShowOverlay(true)
           if(hideTimeoutRef.current){
@@ -7530,7 +7551,7 @@ function Home(){
 
       const currentProg = getCurrentProgram()
 
-      // Próximo programa: encontrar o que vem depois do atual
+      // Pr�ximo programa: encontrar o que vem depois do atual
       let nextProg = null
       if(currentProg && epg && epg.length > 0){
         const currentIdx = epg.findIndex(p => p.id === currentProg.id)
@@ -7567,7 +7588,7 @@ function Home(){
           toggleFullscreen()
         }
       },
-        // Viewport wrapper - centraliza o vídeo perfeitamente
+        // Viewport wrapper - centraliza o v�deo perfeitamente
         e('div', {
           className: 'player-viewport',
           tabIndex: -1,
@@ -7612,7 +7633,7 @@ function Home(){
             }
           }),
 
-          // OVERLAY PIXEL PERFECT - LAYOUT IDÊNTICO AO ALVO (apenas em LIVE, não em VOD)
+          // OVERLAY PIXEL PERFECT - LAYOUT ID�NTICO AO ALVO (apenas em LIVE, n�o em VOD)
           showOverlay && isFullscreen && type === 'live' && e('div', {
             'data-testid': 'player-hud',
             style: {
@@ -7661,7 +7682,7 @@ function Home(){
                 maxWidth: '1400px'
               }
             },
-              // Col 1: Nº do canal
+              // Col 1: N� do canal
               e('div', {
                 style: {
                   fontSize: 'clamp(22px,2vw,28px)',
@@ -7692,7 +7713,7 @@ function Home(){
                   minWidth: 0
                 }
               },
-                // Linha 1: Horário + AO VIVO / PLAYBACK
+                // Linha 1: Hor�rio + AO VIVO / PLAYBACK
                 e('div', {
                   style: {
                     display: 'flex',
@@ -7705,7 +7726,7 @@ function Home(){
                       fontSize: 'clamp(12px,1.2vw,14px)',
                       color: '#C7D2FE'
                     }
-                  }, currentProg && currentProg.start && currentProg.end ? `${currentProg.start} – ${currentProg.end}` : ''),
+                  }, currentProg && currentProg.start && currentProg.end ? `${currentProg.start} ⏱ ${currentProg.end}` : ''),
                   e('div', {
                     style: {
                       background: channel?.playback_mode ? '#F59E0B' : '#E11D48',
@@ -7715,9 +7736,9 @@ function Home(){
                       fontSize: 'clamp(10px,1.1vw,12px)',
                       fontWeight: '600'
                     }
-                  }, channel?.playback_mode ? '🎬 PLAYBACK' : 'AO VIVO')
+                  }, channel?.playback_mode ? '⏮️ PLAYBACK' : 'AO VIVO')
                 ),
-                // Linha 2: Título do programa (usa playback_program se estiver em modo playback)
+                // Linha 2: T�tulo do programa (usa playback_program se estiver em modo playback)
                 e('div', {
                   style: {
                     fontSize: 'clamp(18px,2.2vw,26px)',
@@ -7750,7 +7771,7 @@ function Home(){
                 )
               ),
 
-              // Col 4: Próximo programa (centro-direita)
+              // Col 4: Pr�ximo programa (centro-direita)
               nextProg && e('div', {
                 style: {
                   display: 'flex',
@@ -7778,7 +7799,7 @@ function Home(){
                     }
                   }, 'NEXT')
                 ),
-                // Título do próximo + horário
+                // T�tulo do pr�ximo + hor�rio
                 e('div', {
                   style: {
                     fontSize: 'clamp(14px,1.6vw,18px)',
@@ -7788,10 +7809,10 @@ function Home(){
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap'
                   }
-                }, `${decodeMaybeBase64(nextProg.title)} ${nextProg.start || ''} – ${nextProg.end || ''}`)
+                }, `${decodeMaybeBase64(nextProg.title)} ${nextProg.start || ''} ⏱ ${nextProg.end || ''}`)
               ),
 
-              // Col 5: Hora + Resolução
+              // Col 5: Hora + Resolu��o
               e('div', {
                 style: {
                   textAlign: 'right'
@@ -7828,7 +7849,7 @@ function Home(){
                 flexWrap: 'wrap'
               }
             },
-              // Navegação (← →)
+              // Navegação (setas)
               e('button', {
                 onClick: () => {},
                 style: {
@@ -7843,7 +7864,7 @@ function Home(){
                   outline: 'none',
                   transition: 'all 0.2s'
                 }
-              }, '←'),
+              }, '◄'),
 
               e('button', {
                 onClick: () => {},
@@ -7859,9 +7880,9 @@ function Home(){
                   outline: 'none',
                   transition: 'all 0.2s'
                 }
-              }, '→'),
+              }, '►'),
 
-              // Favorito (⭐/☆)
+              // Favorito (estrela)
               e('button', {
                 onClick: toggleFavorite,
                 style: {
@@ -7878,7 +7899,7 @@ function Home(){
                 }
               }, isFavorite ? '★' : '☆'),
 
-              // Chips de qualidade (FHD, FHD², HD, HD², SD, SD²)
+              // Chips de qualidade (FHD, FHD�, HD, HD�, SD, SD�)
               availableQualities.length > 0 && availableQualities.map(quality =>
                 e('button', {
                   key: quality,
@@ -7975,7 +7996,7 @@ function Home(){
           )
         ),
 
-        // OVERLAY DESABILITADO (será refeito)
+        // OVERLAY DESABILITADO (ser� refeito)
         false && e('div', {
           style: {
             position: 'absolute',
@@ -8028,7 +8049,7 @@ function Home(){
                 boxShadow: '0 8px 32px rgba(0,0,0,0.6)'
               }
             },
-              // ESQUERDA: Número + Logo + Programa Atual
+              // ESQUERDA: N�mero + Logo + Programa Atual
               e('div', {
                 style: {
                   display: 'flex',
@@ -8037,7 +8058,7 @@ function Home(){
                   flex: 1
                 }
               },
-                // Número do canal
+                // N�mero do canal
                 e('div', {
                   style: {
                     fontSize: '32px',
@@ -8046,7 +8067,7 @@ function Home(){
                     minWidth: '60px',
                     textAlign: 'center'
                   }
-                }, String(channel?.num || channel?.stream_id || '—')),
+                }, String(channel?.num || channel?.stream_id || '�')),
 
                 // Logo do canal
                 channel?.stream_icon && e('img', {
@@ -8068,7 +8089,7 @@ function Home(){
                     minWidth: 0
                   }
                 },
-                  // Título + AO VIVO
+                  // T�tulo + AO VIVO
                   e('div', {
                     style: {
                       display: 'flex',
@@ -8100,14 +8121,14 @@ function Home(){
                     }, 'AO VIVO')
                   ),
 
-                  // Horários
+                  // Hor�rios
                   currentProg && e('div', {
                     style: {
                       fontSize: '14px',
                       color: '#aaa',
                       marginBottom: '8px'
                     }
-                  }, `${currentProg.start || '00:00'} – ${currentProg.end || '00:00'}`),
+                  }, `${currentProg.start || '00:00'} � ${currentProg.end || '00:00'}`),
 
                   // Barra de progresso
                   currentProg && e('div', {
@@ -8131,7 +8152,7 @@ function Home(){
                 )
               ),
 
-              // CENTRO: Próximo programa
+              // CENTRO: Pr�ximo programa
               nextProg && e('div', {
                 style: {
                   marginLeft: '32px',
@@ -8150,14 +8171,14 @@ function Home(){
                     marginBottom: '6px',
                     display: 'inline-block'
                   }
-                }, 'PRÓXIMO'),
+                }, 'PR�XIMO'),
                 e('div', {
                   style: {
                     fontSize: '14px',
                     color: '#aaa',
                     marginBottom: '4px'
                   }
-                }, `${nextProg.start || '00:00'} – ${nextProg.end || '00:00'}`),
+                }, `${nextProg.start || '00:00'} � ${nextProg.end || '00:00'}`),
                 e('div', {
                   style: {
                     fontSize: '15px',
@@ -8171,7 +8192,7 @@ function Home(){
                 }, nextProg.title)
               ),
 
-              // DIREITA: Hora + Resolução
+              // DIREITA: Hora + Resolu��o
               e('div', {
                 style: {
                   textAlign: 'right',
@@ -8196,7 +8217,7 @@ function Home(){
               )
             ),
 
-            // BOTÕES DE QUALIDADE
+            // BOT�ES DE QUALIDADE
             availableQualities.length > 0 && e('div', {
               style: {
                 display: 'flex',
@@ -8258,17 +8279,17 @@ function Home(){
     }
 
     function dayNum(offset){ const d = new Date(); d.setDate(d.getDate()+offset); return String(d.getDate()).padStart(2,'0') }
-    function dayWeek(offset){ const d = new Date(); d.setDate(d.getDate()+offset); return ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][d.getDay()] }
+    function dayWeek(offset){ const d = new Date(); d.setDate(d.getDate()+offset); return ['Dom','Seg','Ter','Qua','Qui','Sex','S�b'][d.getDay()] }
 
 // Estado GLOBAL para NetflixMovies (persiste entre remontagens)
 if(typeof window.__netflixMoviesState === 'undefined') {
   window.__netflixMoviesState = {
     initialized: false,
-    currentViewKey: null, // ===== NOVO: Rastreia qual view está carregada =====
+    currentViewKey: null, // ===== NOVO: Rastreia qual view est� carregada =====
     sectionsMovies: [],
     featuredMovieId: null,
-    totalCategories: 0, // Total de categorias disponíveis
-    currentCategoryIndex: 0, // Categoria visível atual
+    totalCategories: 0, // Total de categorias dispon�veis
+    currentCategoryIndex: 0, // Categoria vis�vel atual
     loading: false,
     errorMsg: '',
     marginContent: {}, // ===== NOVO: Estado de scroll horizontal persistente =====
@@ -8281,7 +8302,7 @@ if(typeof window.__netflixMoviesState === 'undefined') {
   }
 }
 
-// Listeners para notificar componentes de mudanças no estado global
+// Listeners para notificar componentes de mudan�as no estado global
 if(typeof window.__netflixMoviesListeners === 'undefined') {
   window.__netflixMoviesListeners = new Set()
 }
@@ -8298,18 +8319,18 @@ window.__hoveredTrailer = {
   updateCallback: null
 }
 
-// Função GLOBAL para atualizar estado e notificar todos os componentes
+// Fun��o GLOBAL para atualizar estado e notificar todos os componentes
 window.updateNetflixMoviesState = (updates) => {
   Object.assign(window.__netflixMoviesState, updates)
   // Notificar todos os componentes montados
   window.__netflixMoviesListeners.forEach(listener => listener())
 }
 
-// Função para resetar estado quando sair da view de filmes
+// Fun��o para resetar estado quando sair da view de filmes
 window.resetNetflixMovies = () => {
   window.__netflixMoviesState = {
     initialized: false,
-    currentViewKey: window.__netflixMoviesState.currentViewKey, // ===== NÃO RESETAR: Manter para cancelar timeouts antigos =====
+    currentViewKey: window.__netflixMoviesState.currentViewKey, // ===== N�O RESETAR: Manter para cancelar timeouts antigos =====
     sectionsMovies: [],
     featuredMovieId: null,
     currentCategoryIndex: 0,
@@ -8319,7 +8340,7 @@ window.resetNetflixMovies = () => {
     showCollectionsView: false,
     selectedCollectionMovies: [],
     viewingCollectionMovies: false,
-    heroBackdrop: null, // Backdrop para mostrar no topo (coleção ou filme)
+    heroBackdrop: null, // Backdrop para mostrar no topo (cole��o ou filme)
     marginContent: {} // ===== NOVO: Resetar estado de scroll =====
   }
   // ===== LIMPAR CATEGORIAS FILTRADAS =====
@@ -8328,17 +8349,17 @@ window.resetNetflixMovies = () => {
   window.__netflixMoviesListeners.forEach(listener => listener())
 }
 
-// Componente NetflixMovies com proteção anti-loop
+// Componente NetflixMovies com prote��o anti-loop
     function NetflixMovies({ contentType = 'vod', categoryFilter = null, selectedCategory = null }){
       const isSeriesMode = contentType === 'series'
-      const modeLabel = isSeriesMode ? 'SÉRIES' : 'FILMES'
+      const modeLabel = isSeriesMode ? 'S�RIES' : 'FILMES'
       const filterLabel = categoryFilter ? ` (${categoryFilter})` : ''
 
       // Usar estado global + forceUpdate para re-renderizar
       const [, forceUpdate] = useState(0)
       const globalState = window.__netflixMoviesState
 
-      // ===== SOLUÇÃO FINAL: useRef + callback para notificar componentes específicos =====
+      // ===== SOLU��O FINAL: useRef + callback para notificar componentes espec�ficos =====
       const marginContentRef = useRef(globalState.marginContent || {})
       const marginListenersRef = useRef({}) // Callbacks por sectionId
 
@@ -8355,14 +8376,14 @@ window.resetNetflixMovies = () => {
             container.style.transform = `translateX(${newValue[sectionId]}px)`
           }
 
-          // ===== NOTIFICAR apenas o SectionMovies específico =====
+          // ===== NOTIFICAR apenas o SectionMovies espec�fico =====
           if (marginListenersRef.current[sectionId]) {
             marginListenersRef.current[sectionId](newValue[sectionId])
           }
         })
       }
 
-      // Função para SectionMovies se registrar
+      // Fun��o para SectionMovies se registrar
       const registerMarginListener = (sectionId, callback) => {
         marginListenersRef.current[sectionId] = callback
         return () => {
@@ -8371,15 +8392,15 @@ window.resetNetflixMovies = () => {
       }
 
       const [focusedMovieIdx, setFocusedMovieIdx] = useState(0)
-      const loadingCategoriesRef = useRef(new Set()) // Múltiplas categorias carregando simultaneamente
+      const loadingCategoriesRef = useRef(new Set()) // M�ltiplas categorias carregando simultaneamente
 
-      // Estados para coleções (usar estado global para persistir)
+      // Estados para cole��es (usar estado global para persistir)
       const collections = globalState.collections || []
       const setCollections = (value) => {
         window.updateNetflixMoviesState({ collections: value })
       }
 
-      // Estados de visualização de coleções (também usar estado global)
+      // Estados de visualiza��o de cole��es (tamb�m usar estado global)
       const showCollectionsView = globalState.showCollectionsView || false
       const setShowCollectionsView = (value) => {
         window.updateNetflixMoviesState({ showCollectionsView: value })
@@ -8401,9 +8422,9 @@ window.resetNetflixMovies = () => {
         window.updateNetflixMoviesState({ loadingCollections: value })
       }
 
-      // Função para carregar índice de coleções pré-construído (INSTANTÂNEO)
+      // Fun��o para carregar �ndice de cole��es pr�-constru�do (INSTANT�NEO)
       const loadCollectionsFromJSON = async (setCollections) => {
-        // Evitar múltiplas chamadas usando flag GLOBAL
+        // Evitar m�ltiplas chamadas usando flag GLOBAL
         if (window.__collectionsLoadAttempted) {
           return
         }
@@ -8411,7 +8432,7 @@ window.resetNetflixMovies = () => {
         setLoadingCollections(true)
 
         try {
-          // URL do arquivo JSON (ajuste conforme necessário)
+          // URL do arquivo JSON (ajuste conforme necess�rio)
           const jsonUrl = './collections.json' // Coloque o arquivo na raiz do projeto
 
           const response = await fetch(jsonUrl)
@@ -8421,10 +8442,10 @@ window.resetNetflixMovies = () => {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`)
           }
 
-          // Verificar se a resposta é realmente JSON
+          // Verificar se a resposta � realmente JSON
           const contentType = response.headers.get('content-type')
           if (!contentType || !contentType.includes('application/json')) {
-            throw new Error(`Tipo de conteúdo inválido: ${contentType}. Esperado JSON, mas recebeu HTML ou outro formato.`)
+            throw new Error(`Tipo de conte�do inv�lido: ${contentType}. Esperado JSON, mas recebeu HTML ou outro formato.`)
           }
 
           const data = await response.json()
@@ -8435,28 +8456,28 @@ window.resetNetflixMovies = () => {
             name: col.name,
             poster: col.poster_path ? `https://image.tmdb.org/t/p/w500${col.poster_path}` : null,
             backdrop: col.backdrop_path ? `https://image.tmdb.org/t/p/original${col.backdrop_path}` : null,
-            overview: '', // Será enriquecido a seguir
+            overview: '', // Ser� enriquecido a seguir
             movies: col.movies.map(m => ({
               stream_id: m.stream_id,
               name: m.name,
               category: m.category,
-              tmdb_genres: m.tmdb_genres || '', // Gêneros do TMDB (string)
-              genre_ids: m.genre_ids || [] // IDs dos gêneros do TMDB (array)
+              tmdb_genres: m.tmdb_genres || '', // G�neros do TMDB (string)
+              genre_ids: m.genre_ids || [] // IDs dos g�neros do TMDB (array)
             }))
           }))
 
-          // ===== ENRIQUECER COLEÇÕES COM GÊNEROS DO TMDB =====
-          // Estratégia: buscar gêneros da COLEÇÃO (não dos filmes individuais)
-          // Isso funciona porque as coleções TMDB têm gêneros derivados dos filmes
+          // ===== ENRIQUECER COLE��ES COM G�NEROS DO TMDB =====
+          // Estrat�gia: buscar g�neros da COLE��O (n�o dos filmes individuais)
+          // Isso funciona porque as cole��es TMDB t�m g�neros derivados dos filmes
           const collectionsToEnrich = collections.slice(0, 200)
 
           Promise.all(
             collectionsToEnrich.map(async (col) => {
               try {
-                // Buscar dados da coleção no TMDB
+                // Buscar dados da cole��o no TMDB
                 const tmdbCollectionData = await getTMDBCollection(col.id)
 
-                // Se a coleção TMDB tem filmes, pegar gêneros do primeiro
+                // Se a cole��o TMDB tem filmes, pegar g�neros do primeiro
                 if (tmdbCollectionData && tmdbCollectionData.parts && tmdbCollectionData.parts.length > 0) {
                   const firstMovie = tmdbCollectionData.parts[0]
 
@@ -8475,7 +8496,7 @@ window.resetNetflixMovies = () => {
                       .filter(name => name)
                       .join(', ')
 
-                    // Adicionar gêneros a TODOS os filmes da coleção
+                    // Adicionar g�neros a TODOS os filmes da cole��o
                     col.movies.forEach(movie => {
                       movie.tmdb_genres = genreNames
                       movie.genre_ids = firstMovie.genre_ids
@@ -8487,10 +8508,10 @@ window.resetNetflixMovies = () => {
               }
             })
           ).then(() => {
-            setCollections([...collections]) // Atualizar estado com gêneros
+            setCollections([...collections]) // Atualizar estado com g�neros
           })
 
-          // Enriquecer primeiras 30 coleções com overview do TMDB (em background)
+          // Enriquecer primeiras 30 cole��es com overview do TMDB (em background)
           const collectionsOverview = collections.slice(0, 30) // Limitar para performance
 
           Promise.all(
@@ -8510,19 +8531,19 @@ window.resetNetflixMovies = () => {
           setCollections(collections)
 
         } catch (err) {
-          // Silenciar erro 404 ou conteúdo inválido - arquivo collections.json é opcional
+          // Silenciar erro 404 ou conte�do inv�lido - arquivo collections.json � opcional
           setCollections([])
         } finally {
           setLoadingCollections(false)
         }
       }
 
-      // Função para construir coleções dinamicamente a partir dos filmes carregados
+      // Fun��o para construir cole��es dinamicamente a partir dos filmes carregados
       const loadCollections = async () => {
         setLoadingCollections(true)
 
         try {
-          // Coletar todos os filmes de todas as seções carregadas
+          // Coletar todos os filmes de todas as se��es carregadas
           const allMovies = []
           for(const section of globalState.sectionsMovies) {
             if(section && section.movies && section.movies.length > 0) {
@@ -8530,7 +8551,7 @@ window.resetNetflixMovies = () => {
             }
           }
 
-          // Usar a função global findCollectionsInMovies
+          // Usar a fun��o global findCollectionsInMovies
           const foundCollections = await findCollectionsInMovies(allMovies)
 
           setCollections(foundCollections)
@@ -8541,7 +8562,7 @@ window.resetNetflixMovies = () => {
         }
       }
 
-      // Expor função globalmente para ser chamada do menu
+      // Expor fun��o globalmente para ser chamada do menu
       useEffect(() => {
         window.loadNetflixCollections = loadCollections
         return () => {
@@ -8551,10 +8572,10 @@ window.resetNetflixMovies = () => {
 
       // ===== NOVO: Setar featuredMovieId automaticamente quando sectionsMovies carrega =====
       useEffect(() => {
-        // Verifica se estamos em uma view de conteúdo (não em coleções ou live)
+        // Verifica se estamos em uma view de conte�do (n�o em cole��es ou live)
         const isContentView = view && view.startsWith('netflix-')
 
-        // Só setar se estamos em view de conteúdo e temos filmes carregados
+        // S� setar se estamos em view de conte�do e temos filmes carregados
         if (isContentView && globalState.sectionsMovies.length > 0) {
           const firstSection = globalState.sectionsMovies[0]
           if (firstSection?.movies?.length > 0) {
@@ -8565,38 +8586,38 @@ window.resetNetflixMovies = () => {
             if (firstMovieId) {
               window.updateNetflixMoviesState({
                 featuredMovieId: firstMovieId,
-                heroBackdrop: null // Garantir que não há backdrop de coleção
+                heroBackdrop: null // Garantir que n�o h� backdrop de cole��o
               })
             }
           }
         }
       }, [view, globalState.sectionsMovies.length])
 
-      // ===== NOVO: Carregar coleções automaticamente quando filmes forem carregados =====
-      // Construir coleções em background assim que tiver filmes suficientes
+      // ===== NOVO: Carregar cole��es automaticamente quando filmes forem carregados =====
+      // Construir cole��es em background assim que tiver filmes suficientes
       useEffect(() => {
         const totalMovies = globalState.sectionsMovies.reduce((sum, section) => {
           return sum + (section?.movies?.length || 0)
         }, 0)
 
-        // Se tem filmes carregados E ainda não tem coleções E não está carregando
+        // Se tem filmes carregados E ainda n�o tem cole��es E n�o est� carregando
         if (totalMovies >= 50 && collections.length === 0 && !loadingCollections) {
           loadCollections()
         }
-      }, [globalState.sectionsMovies.length]) // Disparar quando novas seções forem adicionadas
+      }, [globalState.sectionsMovies.length]) // Disparar quando novas se��es forem adicionadas
 
-      // ===== NOVO: Forçar carregamento de coleções quando entrar na view collections =====
+      // ===== NOVO: For�ar carregamento de cole��es quando entrar na view collections =====
       useEffect(() => {
         if (view === 'collections' && collections.length === 0 && !loadingCollections) {
           const totalMovies = globalState.sectionsMovies.reduce((sum, section) => {
             return sum + (section?.movies?.length || 0)
           }, 0)
 
-          // Se tem pelo menos alguns filmes, tenta carregar coleções
+          // Se tem pelo menos alguns filmes, tenta carregar cole��es
           if (totalMovies > 0) {
             loadCollections()
           } else {
-            // ===== NOVO: Se não tem filmes, carregar automaticamente da netflix-movies =====
+            // ===== NOVO: Se n�o tem filmes, carregar automaticamente da netflix-movies =====
             // Salvar que queremos voltar para collections
             if (!window.__pendingCollectionsView) {
               window.__pendingCollectionsView = true
@@ -8606,7 +8627,7 @@ window.resetNetflixMovies = () => {
           }
         }
 
-        // ===== NOVO: Após carregar filmes, voltar para collections =====
+        // ===== NOVO: Ap�s carregar filmes, voltar para collections =====
         if (window.__pendingCollectionsView && view === 'netflix-movies' && globalState.sectionsMovies.length > 0) {
           const totalMovies = globalState.sectionsMovies.reduce((sum, section) => {
             return sum + (section?.movies?.length || 0)
@@ -8619,17 +8640,17 @@ window.resetNetflixMovies = () => {
         }
       }, [collections.length, globalState.sectionsMovies.length])
 
-      // ===== NOVO: Setar heroBackdrop da primeira coleção quando abrir Coletâneas =====
+      // ===== NOVO: Setar heroBackdrop da primeira coleção quando abrir Coleções =====
       useEffect(() => {
-        // IMPORTANTE: Só setar backdrop inicial se NÃO houver backdrop já setado
+        // IMPORTANTE: S� setar backdrop inicial se N�O houver backdrop j� setado
         if (showCollectionsView === true && collections.length > 0 && !viewingCollectionMovies) {
           const firstCollection = collections[0]
-          // Só setar se NÃO houver backdrop (primeira vez que abre Collections)
+          // S� setar se N�O houver backdrop (primeira vez que abre Collections)
           if (firstCollection && window.updateNetflixMoviesState && !globalState.heroBackdrop) {
             window.updateNetflixMoviesState({
               heroBackdrop: {
                 name: firstCollection.name,
-                overview: firstCollection.overview || `Coleção com ${firstCollection.movies?.length || 0} filmes`,
+                overview: firstCollection.overview || `Cole��o com ${firstCollection.movies?.length || 0} filmes`,
                 backdrop: firstCollection.backdrop,
                 poster: firstCollection.poster,
                 backdrop_path: null
@@ -8637,7 +8658,7 @@ window.resetNetflixMovies = () => {
             })
           }
         } else if (showCollectionsView === false && window.updateNetflixMoviesState) {
-          // Só limpar se showCollectionsView for EXPLICITAMENTE false
+          // S� limpar se showCollectionsView for EXPLICITAMENTE false
           window.updateNetflixMoviesState({
             heroBackdrop: null
           })
@@ -8653,13 +8674,13 @@ window.resetNetflixMovies = () => {
         })
       }
 
-      // ===== NOVO: Ref para rastrear a última categoria e evitar resets desnecessários =====
+      // ===== NOVO: Ref para rastrear a �ltima categoria e evitar resets desnecess�rios =====
       const lastCategoryIndexRef = useRef(currentCategoryIndex)
 
       // Registrar listener para re-renderizar quando estado global mudar
       useEffect(() => {
         const listener = (skipRender) => {
-          // Se skipRender === true, não forçar re-render (usado para marginContent)
+          // Se skipRender === true, n�o for�ar re-render (usado para marginContent)
           if (skipRender) return
 
           // 
@@ -8673,17 +8694,17 @@ window.resetNetflixMovies = () => {
         }
       }, [])
 
-      // ✅ Proteção GLOBAL contra remontagem e loop infinito
-      // ===== IMPORTANTE: Criar chave única baseada em contentType + categoryFilter + selectedCategory =====
+      // ? Prote��o GLOBAL contra remontagem e loop infinito
+      // ===== IMPORTANTE: Criar chave �nica baseada em contentType + categoryFilter + selectedCategory =====
       const selectedCatId = selectedCategory ? getCatId(selectedCategory) : null
       const viewKey = `${contentType}-${categoryFilter || 'all'}-${selectedCatId || 'all'}`
 
       useEffect(() => {
-        // ===== CORREÇÃO CRÍTICA: Atualizar currentViewKey IMEDIATAMENTE antes de qualquer async =====
+        // ===== CORRE��O CR�TICA: Atualizar currentViewKey IMEDIATAMENTE antes de qualquer async =====
         const previousViewKey = globalState.currentViewKey
 
 
-        // Verificar se JÁ inicializou ESSA VIEW ESPECÍFICA (antes de mudar currentViewKey)
+        // Verificar se J� inicializou ESSA VIEW ESPEC�FICA (antes de mudar currentViewKey)
         if(globalState.initialized && previousViewKey === viewKey) {
           return
         }
@@ -8701,32 +8722,32 @@ window.resetNetflixMovies = () => {
 
           try {
             // 1. Carregar categorias VOD ou SERIES dependendo do modo
-            const categoryType = isSeriesMode ? 'SÉRIES' : 'VOD'
+            const categoryType = isSeriesMode ? 'S�RIES' : 'VOD'
             const apiAction = isSeriesMode ? 'get_series_categories' : 'get_vod_categories'
 
             // ===== IMPORTANTE: SEMPRE carregar categorias para garantir filtro correto =====
             let categories = []
 
-            // Sempre buscar da API para garantir que não há cache incorreto
+            // Sempre buscar da API para garantir que n�o h� cache incorreto
             const raw = await apiCall(apiAction)
             const catsArray = toArray(raw)
 
             if(!Array.isArray(catsArray) || catsArray.length === 0) {
-              throw new Error(`Nenhuma categoria ${categoryType} disponível`)
+              throw new Error(`Nenhuma categoria ${categoryType} dispon�vel`)
             }
 
             categories = catsArray
 
-            // 2. Filtrar categorias se houver filtro específico
+            // 2. Filtrar categorias se houver filtro espec�fico
             let selectedCategories = categories
 
-            // Se tem uma categoria específica selecionada pelo usuário, usar apenas ela
+            // Se tem uma categoria espec�fica selecionada pelo usu�rio, usar apenas ela
             if (selectedCategory) {
               const catId = getCatId(selectedCategory)
               selectedCategories = categories.filter(cat => getCatId(cat) === catId)
 
               if (selectedCategories.length === 0) {
-                console.warn('[NETFLIX-MOVIES] Categoria não encontrada (ID:', catId, ') - usando todas as categorias como fallback')
+                console.warn('[NETFLIX-MOVIES] Categoria n�o encontrada (ID:', catId, ') - usando todas as categorias como fallback')
                 // FALLBACK: Usar todas as categorias em vez de mostrar erro
                 selectedCategories = categories
               }
@@ -8741,7 +8762,7 @@ window.resetNetflixMovies = () => {
               })
 
               if (selectedCategories.length === 0) {
-                // ===== CORREÇÃO: NÃO usar todas, mostrar erro =====
+                // ===== CORRE��O: N�O usar todas, mostrar erro =====
                 window.updateNetflixMoviesState({
                   loading: false,
                   errorMsg: `Nenhuma categoria encontrada para "${categoryFilter}"`
@@ -8749,7 +8770,7 @@ window.resetNetflixMovies = () => {
                 return
               }
             }
-            // Se não tem filtro nem categoria selecionada, NÃO carregar nada
+            // Se n�o tem filtro nem categoria selecionada, N�O carregar nada
             // O componente vai aguardar selectedCategory ser definido
             else if (!selectedCategory && !categoryFilter) {
               window.updateNetflixMoviesState({
@@ -8759,12 +8780,12 @@ window.resetNetflixMovies = () => {
               return
             }
 
-            // ===== CORREÇÃO: Guardar categorias com chave única por view =====
+            // ===== CORRE��O: Guardar categorias com chave �nica por view =====
             const categoriesKey = `categories_${viewKey}`
             window[categoriesKey] = selectedCategories
             window[`${categoriesKey}_raw`] = categories
 
-            // Manter compatibilidade (mas serão sobrescritas)
+            // Manter compatibilidade (mas ser�o sobrescritas)
             window.__allAvailableCategories = selectedCategories
             window.__allCategoriesRaw = categories
 
@@ -8786,11 +8807,11 @@ window.resetNetflixMovies = () => {
             }
 
             if(allSections.length === 0) {
-              throw new Error('Nenhuma categoria com filmes disponível')
+              throw new Error('Nenhuma categoria com filmes dispon�vel')
             }
 
-            // Atualizar estado com todas as seções
-            // ===== FIX: Séries usam series_id, filmes usam stream_id =====
+            // Atualizar estado com todas as se��es
+            // ===== FIX: S�ries usam series_id, filmes usam stream_id =====
             const firstMovie = allSections[0]?.movies?.[0]
             const firstMovieId = firstMovie?.series_id || firstMovie?.stream_id
 
@@ -8800,24 +8821,24 @@ window.resetNetflixMovies = () => {
               totalCategories: selectedCategories.length
             })
 
-            // 4. Carregar índice de coleções pré-construído (instantâneo)
+            // 4. Carregar �ndice de cole��es pr�-constru�do (instant�neo)
             await loadCollectionsFromJSON(setCollections)
 
-            // ===== OTIMIZADO: Pré-carregar apenas próximas 3 categorias (lazy loading on-demand) =====
+            // ===== OTIMIZADO: Pr�-carregar apenas pr�ximas 3 categorias (lazy loading on-demand) =====
             const PRELOAD_LIMIT = 3 // Reduzido de TODAS para apenas 3
             const totalCats = selectedCategories.length
             const categoriesToPreload = Math.min(PRELOAD_LIMIT, totalCats - 1)
 
-            // ===== CORREÇÃO: Armazenar timeout IDs para cancelar no cleanup =====
+            // ===== CORRE��O: Armazenar timeout IDs para cancelar no cleanup =====
             const preloadTimeouts = []
             for (let i = 1; i <= categoriesToPreload; i++) {
               const timeoutId = setTimeout(() => {
                 // Verificar se ainda estamos na mesma view antes de carregar
                 if (globalState.currentViewKey === viewKey && !globalState.sectionsMovies[i]) {
-                  loadCategory(i, null, viewKey) // ← PASSAR viewKey!
+                  loadCategory(i, null, viewKey) // ? PASSAR viewKey!
                 } else {
                 }
-              }, i * 1000) // Escalonar: 1s, 2s, 3s (mais espaçado)
+              }, i * 1000) // Escalonar: 1s, 2s, 3s (mais espa�ado)
               preloadTimeouts.push(timeoutId)
             }
 
@@ -8837,11 +8858,11 @@ window.resetNetflixMovies = () => {
         return () => {
           ac.abort()
         }
-      }, [viewKey]) // ===== CORRIGIDO: Dependência viewKey para reinicializar quando mudar =====
+      }, [viewKey]) // ===== CORRIGIDO: Depend�ncia viewKey para reinicializar quando mudar =====
 
       // Resetar scroll horizontal quando mudar de categoria (APENAS quando categoria muda)
       useEffect(() => {
-        // ===== NOVO: Só resetar se a categoria REALMENTE mudou =====
+        // ===== NOVO: S� resetar se a categoria REALMENTE mudou =====
         if (currentCategoryIndex === lastCategoryIndexRef.current) {
           return
         }
@@ -8855,11 +8876,11 @@ window.resetNetflixMovies = () => {
             [currentSection.id]: 0
           }))
         }
-      }, [currentCategoryIndex]) // ===== CORRIGIDO: Removido globalState.sectionsMovies das dependências =====
+      }, [currentCategoryIndex]) // ===== CORRIGIDO: Removido globalState.sectionsMovies das depend�ncias =====
 
-      // Navegação por teclado
+      // Navega��o por teclado
       useEffect(() => {
-        // Verificar se está em qualquer view do NetflixMovies (filmes, séries, novelas, etc)
+        // Verificar se est� em qualquer view do NetflixMovies (filmes, s�ries, novelas, etc)
         const isNetflixView = ['netflix-movies', 'netflix-series', 'netflix-novelas', 'netflix-animes', 'netflix-desenhos', 'netflix-show'].includes(view)
         if(!isNetflixView || globalState.sectionsMovies.length === 0) return
 
@@ -8875,14 +8896,14 @@ window.resetNetflixMovies = () => {
           } else if(e.key === 'ArrowLeft'){
             e.preventDefault()
             if(focusedMovieIdx === 0){
-              // Se está no primeiro filme, volta para home
+              // Se est� no primeiro filme, volta para home
               setView('home')
             } else {
               setFocusedMovieIdx(prev => Math.max(prev - 1, 0))
             }
           } else if(e.key === 'ArrowDown'){
             e.preventDefault()
-            // Mudar para próxima categoria
+            // Mudar para pr�xima categoria
             const totalAvailable = globalState.totalCategories || window.__allAvailableCategories?.length || 0
             if (currentCategoryIndex < totalAvailable - 1) {
               const nextIndex = currentCategoryIndex + 1
@@ -8906,7 +8927,7 @@ window.resetNetflixMovies = () => {
               setCurrentCategoryIndex(nextIndex)
               setFocusedMovieIdx(0)
 
-              // Se a categoria ainda não foi carregada, carregar em background
+              // Se a categoria ainda n�o foi carregada, carregar em background
               if (!nextSection) {
                 loadCategory(nextIndex)
               }
@@ -8936,7 +8957,7 @@ window.resetNetflixMovies = () => {
               setCurrentCategoryIndex(prevIndex)
               setFocusedMovieIdx(0)
 
-              // Se a categoria ainda não foi carregada, carregar em background
+              // Se a categoria ainda n�o foi carregada, carregar em background
               if (!prevSection) {
                 loadCategory(prevIndex)
               }
@@ -8979,7 +9000,7 @@ window.resetNetflixMovies = () => {
         }
       }, [currentCategoryIndex, focusedMovieIdx, view, globalState.sectionsMovies])
 
-      // Carregar filmes de uma categoria (retorna objeto seção)
+      // Carregar filmes de uma categoria (retorna objeto se��o)
       // Carrega TODOS os filmes da categoria de uma vez
       const loadCategoryMovies = async (categoryIndex, categoriesArray) => {
         const cats = categoriesArray
@@ -8990,8 +9011,8 @@ window.resetNetflixMovies = () => {
         }
 
         try {
-          // Buscar APENAS os filmes/séries desta categoria (performance otimizada)
-          const contentLabel = isSeriesMode ? 'séries' : 'filmes'
+          // Buscar APENAS os filmes/s�ries desta categoria (performance otimizada)
+          const contentLabel = isSeriesMode ? 's�ries' : 'filmes'
           const apiAction = isSeriesMode ? 'get_series' : 'get_vod_streams'
 
           const data = await apiCall(apiAction, { category_id: getCatId(cat) })
@@ -9010,11 +9031,11 @@ window.resetNetflixMovies = () => {
 
           const PRIORITY_COUNT = 10
 
-          // Enriquecer APENAS o primeiro filme (featured) IMEDIATAMENTE para backdrop instantâneo
+          // Enriquecer APENAS o primeiro filme (featured) IMEDIATAMENTE para backdrop instant�neo
           const contentTypeParam = isSeriesMode ? 'series' : 'movie'
           const firstEnriched = await enrichMovieWithTMDB(allMoviesInCategory[0], contentTypeParam)
 
-          // Enriquecer filmes 2-10 em background (não bloquear)
+          // Enriquecer filmes 2-10 em background (n�o bloquear)
           if (allMoviesInCategory.length > 1) {
             Promise.all(
               allMoviesInCategory.slice(1, PRIORITY_COUNT).map(movie => enrichMovieWithTMDB(movie, contentTypeParam))
@@ -9028,7 +9049,7 @@ window.resetNetflixMovies = () => {
 
 
           // Retornar TODOS os filmes da categoria
-          // A renderização será feita sob demanda (scroll infinito)
+          // A renderiza��o ser� feita sob demanda (scroll infinito)
           return {
             id: categoryIndex,
             name: cat.category_name,
@@ -9041,15 +9062,15 @@ window.resetNetflixMovies = () => {
         }
       }
 
-      // Carregar uma categoria específica (usa loadCategoryMovies e atualiza estado)
+      // Carregar uma categoria espec�fica (usa loadCategoryMovies e atualiza estado)
       const loadCategory = async (categoryIndex, categoriesArray = null, forceViewKey = null) => {
-        // ===== CORREÇÃO: Usar categorias específicas do viewKey PASSADO ou atual =====
+        // ===== CORRE��O: Usar categorias espec�ficas do viewKey PASSADO ou atual =====
         const useViewKey = forceViewKey || viewKey
         const categoriesKey = `categories_${useViewKey}`
         const cats = categoriesArray || window[`${categoriesKey}_raw`] || window.__allCategoriesRaw || vodCats
         const availableCategories = window[categoriesKey] || window.__allAvailableCategories || []
 
-        // ===== VERIFICAÇÃO CRÍTICA: Abortar se não é mais a view correta =====
+        // ===== VERIFICA��O CR�TICA: Abortar se n�o � mais a view correta =====
         if (useViewKey !== globalState.currentViewKey) {
           return
         }
@@ -9058,13 +9079,13 @@ window.resetNetflixMovies = () => {
           return
         }
 
-        // Verificar se já está carregada
+        // Verificar se j� est� carregada
         if(globalState.sectionsMovies[categoryIndex]) {
           return
         }
 
-        // ===== CORRIGIDO: Permitir múltiplos carregamentos simultâneos =====
-        // Verificar se esta categoria específica já está sendo carregada
+        // ===== CORRIGIDO: Permitir m�ltiplos carregamentos simult�neos =====
+        // Verificar se esta categoria espec�fica j� est� sendo carregada
         if(loadingCategoriesRef.current.has(categoryIndex)) {
           return
         }
@@ -9083,12 +9104,12 @@ window.resetNetflixMovies = () => {
 
           // ===== FIX: Validar section ANTES de adicionar (verificar se tem movies) =====
           if(section && section.movies && Array.isArray(section.movies) && section.movies.length > 0) {
-            // Adicionar a nova seção na posição correta (não substituir)
+            // Adicionar a nova se��o na posi��o correta (n�o substituir)
             const newSections = [...globalState.sectionsMovies]
             newSections[categoryIndex] = section
 
-            // ===== CORRIGIDO: NÃO mudar featuredMovieId em pré-carregamento =====
-            // Só atualizar sectionsMovies, preservar featuredMovieId atual
+            // ===== CORRIGIDO: N�O mudar featuredMovieId em pr�-carregamento =====
+            // S� atualizar sectionsMovies, preservar featuredMovieId atual
             window.updateNetflixMoviesState({
               sectionsMovies: newSections
             })
@@ -9104,7 +9125,7 @@ window.resetNetflixMovies = () => {
       const loadMoviesRef = useRef(false)
 
       const loadMovies = async () => {
-        // Proteção: se já carregou, não carrega de novo
+        // Prote��o: se j� carregou, n�o carrega de novo
         if(loadMoviesRef.current) {
           return
         }
@@ -9143,12 +9164,12 @@ window.resetNetflixMovies = () => {
           const totalWidth = totalMovies * cardWidth
           const maxScroll = Math.min(0, -(totalWidth - viewportWidth))
 
-          // Se não há necessidade de scroll (tudo cabe na tela), não faz nada
+          // Se n�o h� necessidade de scroll (tudo cabe na tela), n�o faz nada
           if (totalWidth <= viewportWidth) {
             return state
           }
 
-          // Scroll dinâmico baseado em cards visíveis (scroll de 1 página por vez)
+          // Scroll din�mico baseado em cards vis�veis (scroll de 1 p�gina por vez)
           const scrollAmount = cardsVisible * cardWidth
           let newValue = currentMargin + (direction === 'left' ? -scrollAmount : scrollAmount)
 
@@ -9164,16 +9185,16 @@ window.resetNetflixMovies = () => {
 
           // 
 
-          // ===== NOVO: Log do estado completo que será retornado =====
+          // ===== NOVO: Log do estado completo que ser� retornado =====
           const newState = {
             ...state,
             [sectionId]: finalValue
           }
           // 
 
-          // ===== DESABILITADO: Não atualizar featured movie durante scroll horizontal =====
+          // ===== DESABILITADO: N�o atualizar featured movie durante scroll horizontal =====
           // Isso causava re-renders (piscadas) a cada clique na seta
-          // O featured movie só muda ao trocar de categoria (teclas ↑↓)
+          // O featured movie s� muda ao trocar de categoria (teclas ??)
           // if (section && section.movies.length > 0) {
           //   const centerPosition = Math.abs(finalValue) + (viewportWidth / 2)
           //   const centerMovieIndex = Math.floor(centerPosition / cardWidth)
@@ -9186,7 +9207,7 @@ window.resetNetflixMovies = () => {
           //   }
           // }
 
-          // ===== CORRIGIDO: Retornar o estado que já criamos =====
+          // ===== CORRIGIDO: Retornar o estado que j� criamos =====
           return newState
         })
       }
@@ -9251,13 +9272,13 @@ window.resetNetflixMovies = () => {
         useEffect(() => {
           if(!featuredMovieId) return
 
-          // ===== OTIMIZAÇÃO: Evitar loop de re-render =====
+          // ===== OTIMIZA��O: Evitar loop de re-render =====
           if(lastProcessedIdRef.current === featuredMovieId) {
             return
           }
           lastProcessedIdRef.current = featuredMovieId
 
-          // Buscar filme nas seções
+          // Buscar filme nas se��es
           let foundMovie = null
           for(let section of globalState.sectionsMovies){
             // ===== FIX: Verificar se section existe E tem movies array =====
@@ -9268,21 +9289,21 @@ window.resetNetflixMovies = () => {
           }
 
           if(!foundMovie) {
-            // Tentar buscar nos filmes da coleção
+            // Tentar buscar nos filmes da cole��o
             if(collectionMovies && collectionMovies.length > 0) {
               foundMovie = collectionMovies.find(m => (m.series_id || m.stream_id) === featuredMovieId)
             }
           }
 
           if(foundMovie){
-            // ===== FIX: Usar series_id para séries, stream_id para filmes =====
+            // ===== FIX: Usar series_id para s�ries, stream_id para filmes =====
             const movieId = foundMovie.series_id || foundMovie.stream_id
 
-            // Verificar se já está no cache GLOBAL
+            // Verificar se j� est� no cache GLOBAL
             if(window.__enrichedMoviesCache[movieId]) {
               const cachedMovie = window.__enrichedMoviesCache[movieId]
 
-              // ===== GUARD: Se é o mesmo filme, NÃO atualizar (evita re-render) =====
+              // ===== GUARD: Se � o mesmo filme, N�O atualizar (evita re-render) =====
               if(movie && movie.id === movieId) {
                 return
               }
@@ -9320,54 +9341,54 @@ window.resetNetflixMovies = () => {
                 // Setar novo filme
                 setMovie(cachedMovie)
 
-                // Após React renderizar, iniciar fade
+                // Ap�s React renderizar, iniciar fade
                 setTimeout(() => {
                   setShowPrevious(false)
                 }, 50)
 
-                // Limpar previousMovie após transição completar
+                // Limpar previousMovie ap�s transi��o completar
                 transitionTimeoutRef.current = setTimeout(() => {
                   setPreviousMovie(null)
                 }, 850) // 50ms + 800ms transition
               } else {
-                // Primeiro filme, sem transição
+                // Primeiro filme, sem transi��o
                 setMovie(cachedMovie)
               }
               })(); // Fechar async IIFE
               return
             }
 
-            // Enriquecer este filme específico com TMDB se ainda não tiver dados
+            // Enriquecer este filme espec�fico com TMDB se ainda n�o tiver dados
             const enrichAndSetMovie = async () => {
               let enrichedMovie = foundMovie
 
-              // Verificar se cast está no formato antigo (string)
+              // Verificar se cast est� no formato antigo (string)
               const hasOldCastFormat = typeof foundMovie.tmdb_cast === 'string'
 
-              // Se não tem dados TMDB completos OU cast está em formato antigo, buscar agora
+              // Se n�o tem dados TMDB completos OU cast est� em formato antigo, buscar agora
               if(!foundMovie.tmdb_overview || !foundMovie.tmdb_genres || hasOldCastFormat) {
                 const detectedType = foundMovie.series_id ? 'series' : 'movie'
                 enrichedMovie = await enrichMovieWithTMDB(foundMovie, detectedType)
               }
 
-              // Helper: validar se URL de imagem é válida
+              // Helper: validar se URL de imagem � v�lida
               const isValidImageUrl = (url) => {
                 if (!url || typeof url !== 'string') return false
-                // Verificar se começa com http/https
+                // Verificar se come�a com http/https
                 if (!url.startsWith('http://') && !url.startsWith('https://')) return false
-                // Verificar se tem extensão de imagem ou é do TMDB
+                // Verificar se tem extens�o de imagem ou � do TMDB
                 return url.includes('image.tmdb.org') || /\.(jpg|jpeg|png|webp|gif)$/i.test(url)
               }
 
-              // Helper: verificar se é backdrop (horizontal) ou poster (vertical)
+              // Helper: verificar se � backdrop (horizontal) ou poster (vertical)
               const isBackdropUrl = (url) => {
                 if (!url) return false
-                // Backdrops do TMDB sempre tem /w1280/ ou /original/ e não tem 'poster' no path
+                // Backdrops do TMDB sempre tem /w1280/ ou /original/ e n�o tem 'poster' no path
                 return url.includes('/w1280/') || url.includes('/original/') ||
                        (url.includes('image.tmdb.org') && !url.includes('/w500/'))
               }
 
-              // Prioridade: backdrops TMDB → stream_icon (se válido) → poster TMDB
+              // Prioridade: backdrops TMDB ? stream_icon (se v�lido) ? poster TMDB
               const getValidBackdrop = () => {
                 // 1. Tentar backdrops do TMDB (melhor qualidade)
                 const tmdbBackdrops = [
@@ -9396,7 +9417,7 @@ window.resetNetflixMovies = () => {
                   }
                 }
 
-                // 4. Como último recurso, usar poster do TMDB
+                // 4. Como �ltimo recurso, usar poster do TMDB
                 if (enrichedMovie.tmdb_poster && isValidImageUrl(enrichedMovie.tmdb_poster)) {
                   return enrichedMovie.tmdb_poster
                 }
@@ -9414,7 +9435,7 @@ window.resetNetflixMovies = () => {
                 rating: enrichedMovie.tmdb_rating ? (enrichedMovie.tmdb_rating * 10).toFixed(0) : '85',
                 releaseDate: enrichedMovie.tmdb_year || enrichedMovie.year || '2024',
                 runtime: enrichedMovie.tmdb_runtime || enrichedMovie.duration || '',
-                overview: enrichedMovie.tmdb_overview || enrichedMovie.plot || enrichedMovie.description || 'Sem descrição disponível',
+                overview: enrichedMovie.tmdb_overview || enrichedMovie.plot || enrichedMovie.description || 'Sem descri��o dispon�vel',
                 genres: enrichedMovie.tmdb_genres || enrichedMovie.genre || 'Filme'
               }
 
@@ -9432,17 +9453,17 @@ window.resetNetflixMovies = () => {
                 // Setar novo filme
                 setMovie(movieData)
 
-                // Após React renderizar, iniciar fade
+                // Ap�s React renderizar, iniciar fade
                 setTimeout(() => {
                   setShowPrevious(false)
                 }, 50)
 
-                // Limpar previousMovie após transição completar
+                // Limpar previousMovie ap�s transi��o completar
                 transitionTimeoutRef.current = setTimeout(() => {
                   setPreviousMovie(null)
                 }, 850)
               } else {
-                // Primeiro filme, sem transição
+                // Primeiro filme, sem transi��o
                 setMovie(movieData)
               }
             }
@@ -9458,7 +9479,7 @@ window.resetNetflixMovies = () => {
 
             setLoadingFeaturedTrailer(true)
             try {
-              // Detectar se é série ou filme
+              // Detectar se � s�rie ou filme
               const type = movie.series_id ? 'tv' : 'movie'
               const trailerUrl = await getTMDBTrailer(movie.tmdb_id, type)
               if (trailerUrl) {
@@ -9534,7 +9555,7 @@ window.resetNetflixMovies = () => {
               left: 0,
               right: 0,
               bottom: 0,
-              // ===== FIX: Background sólido escuro para evitar piscar branco =====
+              // ===== FIX: Background s�lido escuro para evitar piscar branco =====
               backgroundColor: '#0a0a0a',
               backgroundImage: shouldUseGradient ? gradientBg : `url(${movie.imageUrl})`,
               backgroundSize: 'cover',
@@ -9567,14 +9588,14 @@ window.resetNetflixMovies = () => {
                 background: 'linear-gradient(to top, #111 25%, transparent 60%)'
               }
             },
-              // Content com transição suave
+              // Content com transi��o suave
               e('div', {
                 style: {
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'flex-start',
                   justifyContent: 'flex-start', // Alinha no topo
-                  padding: '60px 40px 0 40px', // Padding mínimo no topo
+                  padding: '60px 40px 0 40px', // Padding m�nimo no topo
                   width: '100%',
                   height: '100%',
                   background: 'linear-gradient(to right, rgba(0,0,0,0.6) 40%, transparent 60%)'
@@ -9596,7 +9617,7 @@ window.resetNetflixMovies = () => {
                   }
                 }, displayMovie.name || displayMovie.title),
 
-                // MovieInfo (rating, year, runtime) - usa dados do TMDB quando disponível
+                // MovieInfo (rating, year, runtime) - usa dados do TMDB quando dispon�vel
                 e('div', {
                   style: {
                     display: 'flex',
@@ -9613,7 +9634,7 @@ window.resetNetflixMovies = () => {
                       color: '#46d369',
                       fontWeight: 700
                     }
-                  }, displayMovie.tmdb_rating ? `⭐ ${(displayMovie.tmdb_rating * 10).toFixed(0)}%` : `${displayMovie.rating}% relevante`),
+                  }, displayMovie.tmdb_rating ? `? ${(displayMovie.tmdb_rating * 10).toFixed(0)}%` : `${displayMovie.rating}% relevante`),
 
                   // Ano
                   (displayMovie.tmdb_year || displayMovie.releaseDate) && e('span', {
@@ -9634,7 +9655,7 @@ window.resetNetflixMovies = () => {
                     : (displayMovie.tmdb_runtime || displayMovie.runtime))
                 ),
 
-                // Overview (descrição do TMDB é priorizada)
+                // Overview (descri��o do TMDB � priorizada)
                 e('p', {
                   style: {
                     width: '650px',
@@ -9696,7 +9717,7 @@ window.resetNetflixMovies = () => {
                       border: 'none',
                       fontWeight: '600'
                     }
-                  }, '▶ Assistir'),
+                  }, '▶️ Assistir'),
 
                   // Trailer button
                   e('button', {
@@ -9730,11 +9751,11 @@ window.resetNetflixMovies = () => {
           )
         )
       }, (prevProps, nextProps) => {
-        // Custom comparison: só re-render se featuredMovieId mudar
+        // Custom comparison: s� re-render se featuredMovieId mudar
         return prevProps.featuredMovieId === nextProps.featuredMovieId
       })
 
-      // COMPONENTE: CollectionCard (Card de coleção para carrossel horizontal)
+      // COMPONENTE: CollectionCard (Card de cole��o para carrossel horizontal)
       const CollectionCard = React.memo(({ collection, onClick, sectionId, idx }) => {
         const [isHovered, setIsHovered] = useState(false)
         const isHoveredRef = useRef(false)
@@ -9742,7 +9763,7 @@ window.resetNetflixMovies = () => {
         const [isLoading, setIsLoading] = useState(false)
         const hasEnrichedRef = useRef(false)
 
-        // Sincronizar com a prop collection quando ela muda (já vem enriquecida)
+        // Sincronizar com a prop collection quando ela muda (j� vem enriquecida)
         useEffect(() => {
           if (collection.overview && !fullCollection?.overview) {
             setFullCollection(collection)
@@ -9750,7 +9771,7 @@ window.resetNetflixMovies = () => {
           }
         }, [collection.id])
 
-        // Buscar detalhes completos da coleção ao passar o mouse (só se não tiver overview)
+        // Buscar detalhes completos da cole��o ao passar o mouse (s� se n�o tiver overview)
         useEffect(() => {
           if (isHovered && !hasEnrichedRef.current && !fullCollection?.overview && !isLoading) {
             hasEnrichedRef.current = true
@@ -9777,7 +9798,7 @@ window.resetNetflixMovies = () => {
               overview: coll.overview || `Coleção com ${collection.movies?.length || 0} filmes`,
               backdrop: coll.backdrop,
               poster: coll.poster,
-              backdrop_path: null // Já temos a URL completa em backdrop
+              backdrop_path: null // J� temos a URL completa em backdrop
             }
           })
         }
@@ -9827,7 +9848,7 @@ window.resetNetflixMovies = () => {
           })
         )
       }, (prevProps, nextProps) => {
-        // Custom comparison: só re-render se collection.id mudar
+        // Custom comparison: s� re-render se collection.id mudar
         return prevProps.collection.id === nextProps.collection.id &&
                prevProps.sectionId === nextProps.sectionId &&
                prevProps.idx === nextProps.idx
@@ -9836,7 +9857,7 @@ window.resetNetflixMovies = () => {
       // COMPONENTE: Movie (Card individual) - PART 2: Enhanced hover with TMDB data
       const Movie = React.memo(({ movie, sectionId, idx }) => {
         const [isHovered, setIsHovered] = useState(false)
-        const isHoveredRef = useRef(false) // Mantém estado durante re-renders
+        const isHoveredRef = useRef(false) // Mant�m estado durante re-renders
         const [enrichedMovie, setEnrichedMovie] = useState(movie)
         // Estados para trailer DENTRO do card (estilo Netflix)
         const [showTrailerInCard, setShowTrailerInCard] = useState(false)
@@ -9844,19 +9865,19 @@ window.resetNetflixMovies = () => {
         const [isMuted, setIsMuted] = useState(false)
         const trailerContainerRef = useRef(null)
         const cardRef = useRef(null)
-        const isEnrichingRef = useRef(false) // Evitar múltiplas chamadas de enriquecimento
+        const isEnrichingRef = useRef(false) // Evitar m�ltiplas chamadas de enriquecimento
         // isFocused removido - apenas hover do mouse ativa o efeito
 
-        // Sincronizar enrichedMovie com prop movie quando ela muda (já vem enriquecida do initMovies)
+        // Sincronizar enrichedMovie com prop movie quando ela muda (j� vem enriquecida do initMovies)
         useEffect(() => {
           if (movie.tmdb_rating && !enrichedMovie.tmdb_rating) {
             setEnrichedMovie(movie)
           }
         }, [movie.stream_id])
 
-        // ===== AUTO-ENRIQUECIMENTO: Se o filme não tem dados TMDB, buscar automaticamente =====
+        // ===== AUTO-ENRIQUECIMENTO: Se o filme n�o tem dados TMDB, buscar automaticamente =====
         useEffect(() => {
-          // Verificar se já está enriquecendo OU se já tem dados TMDB
+          // Verificar se j� est� enriquecendo OU se j� tem dados TMDB
           if (isEnrichingRef.current || enrichedMovie.tmdb_poster || enrichedMovie.tmdb_overview) {
             return
           }
@@ -9874,7 +9895,7 @@ window.resetNetflixMovies = () => {
         }, [movie.stream_id])
 
         // Buscar e mostrar trailer DENTRO DO CARD (estilo Netflix)
-        // ===== OTIMIZAÇÃO: Usar ref para evitar recriações desnecessárias do timer =====
+        // ===== OTIMIZA��O: Usar ref para evitar recria��es desnecess�rias do timer =====
         const tmdbIdRef = useRef(enrichedMovie.tmdb_id)
         useEffect(() => {
           tmdbIdRef.current = enrichedMovie.tmdb_id
@@ -9934,14 +9955,14 @@ window.resetNetflixMovies = () => {
             transformOrigin: 'center center',
             boxShadow: isHovered ? '0 12px 32px rgba(0,0,0,0.9)' : '0 2px 8px rgba(0,0,0,0.3)',
             transition: 'transform 0.3s ease-out, box-shadow 0.3s ease-out, z-index 0s',
-            willChange: 'transform' // Otimização para GPU
+            willChange: 'transform' // Otimiza��o para GPU
           },
           onClick: async (e) => {
             e.stopPropagation()
 
-            // ===== NAVEGAR PARA PÁGINA DE DETALHES =====
+            // ===== NAVEGAR PARA P�GINA DE DETALHES =====
 
-            // Preparar dados enriquecidos para página de detalhes
+            // Preparar dados enriquecidos para p�gina de detalhes
             const contentData = {
               ...enrichedMovie,
               ...movie,
@@ -9950,13 +9971,13 @@ window.resetNetflixMovies = () => {
             }
 
 
-            // Se for série, buscar info adicional da API (episódios, temporadas)
+            // Se for s�rie, buscar info adicional da API (epis�dios, temporadas)
             if (isSeriesMode) {
               try {
                 const seriesId = movie.series_id || movie.stream_id || movie.id
                 const seriesInfo = await apiCall('get_series_info', { series_id: seriesId })
 
-                // Contar episódios e temporadas
+                // Contar epis�dios e temporadas
                 const seasons = seriesInfo.episodes || {}
                 const seasonsCount = Object.keys(seasons).length
                 let episodesCount = 0
@@ -9971,7 +9992,7 @@ window.resetNetflixMovies = () => {
               }
             }
 
-            // Navegar para página de detalhes
+            // Navegar para p�gina de detalhes
             setSelectedContent(contentData)
             setView('serie-details')
           },
@@ -9979,12 +10000,12 @@ window.resetNetflixMovies = () => {
             // Ao passar o mouse, atualiza backdrop (APENAS SE MUDOU)
             const movieId = movie.series_id || movie.stream_id || movie.id
 
-            // ✅ OTIMIZAÇÃO: Só atualiza se for um filme DIFERENTE
+            // ? OTIMIZA��O: S� atualiza se for um filme DIFERENTE
             if (window.__netflixMoviesState?.featuredMovieId !== movieId) {
               if (window.updateNetflixMoviesState) {
                 window.updateNetflixMoviesState({
                   featuredMovieId: movieId,
-                  heroBackdrop: null // Limpar backdrop de coleções ao passar mouse em filme
+                  heroBackdrop: null // Limpar backdrop de cole��es ao passar mouse em filme
                 })
               }
             }
@@ -9997,7 +10018,7 @@ window.resetNetflixMovies = () => {
             setIsHovered(false)
           }
         },
-          // Poster ou placeholder (sempre visível, mas escurecido no hover)
+          // Poster ou placeholder (sempre vis�vel, mas escurecido no hover)
           (enrichedMovie.stream_icon || enrichedMovie.cover || enrichedMovie.tmdb_poster)
             ? e('img', {
                 src: enrichedMovie.stream_icon || enrichedMovie.cover || enrichedMovie.tmdb_poster,
@@ -10099,21 +10120,21 @@ window.resetNetflixMovies = () => {
 
         ) // End card container
       }, (prevProps, nextProps) => {
-        // Custom comparison: só re-render se movie.stream_id mudar
+        // Custom comparison: s� re-render se movie.stream_id mudar
         return prevProps.movie.stream_id === nextProps.movie.stream_id &&
                prevProps.sectionId === nextProps.sectionId &&
                prevProps.idx === nextProps.idx
       })
 
-      // COMPONENTE: CollectionsGrid (Grade de coleções)
+      // COMPONENTE: CollectionsGrid (Grade de cole��es)
       // COMPONENTE: SectionMovies
       const SectionMovies = ({ name, movies, sectionId, categoryIndex, totalCategories, onNextCategory, onPrevCategory, isCollectionsMode }) => {
-        // Proteção contra movies undefined
+        // Prote��o contra movies undefined
         if (!movies || !Array.isArray(movies)) {
           return null
         }
 
-        // ===== STATE LOCAL apenas para currentMargin (para atualizar botões) =====
+        // ===== STATE LOCAL apenas para currentMargin (para atualizar bot�es) =====
         const [currentMargin, setCurrentMargin] = useState(marginContentRef.current[sectionId] || 0)
         const marginRef = useRef(currentMargin)
         const [visibleCount, setVisibleCount] = useState(Math.min(50, movies.length)) // Carregar 50 filmes inicialmente ou todos se tiver menos
@@ -10122,7 +10143,7 @@ window.resetNetflixMovies = () => {
         const [hoveringRight, setHoveringRight] = useState(false)
         const verticalScrollTimeoutRef = useRef(null)
 
-        // ===== Registrar listener para receber atualizações de margin =====
+        // ===== Registrar listener para receber atualiza��es de margin =====
         useEffect(() => {
           const unregister = registerMarginListener(sectionId, (newMargin) => {
             setCurrentMargin(newMargin)
@@ -10130,36 +10151,36 @@ window.resetNetflixMovies = () => {
           return unregister
         }, [sectionId])
 
-        // ===== NOVO: Rastrear mudanças de margin =====
+        // ===== NOVO: Rastrear mudan�as de margin =====
         useEffect(() => {
           if (currentMargin !== marginRef.current) {
             marginRef.current = currentMargin
           }
         }, [currentMargin, sectionId])
 
-        // Filmes visíveis (renderizar apenas estes)
+        // Filmes vis�veis (renderizar apenas estes)
         const visibleMovies = (movies || []).slice(0, visibleCount)
         const MAX_WIDTH_CONTENT = visibleMovies.length * 280
 
-        // Calcula se os botões devem aparecer
+        // Calcula se os bot�es devem aparecer
         const viewportWidth = window.innerWidth - 80
         const cardWidth = 280 // 260px card + 20px margin
         const totalWidth = visibleMovies.length * cardWidth
         const maxScroll = Math.min(0, -(totalWidth - viewportWidth))
 
-        const showLeftButton = currentMargin < 0 // Tem conteúdo scrollado para esquerda
-        const showRightButton = true // SEMPRE MOSTRAR (como solicitado pelo usuário)
+        const showLeftButton = currentMargin < 0 // Tem conte�do scrollado para esquerda
+        const showRightButton = true // SEMPRE MOSTRAR (como solicitado pelo usu�rio)
 
         // Carregar mais filmes quando chegar perto do fim (com debounce)
         useEffect(() => {
-          // maxScroll é negativo (ex: -2000), então transformamos em positivo
+          // maxScroll � negativo (ex: -2000), ent�o transformamos em positivo
           const maxScrollDistance = Math.abs(maxScroll)
           const LOAD_MORE_THRESHOLD = maxScrollDistance * 0.7 // Carregar quando estiver a 70% do fim (menos agressivo)
 
-          // currentMargin também é negativo quando scrollado, então pegamos valor absoluto
+          // currentMargin tamb�m � negativo quando scrollado, ent�o pegamos valor absoluto
           const currentScrollDistance = Math.abs(currentMargin)
 
-          // Se rolou além do threshold e ainda tem mais filmes
+          // Se rolou al�m do threshold e ainda tem mais filmes
           if (currentScrollDistance >= LOAD_MORE_THRESHOLD && visibleCount < movies.length) {
             // ===== DEBOUNCE: Aguardar 300ms antes de carregar mais =====
             const timeoutId = setTimeout(() => {
@@ -10198,7 +10219,7 @@ window.resetNetflixMovies = () => {
 
           if (isHorizontalScroll) {
             e.preventDefault()
-            // Se Shift está pressionado, usa deltaY como horizontal
+            // Se Shift est� pressionado, usa deltaY como horizontal
             const scrollAmount = e.shiftKey ? e.deltaY : e.deltaX
 
             setMarginContent(state => {
@@ -10209,7 +10230,7 @@ window.resetNetflixMovies = () => {
               const totalWidth = visibleMovies.length * cardWidth
               const maxScroll = Math.min(0, -(totalWidth - viewportWidth))
 
-              // Se não há necessidade de scroll (tudo cabe), retorna sem mudar
+              // Se n�o h� necessidade de scroll (tudo cabe), retorna sem mudar
               if (totalWidth <= viewportWidth) return state
 
               // Aplica o scroll
@@ -10224,7 +10245,7 @@ window.resetNetflixMovies = () => {
               }
             })
           } else {
-            // Scroll vertical - mudar de categoria (com debounce para evitar múltiplas mudanças)
+            // Scroll vertical - mudar de categoria (com debounce para evitar m�ltiplas mudan�as)
             if (verticalScrollTimeoutRef.current) {
               return // Ignora scroll adicional durante o debounce
             }
@@ -10236,7 +10257,7 @@ window.resetNetflixMovies = () => {
               e.preventDefault()
               onNextCategory()
 
-              // Debounce de 800ms para evitar mudanças rápidas demais
+              // Debounce de 800ms para evitar mudan�as r�pidas demais
               verticalScrollTimeoutRef.current = setTimeout(() => {
                 verticalScrollTimeoutRef.current = null
               }, 800)
@@ -10298,7 +10319,7 @@ window.resetNetflixMovies = () => {
               border: 0,
               left: 0,
               width: '80px',
-              opacity: currentMargin < 0 ? '0.9' : '0', // Só visível se pode rolar
+              opacity: currentMargin < 0 ? '0.9' : '0', // S� vis�vel se pode rolar
               pointerEvents: currentMargin < 0 ? 'auto' : 'none',
               transition: 'opacity 0.3s ease, background 0.2s ease',
               cursor: 'pointer',
@@ -10313,12 +10334,12 @@ window.resetNetflixMovies = () => {
                 transform: hoveringLeft ? 'scale(1.2)' : 'scale(1)',
                 transition: 'transform 0.2s ease'
               }
-            }, '◀')
+            }, '?')
           ),
 
           // Movies container
           e('div', {
-            'data-section-id': sectionId, // ===== NOVO: ID para manipulação direta =====
+            'data-section-id': sectionId, // ===== NOVO: ID para manipula��o direta =====
             style: {
               display: 'flex',
               flexDirection: 'row',
@@ -10341,7 +10362,7 @@ window.resetNetflixMovies = () => {
                     idx,
                     onClick: async (collection, movies) => {
 
-                      // 1. ABRIR INSTANTANEAMENTE com dados que já temos
+                      // 1. ABRIR INSTANTANEAMENTE com dados que j� temos
                       const quickMovies = movies.map(movie => ({
                         stream_id: movie.stream_id,
                         name: movie.name,
@@ -10365,7 +10386,7 @@ window.resetNetflixMovies = () => {
                       // 2. DEPOIS carregar dados completos em background (sem bloquear UI)
 
                       const fetchPromises = movies.map(async (movie, index) => {
-                        // Tentar encontrar nos filmes já carregados
+                        // Tentar encontrar nos filmes j� carregados
                         for (const section of globalState.sectionsMovies) {
                           if(section.movies && section.movies.length > 0) {
                             const found = section.movies.find(m => m.stream_id === movie.stream_id)
@@ -10376,7 +10397,7 @@ window.resetNetflixMovies = () => {
                         }
 
                         // ===== DESABILITADO: get_vod_info muito lento =====
-                        // Retornar apenas dados básicos, enriquecimento TMDB acontece depois
+                        // Retornar apenas dados b�sicos, enriquecimento TMDB acontece depois
                         // try {
                         //   const info = await apiCall('get_vod_info', { vod_id: movie.stream_id })
                         //   ...
@@ -10396,11 +10417,11 @@ window.resetNetflixMovies = () => {
                         }
                       })
 
-                      // Atualizar filmes conforme vão chegando
+                      // Atualizar filmes conforme v�o chegando
                       const results = await Promise.all(fetchPromises)
                       let fullMovies = results.map(r => r.movie)
 
-                      // ORDENAR por ano de lançamento (do mais antigo para o mais recente)
+                      // ORDENAR por ano de lan�amento (do mais antigo para o mais recente)
                       fullMovies = fullMovies.sort((a, b) => {
                         const yearA = a.releasedate || a.tmdb_year || '0'
                         const yearB = b.releasedate || b.tmdb_year || '0'
@@ -10434,14 +10455,14 @@ window.resetNetflixMovies = () => {
             )
           ),
 
-          // Right button (avançar) - SEMPRE VISÍVEL
+          // Right button (avan�ar) - SEMPRE VIS�VEL
           showRightButton ? e('button', {
             id: 'btnScrollRight',
             type: 'button',
             onClick: (e) => {
               e.stopPropagation() // Evita que o clique propague e cause blur nos cards
 
-              // Versão local do handleScrollMovies que usa movies diretamente
+              // Vers�o local do handleScrollMovies que usa movies diretamente
               setMarginContent(prevState => {
                 const currentMargin = prevState[sectionId] || 0
                 const cardWidth = 280
@@ -10458,7 +10479,7 @@ window.resetNetflixMovies = () => {
                 }
 
                 const scrollAmount = cardsVisible * cardWidth
-                let newValue = currentMargin - scrollAmount // left = avançar para direita
+                let newValue = currentMargin - scrollAmount // left = avan�ar para direita
                 let finalValue = newValue < maxScroll ? 0 : Math.max(newValue, maxScroll)
 
                 return { ...prevState, [sectionId]: finalValue }
@@ -10494,7 +10515,7 @@ window.resetNetflixMovies = () => {
               transform: hoveringRight ? 'scale(1.2)' : 'scale(1)',
               transition: 'transform 0.2s ease'
             }
-          }, '›')) : null
+          }, '�')) : null
         )
       }
 
@@ -10554,8 +10575,8 @@ window.resetNetflixMovies = () => {
         )
       }
 
-      // Se não tem filmes carregados e não está loading nem com erro, mostra tela vazia
-      // EXCETO se estamos em modo collections E já temos coleções carregadas
+      // Se n�o tem filmes carregados e n�o est� loading nem com erro, mostra tela vazia
+      // EXCETO se estamos em modo collections E j� temos cole��es carregadas
       if(globalState.sectionsMovies.length === 0 && !(view === 'collections' && collections.length > 0)){
         return e('div', {
           style: {
@@ -10579,7 +10600,7 @@ window.resetNetflixMovies = () => {
         // NavBar (TopBar do projeto) - Fixo no topo
         e(TopBar),
 
-        // Container principal com FeaturedMovie de fundo e carrosséis sobrepostos
+        // Container principal com FeaturedMovie de fundo e carross�is sobrepostos
         e('div', {
           style: {
             flex: 1,
@@ -10588,7 +10609,7 @@ window.resetNetflixMovies = () => {
             width: '100%'
           }
         },
-          // Featured Movie (fundo completo) ou Hero Backdrop (coleções)
+          // Featured Movie (fundo completo) ou Hero Backdrop (cole��es)
           (() => {
             return (globalState.heroBackdrop && !viewingCollectionMovies) ? e('div', {
               key: globalState.heroBackdrop.backdrop || globalState.heroBackdrop.name, // Force re-render quando backdrop mudar
@@ -10598,7 +10619,7 @@ window.resetNetflixMovies = () => {
                 left: 0,
                 width: '100%',
                 height: '100%',
-                // ===== FIX: Background sólido antes da imagem carregar =====
+                // ===== FIX: Background s�lido antes da imagem carregar =====
                 backgroundColor: '#0a0a0a',
                 backgroundImage: globalState.heroBackdrop.backdrop
                   ? `url(${globalState.heroBackdrop.backdrop})`
@@ -10610,7 +10631,7 @@ window.resetNetflixMovies = () => {
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 zIndex: 1,
-                // ===== FIX: Transição suave para evitar piscar =====
+                // ===== FIX: Transi��o suave para evitar piscar =====
                 opacity: 1,
                 transition: 'opacity 0.5s ease-in-out, background-image 0.5s ease-in-out',
                 animation: 'fadeIn 0.5s ease-in-out'
@@ -10629,7 +10650,7 @@ window.resetNetflixMovies = () => {
               }
             }),
 
-            // Informações do filme
+            // Informa��es do filme
             e('div', {
               style: {
                 position: 'absolute',
@@ -10682,18 +10703,18 @@ window.resetNetflixMovies = () => {
               paddingBottom: '0px'
             }
           },
-          // MODO 3: Visualizando filmes de uma coleção
+          // MODO 3: Visualizando filmes de uma cole��o
           viewingCollectionMovies && selectedCollectionMovies.length > 0 ? e(SectionMovies, {
             key: 'collection-movies',
             name: '🎬 Filmes da Coleção',
             movies: selectedCollectionMovies,
             sectionId: 'collection-movies',
-            categoryIndex: undefined, // Sem navegação de categorias
+            categoryIndex: undefined, // Sem navega��o de categorias
             totalCategories: 0,
             onNextCategory: () => {},
             onPrevCategory: () => {}
           }) :
-          // MODO 2: Lista de coleções (carrossel horizontal) - APENAS se view for 'collections'
+          // MODO 2: Lista de cole��es (carrossel horizontal) - APENAS se view for 'collections'
           view === 'collections' && loadingCollections ? e('div', {
             style: {
               display: 'flex',
@@ -10726,7 +10747,7 @@ window.resetNetflixMovies = () => {
             )
           ) :
           view === 'collections' && collections.length > 0 ? (() => {
-            // Filtrar coleções por gênero TMDB se houver categoria selecionada
+            // Filtrar cole��es por g�nero TMDB se houver categoria selecionada
             let filteredCollections = collections
 
             if (selectedCategory) {
@@ -10757,7 +10778,7 @@ window.resetNetflixMovies = () => {
               const searchGenres = genreNames[selectedGenreId] || []
 
               filteredCollections = collections.filter(collection => {
-                // Verificar se algum filme da coleção tem o gênero no tmdb_genres (string)
+                // Verificar se algum filme da cole��o tem o g�nero no tmdb_genres (string)
                 const hasGenre = collection.movies && collection.movies.some(movie => {
                   if (movie.tmdb_genres) {
                     const movieGenres = movie.tmdb_genres.toLowerCase()
@@ -10773,8 +10794,8 @@ window.resetNetflixMovies = () => {
             return e(SectionMovies, {
               key: 'collections-list',
               name: selectedCategory
-                ? `🎬 Coleções de ${selectedCategory.category_name || selectedCategory.name} (${filteredCollections.length})`
-                : `🎬 Coleções (${filteredCollections.length})`,
+                ? `📚 Coleções de ${selectedCategory.category_name || selectedCategory.name} (${filteredCollections.length})`
+                : `📚 Coleções (${filteredCollections.length})`,
               movies: filteredCollections,
               sectionId: 'collections',
               categoryIndex: undefined,
@@ -10799,7 +10820,7 @@ window.resetNetflixMovies = () => {
               style: {
                 fontSize: '48px'
               }
-            }, '🎬'),
+            }, '??'),
             e('div', {
               style: {
                 color: '#fff',
@@ -10816,7 +10837,7 @@ window.resetNetflixMovies = () => {
               }
             }, 'Carregando filmes para montar as coleções. Aguarde alguns instantes.')
           ) :
-          // MODO 1: Renderiza a categoria atual OU loading se ainda não carregou
+          // MODO 1: Renderiza a categoria atual OU loading se ainda n�o carregou
           globalState.sectionsMovies[currentCategoryIndex] && globalState.sectionsMovies[currentCategoryIndex].movies ? e(SectionMovies, {
             key: globalState.sectionsMovies[currentCategoryIndex].id,
             name: globalState.sectionsMovies[currentCategoryIndex].name,
@@ -10844,11 +10865,11 @@ window.resetNetflixMovies = () => {
                   setMarginContent({ [nextSection.id]: 0 })
                 }
 
-                // Mudar imediatamente para a próxima categoria
+                // Mudar imediatamente para a pr�xima categoria
                 setCurrentCategoryIndex(nextIndex)
                 setFocusedMovieIdx(0)
 
-                // Se a categoria ainda não foi carregada, carregar IMEDIATAMENTE
+                // Se a categoria ainda n�o foi carregada, carregar IMEDIATAMENTE
                 if (!nextSection) {
                   loadCategory(nextIndex)
                 }
@@ -10877,7 +10898,7 @@ window.resetNetflixMovies = () => {
                 setCurrentCategoryIndex(prevIndex)
                 setFocusedMovieIdx(0)
 
-                // Se a categoria ainda não foi carregada, carregar IMEDIATAMENTE
+                // Se a categoria ainda n�o foi carregada, carregar IMEDIATAMENTE
                 if (!prevSection) {
                   loadCategory(prevIndex)
                 }
@@ -10924,10 +10945,10 @@ window.resetNetflixMovies = () => {
       const [favoriteChannels, setFavoriteChannels] = useState([])
       const [focusedItemIdx, setFocusedItemIdx] = useState(0)
 
-      // Decodificar Base64 se necessário
+      // Decodificar Base64 se necess�rio
       const decodeMaybeBase64 = (str) => {
-        if(!str || typeof str !== 'string') return 'Sem título'
-        // Se já parece texto normal, retorna direto
+        if(!str || typeof str !== 'string') return 'Sem t�tulo'
+        // Se j� parece texto normal, retorna direto
         if(/[\s\u00C0-\u00FF]/.test(str) || !/[A-Za-z0-9+/=]/.test(str)){
           return str
         }
@@ -10958,13 +10979,13 @@ window.resetNetflixMovies = () => {
       useEffect(() => {
         loadFavorites()
 
-        // Escutar atualizações de favoritos
+        // Escutar atualiza��es de favoritos
         const handleFavoritesUpdate = () => loadFavorites()
         window.addEventListener('favorites-updated', handleFavoritesUpdate)
         return () => window.removeEventListener('favorites-updated', handleFavoritesUpdate)
       }, [])
 
-      // Navegação por teclado
+      // Navega��o por teclado
       useEffect(() => {
         if (view !== 'favorites' || favoriteChannels.length === 0) return
 
@@ -11006,7 +11027,7 @@ window.resetNetflixMovies = () => {
       if (favoriteChannels.length === 0) {
         return e('div', { className: 'star-bg min-h-screen flex flex-col items-center justify-center p-6' },
           e('div', { className: 'text-center' },
-            e('div', { className: 'text-6xl mb-4' }, '⭐'),
+            e('div', { className: 'text-6xl mb-4' }, '?'),
             e('h2', { className: 'text-2xl font-bold text-white mb-2' }, 'Nenhum Favorito'),
             e('p', { className: 'text-gray-400 mb-6' }, 'Adicione canais aos favoritos clicando na estrela durante a reprodução'),
             e('button', {
@@ -11111,7 +11132,7 @@ window.resetNetflixMovies = () => {
         e(TopBar),
         e('div', { className:'flex flex-wrap items-center gap-3 mb-4' },
           e('button', { onClick:()=> setView(selectedCat.type==='live'?'live-categories': selectedCat.type==='vod'?'movie-categories':'series-categories'), className:'text-white text-xl hover:text-purple-400' }, '←'),
-          e('h2', { className:'text-white text-2xl font-bold' }, selectedCat?.category_name || 'Categoria'),
+          e('h2', { className:'text-white text-2xl font-bold' }, fixEncoding(selectedCat?.category_name || 'Categoria')),
           e('div', { className:'grow' }),
           e('input', { value:query, onChange:(ev)=>setQuery(ev.target.value), placeholder:'Pesquisar...', className:'w-full md:w-72 frost rounded-lg px-4 py-2 text-white placeholder:text-gray-400' })
         ),
@@ -11128,13 +11149,13 @@ window.resetNetflixMovies = () => {
                   className:'rounded-lg frost p-3 text-left card transition-all ' + (isFocused ? 'ring-2 ring-purple-400 bg-purple-500/20 scale-105' : '')
                 },
                   item.stream_icon ? e('img', { src:item.stream_icon, alt:item.name, loading:'lazy', className:'w-full h-32 object-cover rounded mb-3' })
-                                    : e('div', { className:'w-full h-32 bg-gradient-to-br from-purple-500 to-blue-500 rounded mb-3 grid place-items-center text-3xl' }, '▶️'),
-                  e('div', { className:'text-white text-sm font-medium truncate' }, item.name || item.title || 'Sem título')
+                                    : e('div', { className:'w-full h-32 bg-gradient-to-br from-purple-500 to-blue-500 rounded mb-3 grid place-items-center text-3xl' }, '🎬'),
+                  e('div', { className:'text-white text-sm font-medium truncate' }, item.name || item.title || 'Sem t�tulo')
                 )
               }),
               e('div', { key:'hint', className:'col-span-full text-center text-xs text-gray-400 mt-3 py-2' }, '↑ ↓ ← → Navegar | Enter Reproduzir | ESC Voltar')
             ]
-          : e('div', { className:'text-center text-gray-400 col-span-full mt-12' }, 'Nenhum conteúdo nesta categoria')
+          : e('div', { className:'text-center text-gray-400 col-span-full mt-12' }, 'Nenhum conte�do nesta categoria')
         )
       )
     }
@@ -11156,7 +11177,7 @@ window.resetNetflixMovies = () => {
         setLoading(true)
         setResults([]) // Limpar resultados anteriores
 
-        // Debounce: esperar 300ms após parar de digitar
+        // Debounce: esperar 300ms ap�s parar de digitar
         const timeoutId = setTimeout(async () => {
           const query = searchQuery.toLowerCase().trim()
 
@@ -11192,12 +11213,12 @@ window.resetNetflixMovies = () => {
                 categoryName: cat.category_name || cat.name
               }))
 
-              // 🎯 ATUALIZAR RESULTADOS IMEDIATAMENTE quando encontrar algo
+              // ?? ATUALIZAR RESULTADOS IMEDIATAMENTE quando encontrar algo
               if (filtered.length > 0) {
                 setResults(prev => [...prev, ...filtered].slice(0, 20)) // Limitar a 20
               }
 
-              // Parar se já tiver 20 resultados
+              // Parar se j� tiver 20 resultados
               if (filtered.length >= 20) {
                 break
               }
@@ -11232,12 +11253,12 @@ window.resetNetflixMovies = () => {
                 categoryName: cat.category_name || cat.name
               }))
 
-              // 🎯 ATUALIZAR RESULTADOS IMEDIATAMENTE quando encontrar algo
+              // ?? ATUALIZAR RESULTADOS IMEDIATAMENTE quando encontrar algo
               if (filtered.length > 0) {
                 setResults(prev => [...prev, ...filtered].slice(0, 20)) // Limitar a 20
               }
 
-              // Parar se já tiver 20 resultados no total
+              // Parar se j� tiver 20 resultados no total
               const currentTotal = document.querySelectorAll('[data-search-result]').length
               if (currentTotal >= 20) {
                 break
@@ -11252,7 +11273,7 @@ window.resetNetflixMovies = () => {
         return () => clearTimeout(timeoutId)
       }, [searchQuery, vodCats, seriesCats])
 
-      // Não mostrar se query vazia
+      // N�o mostrar se query vazia
       if (!searchQuery || searchQuery.length < 2) return null
 
       return e('div', {
@@ -11299,7 +11320,7 @@ window.resetNetflixMovies = () => {
               padding: '0',
               lineHeight: 1
             }
-          }, '×')
+          }, '�')
         ),
 
         // Resultados
@@ -11417,7 +11438,7 @@ window.resetNetflixMovies = () => {
                       fontSize: '12px',
                       fontWeight: '600'
                     }
-                  }, `⭐ ${item.rating}`)
+                  }, `? ${item.rating}`)
                 ),
 
                 e('p', {
@@ -11443,13 +11464,13 @@ window.resetNetflixMovies = () => {
               fontSize: '12px',
               borderTop: '1px solid rgba(255,255,255,0.1)'
             }
-          }, '🔍 Buscando mais resultados...')
+          }, '?? Buscando mais resultados...')
         )
       )
     }
 
     // ============================================================
-    // PLAYER HUD - Controles sobre o vídeo
+    // PLAYER HUD - Controles sobre o v�deo
     // ============================================================
     function PlayerHUD({ visible, videoRef, hlsObj, channelInfo, onHide }) {
       const [currentTime, setCurrentTime] = useState(new Date())
@@ -11460,7 +11481,7 @@ window.resetNetflixMovies = () => {
       const [isFavorite, setIsFavorite] = useState(false)
       const hideTimerRef = useRef(null)
 
-      // Verificar se canal está nos favoritos ao carregar
+      // Verificar se canal est� nos favoritos ao carregar
       useEffect(() => {
         if (!channelInfo?.stream_id) return
         const favorites = JSON.parse(localStorage.getItem('dreamtv_favorites') || '{}')
@@ -11473,7 +11494,7 @@ window.resetNetflixMovies = () => {
         return () => clearInterval(interval)
       }, [])
 
-      // Detectar níveis de qualidade do HLS
+      // Detectar n�veis de qualidade do HLS
       useEffect(() => {
         if (!hlsObj) return
         const onManifestParsed = () => {
@@ -11501,7 +11522,7 @@ window.resetNetflixMovies = () => {
         }
       }, [hlsObj])
 
-      // Atualizar resolução atual do vídeo
+      // Atualizar resolu��o atual do v�deo
       useEffect(() => {
         const video = videoRef?.current
         if (!video) return
@@ -11521,7 +11542,7 @@ window.resetNetflixMovies = () => {
         }
       }, [videoRef])
 
-      // Auto-hide após 4 segundos
+      // Auto-hide ap�s 4 segundos
       useEffect(() => {
         if (visible) {
           if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
@@ -11541,7 +11562,7 @@ window.resetNetflixMovies = () => {
         return 'SD'
       }
 
-      // Agrupar níveis por qualidade
+      // Agrupar n�veis por qualidade
       const groupedLevels = useMemo(() => {
         const groups = { FHD: [], HD: [], SD: [] }
         levels.forEach(level => {
@@ -11562,7 +11583,7 @@ window.resetNetflixMovies = () => {
           setCurrentLevel(level.index)
           setIsAuto(false)
 
-          // Salvar preferência
+          // Salvar prefer�ncia
           if (channelInfo?.stream_id) {
             localStorage.setItem(`quality:channel:${channelInfo.stream_id}`, JSON.stringify({ quality, variant }))
           }
@@ -11632,7 +11653,7 @@ window.resetNetflixMovies = () => {
         return null
       }
 
-      const now = channelInfo?.epg?.now || { title: channelInfo?.name || 'Sem informação', start: '--:--', end: '--:--', isLive: false }
+      const now = channelInfo?.epg?.now || { title: channelInfo?.name || 'Sem informa��o', start: '--:--', end: '--:--', isLive: false }
       const next = channelInfo?.epg?.next || null
       const currentHour = currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
 
@@ -11656,22 +11677,22 @@ window.resetNetflixMovies = () => {
                 now.isLive && e('span', { className: 'bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full' }, 'AO VIVO')
               ),
               e('div', { className: 'flex items-center gap-3 mb-2' },
-                e('span', { className: 'text-sm text-gray-300' }, `${now.start} – ${now.end}`),
-                // Barra de progresso (exemplo fixo - você pode calcular o progresso real)
+                e('span', { className: 'text-sm text-gray-300' }, `${now.start} � ${now.end}`),
+                // Barra de progresso (exemplo fixo - voc� pode calcular o progresso real)
                 e('div', { className: 'flex-1 h-1 bg-gray-700 rounded-full overflow-hidden' },
                   e('div', { className: 'h-full bg-red-600', style: { width: '45%' } })
                 )
               )
             ),
 
-            // Próximo programa
+            // Pr�ximo programa
             next && e('div', { className: 'w-64' },
               e('div', { className: 'text-xs text-gray-400 mb-1' }, 'NEXT'),
               e('h4', { className: 'text-sm font-medium text-white truncate' }, next.title),
-              e('span', { className: 'text-xs text-gray-400' }, `${next.start} – ${next.end}`)
+              e('span', { className: 'text-xs text-gray-400' }, `${next.start} � ${next.end}`)
             ),
 
-            // Hora e resolução
+            // Hora e resolu��o
             e('div', { className: 'text-right' },
               e('div', { className: 'text-3xl font-bold text-white' }, currentHour),
               e('div', { className: 'text-xs text-gray-400' }, resolution)
@@ -11685,7 +11706,7 @@ window.resetNetflixMovies = () => {
           e('button', {
             onClick: toggleFavorite,
             className: `px-4 py-2 rounded-full transition-all ${isFavorite ? 'bg-yellow-500 text-black' : 'bg-white/10 text-white hover:bg-white/20'}`
-          }, isFavorite ? '★' : '☆'),
+          }, isFavorite ? '?' : '?'),
 
           // Separador
           e('div', { className: 'w-px h-6 bg-white/20' }),
@@ -11709,7 +11730,7 @@ window.resetNetflixMovies = () => {
                   ? 'bg-purple-500 text-white ring-2 ring-purple-400'
                   : 'bg-white/10 text-white hover:bg-white/20'
               }`
-            }, 'FHD²')
+            }, 'FHD�')
           ],
 
           // Qualidades HD
@@ -11731,7 +11752,7 @@ window.resetNetflixMovies = () => {
                   ? 'bg-blue-500 text-white ring-2 ring-blue-400'
                   : 'bg-white/10 text-white hover:bg-white/20'
               }`
-            }, 'HD²')
+            }, 'HD�')
           ],
 
           // Qualidades SD
@@ -11753,7 +11774,7 @@ window.resetNetflixMovies = () => {
                   ? 'bg-green-500 text-white ring-2 ring-green-400'
                   : 'bg-white/10 text-white hover:bg-white/20'
               }`
-            }, 'SD²')
+            }, 'SD�')
           ],
 
           // Separador
@@ -11778,54 +11799,342 @@ window.resetNetflixMovies = () => {
       )
     }
 
-    // ===== COMPONENTE: LISTAGEM DE EPISÓDIOS =====
-    function EpisodesList({ seriesData }) {
-      const [selectedSeason, setSelectedSeason] = useState(1)
-      const [seasonsData, setSeasonsData] = useState([])
-      const [loading, setLoading] = useState(true)
+    // ===== COMPONENTE: LISTAGEM DE EPIS�DIOS =====
+    const EpisodesList = React.memo(function EpisodesList({ seriesData }) {
+      console.log('[EpisodesList] ========== COMPONENTE MONTADO/RENDERIZADO ==========')
+
+      const seriesId = seriesData?.series_id
+      const cacheKey = `series_${seriesId}`
+
+      console.log('[EpisodesList] 🔍 seriesId:', seriesId, 'cacheKey:', cacheKey)
+
+      // Inicializar estado diretamente do cache, se existir
+      const [selectedSeason, setSelectedSeason] = useState(() => {
+        if (seriesCache[cacheKey]?.seasons?.length > 0) {
+          return seriesCache[cacheKey].seasons[0].seasonNumber
+        }
+        return 1
+      })
+
+      const [seasonsData, setSeasonsData] = useState(() => {
+        return seriesCache[cacheKey]?.seasons || []
+      })
+
+      const [loading, setLoading] = useState(() => !seriesCache[cacheKey])
       const [error, setError] = useState(null)
 
-      // Buscar informações completas da série (temporadas + episódios)
+      // Estados para episódios do TMDB PT-BR
+      const [tmdbSeriesId, setTmdbSeriesId] = useState(() => seriesCache[cacheKey]?.tmdbSeriesId || null)
+      const [tmdbEpisodesCache, setTmdbEpisodesCache] = useState({})
+
+      console.log('[EpisodesList] 📊 Estado ATUAL - loading:', loading, 'seasonsData.length:', seasonsData.length, 'error:', error)
+
+      // Monitor de mudanças de estado
       useEffect(() => {
+        console.log('[EpisodesList] 🔔 selectedSeason mudou para:', selectedSeason)
+      }, [selectedSeason])
+
+      useEffect(() => {
+        console.log('[EpisodesList] 🔔 seasonsData mudou, length:', seasonsData.length)
+      }, [seasonsData])
+
+      useEffect(() => {
+        console.log('[EpisodesList] 🔔 loading mudou para:', loading)
+      }, [loading])
+
+      useEffect(() => {
+        console.log('[EpisodesList] 🔔 error mudou para:', error)
+      }, [error])
+
+      // Buscar informa��es completas da s�rie (temporadas + epis�dios)
+      useEffect(() => {
+        console.log('[EpisodesList] 🎬 useEffect EXECUTADO')
+
+        let checkCacheInterval = null
+        let timeoutId = null
+
         const fetchSeriesInfo = async () => {
-          if (!seriesData || !seriesData.series_id) {
-            setError('ID da série não disponível')
+          if (!seriesId) {
+            setError('ID da s�rie n�o dispon�vel')
             setLoading(false)
             return
           }
 
+          // VERIFICAÇÃO GLOBAL: Se já está carregando, aguardar
+          if (seriesLoadingState.has(seriesId)) {
+            console.log('[EpisodesList] ✋ Série já está sendo carregada, aguardando dados no cache...')
+
+            // Verificar se já foi atualizado por outra instância
+            if (seriesStateUpdated.has(seriesId)) {
+              console.log('[EpisodesList] ⚠️ Estados já foram atualizados por outra instância, usando cache diretamente')
+              if (seriesCache[cacheKey]) {
+                setSeasonsData(seriesCache[cacheKey].seasons)
+                if (seriesCache[cacheKey].seasons.length > 0) {
+                  setSelectedSeason(seriesCache[cacheKey].seasons[0].seasonNumber)
+                }
+                setLoading(false)
+              }
+              return
+            }
+
+            // Aguardar até que os dados estejam no cache (polling)
+            checkCacheInterval = setInterval(() => {
+              if (seriesCache[cacheKey] && !seriesStateUpdated.has(seriesId)) {
+                seriesStateUpdated.add(seriesId) // Marcar GLOBALMENTE como atualizado
+                console.log('[EpisodesList] ✅ Dados agora disponíveis no cache!')
+                clearInterval(checkCacheInterval)
+                clearTimeout(timeoutId) // Limpar timeout
+
+                // Atualizar estado com dados do cache APENAS UMA VEZ
+                setSeasonsData(seriesCache[cacheKey].seasons)
+                if (seriesCache[cacheKey].tmdbSeriesId) {
+                  setTmdbSeriesId(seriesCache[cacheKey].tmdbSeriesId)
+                }
+                if (seriesCache[cacheKey].seasons.length > 0) {
+                  setSelectedSeason(seriesCache[cacheKey].seasons[0].seasonNumber)
+                }
+                setLoading(false)
+                console.log('[EpisodesList] 🏁 Estados atualizados do cache!')
+              }
+            }, 100) // Verificar a cada 100ms
+
+            // Timeout de segurança (10 segundos)
+            timeoutId = setTimeout(() => {
+              if (!seriesStateUpdated.has(seriesId)) {
+                clearInterval(checkCacheInterval)
+                console.error('[EpisodesList] ⏱️ Timeout aguardando cache')
+                setError('Timeout ao carregar dados')
+                setLoading(false)
+              }
+            }, 10000)
+
+            return
+          }
+
+          // Marcar como carregando IMEDIATAMENTE
+          seriesLoadingState.add(seriesId)
+          console.log('[EpisodesList] 🔒 Bloqueando série:', seriesId)
+
+          // Verificar se já está no cache
+          if (seriesCache[cacheKey]) {
+            console.log('[EpisodesList] ✅ Dados já no cache para série:', seriesId)
+            return
+          }
+
           try {
-            setLoading(true)
+            console.log('[EpisodesList] 🌐 Buscando dados da API para série:', seriesId)
 
-            const data = await apiCall('get_series_info', { series_id: seriesData.series_id })
+            const data = await apiCall('get_series_info', { series_id: seriesId })
 
-            if (data && data.seasons) {
-              // Converter object de temporadas em array e ordenar
-              const seasonsArray = Object.entries(data.seasons || {})
-                .map(([seasonNum, episodes]) => ({
-                  seasonNumber: parseInt(seasonNum),
-                  episodes: Array.isArray(episodes) ? episodes : []
-                }))
+            console.log('[EpisodesList] ✅ API retornou dados para série:', seriesId, data)
+
+            // Buscar dados do TMDB em PT-BR para obter posters e episódios corretos
+            let tmdbSeasonsPTBR = []
+            let tmdbSeriesId = null
+
+            // Servidor IPTV não fornece TMDB ID, então buscar pelo nome
+            if (data?.info?.name) {
+              try {
+                // Remover aspas extras da API key (caso tenha sido salva com aspas)
+                const tmdbApiKey = (localStorage.getItem('tmdb_api_key') || '7e61dfdf698b31e14082e80a0ca9f9fa').replace(/['"]/g, '')
+                const seriesName = data.info.name
+
+                // Passo 1: Buscar série pelo nome
+                const searchUrl = `https://api.themoviedb.org/3/search/tv?api_key=${tmdbApiKey}&language=pt-BR&query=${encodeURIComponent(seriesName)}`
+                console.log('[EpisodesList] 🔍 Buscando série no TMDB:', seriesName)
+
+                const searchResponse = await fetch(searchUrl)
+                const searchData = await searchResponse.json()
+
+                console.log('[EpisodesList] 📊 Resultados encontrados:', searchData.results?.length || 0)
+
+                if (searchData.results && searchData.results.length > 0) {
+                  tmdbSeriesId = searchData.results[0].id
+                  console.log('[EpisodesList] ✅ Série encontrada no TMDB, ID:', tmdbSeriesId)
+
+                  // Passo 2: Buscar detalhes da série em PT-BR
+                  const detailsUrl = `https://api.themoviedb.org/3/tv/${tmdbSeriesId}?api_key=${tmdbApiKey}&language=pt-BR`
+                  const detailsResponse = await fetch(detailsUrl)
+                  const tmdbData = await detailsResponse.json()
+                  tmdbSeasonsPTBR = tmdbData.seasons || []
+
+                  console.log('[EpisodesList] 🇧🇷 TMDB PT-BR temporadas:', tmdbSeasonsPTBR.length)
+                } else {
+                  console.warn('[EpisodesList] ⚠️ Série não encontrada no TMDB:', seriesName)
+                }
+              } catch (err) {
+                console.error('[EpisodesList] ❌ Erro ao buscar TMDB PT-BR:', err)
+              }
+            }
+
+            console.log('[EpisodesList] 🔍 data.seasons:', data?.seasons)
+            console.log('[EpisodesList] 🔍 data.episodes:', data?.episodes)
+            console.log('[EpisodesList] 🔍 Tipo de data.episodes:', typeof data?.episodes, 'É array?', Array.isArray(data?.episodes))
+
+            // Usar data.episodes que contém os episódios REAIS do servidor IPTV
+            const seasonsSource = data?.episodes
+
+            console.log('[EpisodesList] 📦 seasonsSource encontrado:', seasonsSource ? 'SIM' : 'NÃO', seasonsSource)
+
+            if (seasonsSource) {
+              // Função para decodificar UTF-8 mal codificado
+              const fixEncoding = (str) => {
+                if (!str) return str
+                try {
+                  return decodeURIComponent(escape(str))
+                } catch (e) {
+                  return str
+                }
+              }
+
+              // Converter object de temporadas em array e ordenar, incluindo dados do TMDB
+              const seasonsArray = Object.entries(seasonsSource || {})
+                .map(([seasonNum, episodes]) => {
+                  const seasonNumber = parseInt(seasonNum)
+
+                  // PRIORIZAR dados do TMDB PT-BR (busca direta)
+                  const tmdbSeasonPTBR = tmdbSeasonsPTBR.find(s => s.season_number === seasonNumber) || {}
+
+                  // Fallback: dados do servidor IPTV (pode estar em inglês)
+                  const tmdbSeasonData = data?.seasons?.find(s => s.season_number === seasonNumber) || {}
+
+                  console.log(`[EpisodesList] 📺 Temporada ${seasonNumber}:`)
+                  console.log(`  - tmdbSeasonPTBR.poster_path:`, tmdbSeasonPTBR.poster_path)
+                  console.log(`  - tmdbSeasonData.cover_big:`, tmdbSeasonData.cover_big)
+                  console.log(`  - tmdbSeasonData.cover:`, tmdbSeasonData.cover)
+
+                  // Decidir qual poster usar (priorizar TMDB PT-BR)
+                  let posterPath = null
+                  let posterSource = 'none'
+
+                  if (tmdbSeasonPTBR.poster_path) {
+                    // Poster do TMDB PT-BR (prefixar com URL do TMDB)
+                    posterPath = tmdbSeasonPTBR.poster_path
+                    posterSource = 'TMDB PT-BR'
+                  } else if (tmdbSeasonData.cover_big) {
+                    // Poster do servidor IPTV (URL completa)
+                    posterPath = tmdbSeasonData.cover_big
+                    posterSource = 'IPTV cover_big'
+                  } else if (tmdbSeasonData.cover) {
+                    posterPath = tmdbSeasonData.cover
+                    posterSource = 'IPTV cover'
+                  } else if (tmdbSeasonData.poster_path) {
+                    posterPath = tmdbSeasonData.poster_path
+                    posterSource = 'IPTV poster_path'
+                  }
+
+                  console.log(`  ✅ Poster escolhido: ${posterPath} (fonte: ${posterSource})`)
+
+                  return {
+                    seasonNumber,
+                    episodes: Array.isArray(episodes) ? episodes.map(ep => ({
+                      ...ep,
+                      title: fixEncoding(ep.title),
+                      info: ep.info ? fixEncoding(ep.info) : ep.info
+                    })) : [],
+                    // Dados do TMDB PT-BR (prioridade) ou servidor IPTV (fallback)
+                    name: tmdbSeasonPTBR.name || tmdbSeasonData.name || `Temporada ${seasonNumber}`,
+                    overview: fixEncoding(tmdbSeasonPTBR.overview || tmdbSeasonData.overview) || null,
+                    airDate: tmdbSeasonPTBR.air_date || tmdbSeasonData.air_date || null,
+                    posterPath: posterPath,
+                    voteAverage: tmdbSeasonPTBR.vote_average || tmdbSeasonData.vote_average || null,
+                    episodeCount: tmdbSeasonPTBR.episode_count || tmdbSeasonData.episode_count || episodes.length
+                  }
+                })
                 .sort((a, b) => a.seasonNumber - b.seasonNumber)
 
-              setSeasonsData(seasonsArray)
+              // Armazenar no cache ANTES de atualizar estado (incluindo tmdbSeriesId para buscar episódios)
+              seriesCache[cacheKey] = {
+                seasons: seasonsArray,
+                tmdbSeriesId: tmdbSeriesId,
+                seriesData: data.info
+              }
 
-              // Selecionar primeira temporada por padrão
+              console.log('[EpisodesList] 🎬 Temporadas processadas:', seasonsArray.length, seasonsArray)
+
+              // Atualizar estado apenas uma vez
+              setSeasonsData(seasonsArray)
+              if (tmdbSeriesId) {
+                setTmdbSeriesId(tmdbSeriesId)
+              }
+
+              // Selecionar primeira temporada por padr�o
               if (seasonsArray.length > 0) {
                 setSelectedSeason(seasonsArray[0].seasonNumber)
               }
+
+              console.log('[EpisodesList] ✅ Estados atualizados! Desligando loading...')
             }
             setLoading(false)
+            console.log('[EpisodesList] 🏁 Loading = false')
           } catch (err) {
-            setError('Erro ao carregar episódios')
+            console.error('[EpisodesList] ? Erro ao carregar s�rie:', seriesId, err)
+            setError('Erro ao carregar epis�dios')
             setLoading(false)
           }
         }
 
         fetchSeriesInfo()
-      }, [seriesData])
+
+        // Cleanup: limpar timers quando componente desmontar
+        return () => {
+          console.log('[EpisodesList] 🧹 Limpando timers no cleanup')
+          if (checkCacheInterval) clearInterval(checkCacheInterval)
+          if (timeoutId) clearTimeout(timeoutId)
+        }
+      }, []) // Array vazio - executar apenas UMA VEZ no mount
+
+      // useEffect para buscar episódios do TMDB quando temporada mudar
+      React.useEffect(() => {
+        if (!tmdbSeriesId || !selectedSeason) return
+
+        // Verificar se já tem no cache
+        const episodesCacheKey = `tmdb_${tmdbSeriesId}_s${selectedSeason}`
+        if (tmdbEpisodesCache[episodesCacheKey]) {
+          console.log('[EpisodesList] 📺 Episódios do TMDB já em cache para temporada', selectedSeason)
+          return
+        }
+
+        // Buscar episódios da temporada do TMDB
+        const fetchTMDBEpisodes = async () => {
+          try {
+            const tmdbApiKey = (localStorage.getItem('tmdb_api_key') || '7e61dfdf698b31e14082e80a0ca9f9fa').replace(/['"]/g, '')
+            const seasonUrl = `https://api.themoviedb.org/3/tv/${tmdbSeriesId}/season/${selectedSeason}?api_key=${tmdbApiKey}&language=pt-BR`
+
+            console.log('[EpisodesList] 🎬 Buscando episódios TMDB PT-BR para temporada', selectedSeason)
+
+            const response = await fetch(seasonUrl)
+            const seasonData = await response.json()
+
+            if (seasonData.episodes) {
+              console.log('[EpisodesList] ✅ Episódios TMDB encontrados:', seasonData.episodes.length)
+
+              // Armazenar no cache
+              setTmdbEpisodesCache(prev => ({
+                ...prev,
+                [episodesCacheKey]: seasonData.episodes
+              }))
+            }
+          } catch (err) {
+            console.error('[EpisodesList] ❌ Erro ao buscar episódios TMDB:', err)
+          }
+        }
+
+        fetchTMDBEpisodes()
+      }, [tmdbSeriesId, selectedSeason])
 
       // Helpers
+      const fixEncoding = (str) => {
+        if (!str) return str
+        try {
+          // Se a string tem caracteres mal codificados, tentar decodificar
+          return decodeURIComponent(escape(str))
+        } catch (e) {
+          // Se falhar, retornar a string original
+          return str
+        }
+      }
+
       const formatEpisodeTitle = (episode) => {
         const type = seriesData.type || 'serie'
         const season = episode.season || selectedSeason
@@ -11852,7 +12161,7 @@ window.resetNetflixMovies = () => {
 
       const handleEpisodeClick = (episode) => {
 
-        // Construir URL do episódio
+        // Construir URL do epis�dio
         const ext = episode.container_extension || 'mp4'
         const url = buildURL(cfg.server, [
           'series',
@@ -11862,7 +12171,7 @@ window.resetNetflixMovies = () => {
         ])
 
         setCurrent({
-          name: `${seriesData.title || seriesData.name} - ${formatEpisodeTitle(episode)} - ${episode.title || ''}`,
+          name: `${fixEncoding(seriesData.title || seriesData.name)} - ${formatEpisodeTitle(episode)} - ${fixEncoding(episode.title || '')}`,
           url,
           isHls: ext === 'm3u8'
         })
@@ -11885,7 +12194,7 @@ window.resetNetflixMovies = () => {
             color: '#fff',
             fontSize: '24px'
           }
-        }, 'Carregando episódios...')
+        }, 'Carregando epis�dios...')
       }
 
       // Error state
@@ -11918,22 +12227,81 @@ window.resetNetflixMovies = () => {
         )
       }
 
+      // Determinar qual imagem usar para background
+      // backdrop_path pode ser string, array ou undefined
+      let backdropUrl = null
+      if (seriesData.backdrop_path) {
+        if (Array.isArray(seriesData.backdrop_path) && seriesData.backdrop_path.length > 0) {
+          backdropUrl = seriesData.backdrop_path[0]
+        } else if (typeof seriesData.backdrop_path === 'string') {
+          backdropUrl = seriesData.backdrop_path.split(',')[0].trim()
+        }
+      }
+
+      const backgroundImage = backdropUrl || seriesData.cover_big || seriesData.cover || null
+
       return e('div', {
+        className: 'episodes-container',
         style: {
-          background: '#000',
+          position: 'relative',
           minHeight: '100vh',
           color: '#fff',
-          padding: '40px',
-          fontFamily: 'system-ui, -apple-system, sans-serif'
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          background: '#000',
+          overflow: 'hidden'
         }
       },
+        // Background com capa da série
+        backgroundImage && e('div', {
+          className: 'series-background-blur',
+          id: 'seriesBackground',
+          style: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `url(${backgroundImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            filter: 'blur(15px)',
+            opacity: 0.4,
+            zIndex: 0,
+            pointerEvents: 'none'
+          }
+        }),
+
+        // Overlay escuro gradiente
+        backgroundImage && e('div', {
+          className: 'series-overlay',
+          style: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.75) 100%)',
+            zIndex: 1,
+            pointerEvents: 'none'
+          }
+        }),
+
+        // Conteúdo
+        e('div', {
+          style: {
+            position: 'relative',
+            padding: '40px',
+            zIndex: 2
+          }
+        },
         // Header
         e('div', {
           style: {
             marginBottom: '40px'
           }
         },
-          // Botão voltar
+          // Bot�o voltar
           e('button', {
             onClick: () => setView('serie-details'),
             style: {
@@ -11951,7 +12319,7 @@ window.resetNetflixMovies = () => {
             }
           }, '← Voltar'),
 
-          // Título
+          // T�tulo
           e('h1', {
             style: {
               fontSize: '48px',
@@ -11973,7 +12341,7 @@ window.resetNetflixMovies = () => {
           },
             seriesData.tmdb_rating && e('span', {
               style: { color: '#fbbf24', fontWeight: 'bold' }
-            }, `⭐ ${(seriesData.tmdb_rating * 10).toFixed(1)}%`),
+            }, `? ${(seriesData.tmdb_rating * 10).toFixed(1)}%`),
             seriesData.tmdb_year && e('span', null, seriesData.tmdb_year),
             seriesData.ageRating && e('span', {
               style: {
@@ -11986,7 +12354,7 @@ window.resetNetflixMovies = () => {
             }, seriesData.ageRating || '16+')
           ),
 
-          // Total episódios e temporadas
+          // Total epis�dios e temporadas
           e('div', {
             style: {
               fontSize: '18px',
@@ -12015,8 +12383,9 @@ window.resetNetflixMovies = () => {
         },
           // COLUNA ESQUERDA: Temporadas
           e('div', {
+            className: 'episodes-scroll',
             style: {
-              overflowY: 'hidden',
+              overflowY: 'auto',
               paddingRight: '16px'
             }
           },
@@ -12031,40 +12400,44 @@ window.resetNetflixMovies = () => {
             ...seasonsData.map(season =>
               e('div', {
                 key: season.seasonNumber,
+                className: 'season-card-hover',
                 onClick: () => setSelectedSeason(season.seasonNumber),
                 style: {
                   display: 'flex',
                   gap: '16px',
                   padding: '16px',
-                  background: '#141414',
+                  background: selectedSeason === season.seasonNumber ? 'linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%)' : '#141414',
                   borderRadius: '8px',
                   marginBottom: '16px',
                   cursor: 'pointer',
                   border: `2px solid ${selectedSeason === season.seasonNumber ? '#e50914' : '#333'}`,
-                  transition: 'all 0.2s'
-                },
-                onMouseEnter: (e) => {
-                  if (selectedSeason !== season.seasonNumber) {
-                    e.currentTarget.style.background = '#1f1f1f'
-                  }
-                },
-                onMouseLeave: (e) => {
-                  e.currentTarget.style.background = '#141414'
+                  transition: 'all 0.3s ease'
                 }
               },
-                // Poster placeholder
+                // Poster da temporada
                 e('div', {
                   style: {
-                    width: '120px',
-                    height: '160px',
-                    background: '#333',
+                    width: '100px',
+                    height: '150px',
+                    backgroundImage: season.posterPath
+                      ? (season.posterPath.startsWith('http')
+                          ? `url(${season.posterPath})`
+                          : `url(https://image.tmdb.org/t/p/w500${season.posterPath})`)
+                      : seriesData.cover ? `url(${seriesData.cover})`
+                      : 'none',
+                    backgroundColor: '#1a1a1a',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
                     borderRadius: '8px',
                     flexShrink: 0,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '48px',
-                    color: '#666'
+                    fontSize: '36px',
+                    fontWeight: 'bold',
+                    color: (season.posterPath || seriesData.cover) ? 'transparent' : '#fff',
+                    boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
                   }
                 }, season.seasonNumber),
 
@@ -12077,23 +12450,51 @@ window.resetNetflixMovies = () => {
                     gap: '8px'
                   }
                 },
+                  // Título
                   e('h3', {
                     style: {
-                      fontSize: '20px',
-                      fontWeight: 'bold'
+                      fontSize: '18px',
+                      fontWeight: 'bold',
+                      color: '#fff'
                     }
-                  }, `Temporada ${season.seasonNumber}`),
+                  }, season.name || `Temporada ${season.seasonNumber}`),
 
+                  // Metadados (ano, episódios, rating)
                   e('div', {
                     style: {
-                      fontSize: '14px',
+                      display: 'flex',
+                      gap: '12px',
+                      alignItems: 'center',
+                      fontSize: '13px',
                       color: '#b3b3b3'
                     }
-                  }, `${season.episodes.length} ${season.episodes.length === 1 ? 'Episódio' : 'Episódios'}`),
+                  },
+                    // Ano
+                    season.airDate && e('span', {
+                      style: { color: '#999' }
+                    }, new Date(season.airDate).getFullYear()),
 
-                  e('div', {
+                    // Episódios
+                    e('span', {
+                      style: { color: '#b3b3b3' }
+                    }, `${season.episodes.length} ${season.episodes.length === 1 ? 'Episódio' : 'Episódios'}`),
+
+                    // Rating
+                    season.voteAverage && season.voteAverage > 0 && e('span', {
+                      style: {
+                        color: '#46d369',
+                        fontWeight: 'bold',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }
+                    }, '⭐', season.voteAverage.toFixed(1))
+                  ),
+
+                  // Sinopse
+                  season.overview && e('div', {
                     style: {
-                      fontSize: '14px',
+                      fontSize: '13px',
                       color: '#999',
                       lineHeight: '1.5',
                       overflow: 'hidden',
@@ -12102,17 +12503,19 @@ window.resetNetflixMovies = () => {
                       WebkitLineClamp: 3,
                       WebkitBoxOrient: 'vertical'
                     }
-                  }, season.synopsis || `Temporada ${season.seasonNumber} com ${season.episodes.length} episódios.`)
+                  }, season.overview)
                 )
               )
             )
           ),
 
-          // COLUNA DIREITA: Episódios
+          // COLUNA DIREITA: Epis�dios
           e('div', {
+            className: 'episodes-scroll',
             style: {
-              overflowY: 'hidden',
-              paddingRight: '16px'
+              overflowY: 'auto',
+              paddingRight: '16px',
+              maxHeight: 'calc(100vh - 450px)'
             }
           },
             e('h2', {
@@ -12132,63 +12535,115 @@ window.resetNetflixMovies = () => {
               }
             }, 'Nenhum episódio disponível') :
 
-            episodes.map((episode, idx) =>
-              e('div', {
-                key: episode.id || idx,
-                onClick: () => handleEpisodeClick(episode),
-                style: {
-                  display: 'flex',
-                  gap: '16px',
-                  padding: '16px',
-                  background: '#141414',
-                  borderRadius: '8px',
-                  marginBottom: '16px',
-                  cursor: 'pointer',
-                  border: '2px solid #333',
-                  transition: 'all 0.2s'
-                },
-                onMouseEnter: (e) => {
-                  e.currentTarget.style.background = '#1f1f1f'
-                  e.currentTarget.style.borderColor = '#666'
-                },
-                onMouseLeave: (e) => {
-                  e.currentTarget.style.background = '#141414'
-                  e.currentTarget.style.borderColor = '#333'
-                }
-              },
-                // Thumbnail
-                e('div', {
+            episodes.map((episode, idx) => {
+              // Buscar episódios do TMDB em cache
+              const episodesCacheKey = `tmdb_${tmdbSeriesId}_s${selectedSeason}`
+              const tmdbEpisodes = tmdbEpisodesCache[episodesCacheKey] || []
+
+              // Encontrar episódio correspondente no TMDB (por número do episódio)
+              const episodeNumber = parseInt(episode.episode_num) || (idx + 1)
+              const tmdbEpisode = tmdbEpisodes.find(ep => ep.episode_number === episodeNumber) || {}
+
+              // Mesclar dados: PRIORIZAR TMDB PT-BR, fallback para IPTV
+              const thumbnail = tmdbEpisode.still_path
+                ? `https://image.tmdb.org/t/p/w500${tmdbEpisode.still_path}`
+                : (episode.info?.movie_image || null)
+
+              const episodeTitle = tmdbEpisode.name || fixEncoding(episode.title) || `Episódio ${episodeNumber}`
+              const episodePlot = (tmdbEpisode.overview ? fixEncoding(tmdbEpisode.overview) : null) || (episode.info?.plot ? fixEncoding(episode.info.plot) : null)
+              const airDate = tmdbEpisode.air_date || episode.info?.releasedate || null
+              const rating = tmdbEpisode.vote_average || episode.info?.rating || null
+
+              return e('div', {
+                  key: episode.id || idx,
+                  className: 'episode-card-hover card-gradient',
+                  onClick: () => handleEpisodeClick(episode),
                   style: {
-                    width: '240px',
-                    height: '135px',
-                    background: episode.info?.movie_image ? `url(${episode.info.movie_image}) center/cover` : '#333',
-                    borderRadius: '8px',
-                    flexShrink: 0,
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '48px',
-                    color: '#666',
-                    position: 'relative'
+                    gap: '16px',
+                    padding: '16px',
+                    background: '#141414',
+                    borderRadius: '8px',
+                    marginBottom: '16px',
+                    cursor: 'pointer',
+                    border: '2px solid #333',
+                    transition: 'all 0.3s ease'
                   }
                 },
+                  // Thumbnail
+                  e('div', {
+                    className: 'episode-thumbnail',
+                    style: {
+                      width: '300px',
+                      height: '168px',
+                      background: thumbnail
+                        ? `url(${thumbnail}) center/cover`
+                        : 'linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%)',
+                      borderRadius: '8px',
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '48px',
+                      color: '#fff',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }
+                  },
+                  // Número do episódio (badge no canto)
+                  e('div', {
+                    className: 'episode-number-badge',
+                    style: {
+                      position: 'absolute',
+                      top: '12px',
+                      left: '12px',
+                      background: 'rgba(0, 0, 0, 0.85)',
+                      backdropFilter: 'blur(8px)',
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                      fontWeight: 'bold',
+                      color: '#fff',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+                    }
+                  }, formatEpisodeTitle(episode)),
+
                   // Play overlay
                   e('div', {
+                    className: 'play-overlay',
                     style: {
                       position: 'absolute',
                       top: '50%',
                       left: '50%',
                       transform: 'translate(-50%, -50%)',
-                      background: 'rgba(0,0,0,0.7)',
+                      background: 'rgba(229, 9, 20, 0.9)',
                       borderRadius: '50%',
-                      width: '50px',
-                      height: '50px',
+                      width: '60px',
+                      height: '60px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '24px'
+                      fontSize: '26px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
                     }
-                  }, '▶')
+                  }, '▶'),
+
+                  // Duração (badge no canto inferior direito)
+                  episode.info?.duration_secs && e('div', {
+                    style: {
+                      position: 'absolute',
+                      bottom: '12px',
+                      right: '12px',
+                      background: 'rgba(0, 0, 0, 0.85)',
+                      backdropFilter: 'blur(8px)',
+                      padding: '4px 10px',
+                      borderRadius: '4px',
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      color: '#fff',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+                    }
+                  }, formatDuration(episode.info.duration_secs))
                 ),
 
                 // Info
@@ -12197,52 +12652,90 @@ window.resetNetflixMovies = () => {
                     flex: 1,
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '8px'
+                    gap: '12px',
+                    padding: '8px 0'
                   }
                 },
+                  // Título do episódio (TMDB PT-BR priorizado)
                   e('h3', {
                     style: {
-                      fontSize: '18px',
-                      fontWeight: 'bold'
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      color: '#fff',
+                      margin: 0,
+                      lineHeight: '1.3'
                     }
-                  }, `${formatEpisodeTitle(episode)} - ${episode.title || `Episódio ${episode.episode_num}`}`),
+                  }, episodeTitle),
 
+                  // Metadados (data, duração, rating)
                   e('div', {
                     style: {
                       display: 'flex',
                       alignItems: 'center',
+                      flexWrap: 'wrap',
                       gap: '12px',
-                      fontSize: '12px',
+                      fontSize: '13px',
                       color: '#b3b3b3'
                     }
                   },
-                    e('span', null, formatDate(episode.info?.releasedate || episode.added)),
-                    e('span', null, '•'),
-                    e('span', null, formatDuration(episode.info?.duration_secs || episode.info?.duration)),
-                    episode.info?.rating && e('span', { style: { color: '#fbbf24' } }, `⭐ ${episode.info.rating}`)
+                    // Data de lançamento (TMDB ou IPTV)
+                    airDate && e('span', {
+                      style: {
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        color: '#999'
+                      }
+                    }, '📅', formatDate(airDate)),
+
+                    airDate && episode.info?.duration_secs && e('span', null, '•'),
+
+                    // Duração (apenas IPTV tem essa info)
+                    episode.info?.duration_secs && e('span', {
+                      style: {
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }
+                    }, '⏱️', formatDuration(episode.info.duration_secs)),
+
+                    (episode.info?.duration_secs || airDate) && rating && e('span', null, '•'),
+
+                    // Rating (TMDB priorizado)
+                    rating && e('span', {
+                      style: {
+                        color: rating >= 7 ? '#46d369' : '#fbbf24',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontWeight: 'bold'
+                      }
+                    }, '⭐', typeof rating === 'number' ? rating.toFixed(1) : rating)
                   ),
 
-                  e('div', {
+                  // Sinopse (TMDB PT-BR priorizado)
+                  episodePlot && e('div', {
                     style: {
                       fontSize: '14px',
-                      color: '#999',
-                      lineHeight: '1.5',
+                      color: '#aaa',
+                      lineHeight: '1.6',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       display: '-webkit-box',
-                      WebkitLineClamp: 2,
+                      WebkitLineClamp: 3,
                       WebkitBoxOrient: 'vertical'
                     }
-                  }, episode.info?.plot || `Episódio ${episode.episode_num} da temporada ${selectedSeason}.`)
+                  }, episodePlot)
                 )
               )
-            )
+            })
           )
         )
-      )
-    }
+        ) // Fecha div de conteúdo
+      ) // Fecha div principal
+    })
 
-    // ===== COMPONENTE: PÁGINA DE DETALHES DE SÉRIE/FILME =====
+    // ===== COMPONENTE: P�GINA DE DETALHES DE S�RIE/FILME =====
     function SerieDetails({ contentData }) {
       const [isFavorite, setIsFavorite] = useState(false)
       const [showEpisodes, setShowEpisodes] = useState(false)
@@ -12289,19 +12782,19 @@ window.resetNetflixMovies = () => {
       } = contentData
 
       // Dados processados - PRIORIZAR TMDB
-      const displayTitle = title || name || 'Sem título'
-      const displayYear = tmdb_year || year || '—'
-      const displaySynopsis = tmdb_overview || tmdb_plot || synopsis || plot || 'Sinopse não disponível.'
+      const displayTitle = title || name || 'Sem t�tulo'
+      const displayYear = tmdb_year || year || '�'
+      const displaySynopsis = tmdb_overview || tmdb_plot || synopsis || plot || 'Sinopse n�o dispon�vel.'
       const displayBackdrop = tmdb_backdrop || backdrop || cover || stream_icon || 'https://via.placeholder.com/1920x1080/1a1a1a/ffffff?text=Sem+Imagem'
       const displayGenres = tmdb_genres || (genre ? genre.split(',').map(g => g.trim()).join(', ') : 'Drama')
-      const displayRating = tmdb_rating ? `⭐ ${(tmdb_rating * 10).toFixed(0)}%` : (rating || '—')
+      const displayRating = tmdb_rating ? `? ${(tmdb_rating * 10).toFixed(0)}%` : (rating || '�')
       const displayDirector = tmdb_director || null
       const displayRuntime = tmdb_runtime ? `${tmdb_runtime} min` : null
 
-      // ===== CORREÇÃO: Garantir que cast seja sempre um array =====
+      // ===== CORRE��O: Garantir que cast seja sempre um array =====
       let displayCast = tmdb_cast || cast || []
 
-      // Se cast é string (formato antigo: "Nome1, Nome2, Nome3"), converter para array de objetos
+      // Se cast � string (formato antigo: "Nome1, Nome2, Nome3"), converter para array de objetos
       if (typeof displayCast === 'string') {
         displayCast = displayCast.split(',').map(name => ({
           name: name.trim(),
@@ -12312,20 +12805,20 @@ window.resetNetflixMovies = () => {
         displayCast = []
       }
 
-      // Garantir que cada item tenha as propriedades necessárias
+      // Garantir que cada item tenha as propriedades necess�rias
       displayCast = displayCast.map(actor => ({
         name: actor.name || actor,
         profile_path: actor.profile_path || null,
         character: actor.character || null
       }))
 
-      const displayEpisodes = episodes_count || '—'
-      const displaySeasons = seasons_count || '—'
+      const displayEpisodes = episodes_count || '�'
+      const displaySeasons = seasons_count || '�'
 
-      // Buscar trailer do TMDB se não existir trailer_url do servidor
+      // Buscar trailer do TMDB se n�o existir trailer_url do servidor
       useEffect(() => {
         const fetchTrailer = async () => {
-          // Se já tem trailer_url do servidor, não precisa buscar
+          // Se j� tem trailer_url do servidor, n�o precisa buscar
           if (trailer_url || tmdbTrailerUrl || loadingTrailer) return
 
           // Buscar tmdb_id do contentData
@@ -12334,7 +12827,7 @@ window.resetNetflixMovies = () => {
 
           setLoadingTrailer(true)
           try {
-            // Detectar se é série ou filme
+            // Detectar se � s�rie ou filme
             const type = series_id ? 'tv' : 'movie'
             const trailerUrl = await getTMDBTrailer(tmdbId, type)
             if (trailerUrl) {
@@ -12352,12 +12845,12 @@ window.resetNetflixMovies = () => {
 
       // Handlers
       const handleWatch = () => {
-        // TODO: Navegar para player ou mostrar episódios
+        // TODO: Navegar para player ou mostrar epis�dios
         if (series_id) {
-          // É série: mostrar episódios
+          // � s�rie: mostrar epis�dios
           setShowEpisodes(true)
         } else {
-          // É filme: iniciar reprodução
+          // � filme: iniciar reprodu��o
           const id = stream_id || series_id
           const ext = 'mp4'
           const url = buildURL(cfg.server, ['movie', cfg.username, cfg.password, id + '.' + ext])
@@ -12378,7 +12871,7 @@ window.resetNetflixMovies = () => {
             window.open(url, '_blank')
           }
         } else {
-          alert('Trailer não disponível')
+          alert('Trailer n�o dispon�vel')
         }
       }
 
@@ -12388,7 +12881,7 @@ window.resetNetflixMovies = () => {
       }
 
       const handleEpisodes = () => {
-        // Navegar para a view de episódios
+        // Navegar para a view de epis�dios
         setView('episodes')
       }
 
@@ -12403,7 +12896,7 @@ window.resetNetflixMovies = () => {
           style: { backgroundImage: `url(${displayBackdrop})` }
         }),
 
-        // Botão Voltar
+        // Bot�o Voltar
         e('button', {
           onClick: () => setView('netflix-movies'),
           style: {
@@ -12455,16 +12948,16 @@ window.resetNetflixMovies = () => {
           // Sinopse
           e('p', { className: 'serie-detail-synopsis' }, displaySynopsis),
 
-          // Botões de ação
+          // Bot�es de a��o
           e('div', { className: 'serie-detail-actions' },
             e('button', {
               className: 'serie-detail-btn serie-detail-btn-watch',
               onClick: handleWatch
             },
-              '▶ Assistir'
+              '▶️ Assistir'
             ),
 
-            // Sempre mostrar botão de trailer (busca do TMDB se necessário)
+            // Sempre mostrar bot�o de trailer (busca do TMDB se necess�rio)
             e('button', {
               className: 'serie-detail-btn serie-detail-btn-trailer',
               onClick: handleTrailer,
@@ -12474,26 +12967,26 @@ window.resetNetflixMovies = () => {
                 cursor: loadingTrailer ? 'wait' : 'pointer'
               }
             },
-              loadingTrailer ? '⏳ Buscando...' : (trailer_url || tmdbTrailerUrl ? '🎬 Trailer' : '🎬 Trailer')
+              loadingTrailer ? '⏳ Buscando...' : '🎬 Trailer'
             ),
 
             e('button', {
               className: 'serie-detail-btn serie-detail-btn-favorite',
               onClick: handleFavorite
             },
-              isFavorite ? '💔 Remover dos Favoritos' : '❤️ Adicionar aos Favoritos'
+              isFavorite ? '⭐ Remover dos Favoritos' : '⭐ Adicionar aos Favoritos'
             )
           ),
 
-          // Botão Episódios (apenas para séries)
+          // Bot�o Epis�dios (apenas para s�ries)
           series_id && e('button', {
             className: 'serie-detail-btn serie-detail-btn-episodes',
             onClick: handleEpisodes
           },
-            '≡ Episódios e mais'
+            '= Epis�dios e mais'
           ),
 
-          // Seção Elenco
+          // Se��o Elenco
           displayCast.length > 0 && e('div', { className: 'serie-detail-cast-section' },
             e('h2', null, 'Elenco'),
 
@@ -12556,8 +13049,8 @@ window.resetNetflixMovies = () => {
         }
       },[hlsObj])
 
-      // ⚠️ FULLSCREEN AUTOMÁTICO DESABILITADO
-      // Agora o usuário controla quando quer fullscreen (botão F ou duplo clique)
+      // ?? FULLSCREEN AUTOM�TICO DESABILITADO
+      // Agora o usu�rio controla quando quer fullscreen (bot�o F ou duplo clique)
       /*
       useEffect(() => {
         const enterFullscreen = async () => {
@@ -12581,7 +13074,7 @@ window.resetNetflixMovies = () => {
           }
         }
 
-        // Delay para garantir que o vídeo está carregado
+        // Delay para garantir que o v�deo est� carregado
         setTimeout(enterFullscreen, 300)
       }, [current])
       */
@@ -12629,7 +13122,7 @@ window.resetNetflixMovies = () => {
           playerInstanceRef.current = null
         }
 
-        // Inicializar player baseado na seleção
+        // Inicializar player baseado na sele��o
         if(selectedPlayer === 'Clappr Player (Recommended)' && window.Clappr){
           const player = new Clappr.Player({
             source: current.url,
@@ -12684,7 +13177,7 @@ window.resetNetflixMovies = () => {
           v.style.display = 'none'
         }
         else {
-          // HLS.js (Sistema) - fallback padrão
+          // HLS.js (Sistema) - fallback padr�o
           v.style.display = 'block'
           const isM3U8 = /\.m3u8($|\?)/i.test(current.url)
           const canNative = v.canPlayType('application/vnd.apple.mpegURL')
@@ -12713,7 +13206,7 @@ window.resetNetflixMovies = () => {
             },
             className:'text-white hover:text-purple-400 flex items-center gap-2'
           }, '← Voltar'),
-          e('h2', { className:'text-white font-semibold truncate max-w-[60vw]' }, current?.name || 'Reprodução'),
+          e('h2', { className:'text-white font-semibold truncate max-w-[60vw]' }, current?.name || 'Reprodu��o'),
           e('div', { className:'w-10' })
         ),
         e('div', { id: 'player-container', className:'flex-1 grid place-items-center p-4 relative' },
@@ -12724,7 +13217,7 @@ window.resetNetflixMovies = () => {
 
     function Config(){
       // ===== DNS FIXO: http://infcsfortal.pro =====
-      // Garante que o servidor está sempre configurado corretamente
+      // Garante que o servidor est� sempre configurado corretamente
       const [serverSet, setServerSet] = useState(false)
       React.useEffect(() => {
         if (!serverSet && cfg.server !== 'http://infcsfortal.pro') {
@@ -12747,11 +13240,11 @@ window.resetNetflixMovies = () => {
         }
       }, [])
 
-      // Função de conexão
+      // Fun��o de conex�o
       const handleConnect = () => {
         // Atualizar cfg com os valores locais
         setCfg(v => ({...v, username: localUsername, password: localPassword}))
-        // Conectar após breve delay para garantir que cfg foi atualizado
+        // Conectar ap�s breve delay para garantir que cfg foi atualizado
         setTimeout(() => onConnect(), 50)
       }
 
@@ -12826,7 +13319,7 @@ window.resetNetflixMovies = () => {
           padding: '20px'
         }
       },
-        // Botão fechar (X)
+        // Bot�o fechar (X)
         e('button', {
           onClick: (ev) => {
             ev.stopPropagation()
@@ -12859,7 +13352,7 @@ window.resetNetflixMovies = () => {
             ev.target.style.background = 'rgba(255, 255, 255, 0.2)'
             ev.target.style.transform = 'scale(1)'
           }
-        }, '✕'),
+        }, '?'),
 
         // Video container
         e('div', {
@@ -12893,11 +13386,11 @@ window.resetNetflixMovies = () => {
       }, toast)
     }
 
-    // ===== Botão de Fullscreen =====
+    // ===== Bot�o de Fullscreen =====
     function FullscreenButton(){
       const [isFullscreen, setIsFullscreen] = useState(false)
 
-      // Detectar mudanças de fullscreen (F11, ESC, etc)
+      // Detectar mudan�as de fullscreen (F11, ESC, etc)
       useEffect(() => {
         const handleFullscreenChange = () => {
           setIsFullscreen(!!document.fullscreenElement)
@@ -12916,7 +13409,7 @@ window.resetNetflixMovies = () => {
         }
       }, [])
 
-      // Usando emoji para ícones (sem dependência de bibliotecas externas)
+      // Usando emoji para �cones (sem depend�ncia de bibliotecas externas)
 
       const toggleFullscreen = async () => {
         try {
@@ -12948,7 +13441,7 @@ window.resetNetflixMovies = () => {
         }
       }
 
-      // Não mostrar na tela de config (login)
+      // N�o mostrar na tela de config (login)
       if(view === 'config') return null
 
       return e('button', {
@@ -12961,11 +13454,11 @@ window.resetNetflixMovies = () => {
         },
         title: isFullscreen ? 'Sair da tela cheia (ESC)' : 'Tela cheia (F11)'
       },
-        // Ícone usando emoji
+        // �cone usando emoji
         e('span', {
           className: 'text-white transition-colors group-hover:text-purple-400',
           style: { fontSize: '20px' }
-        }, isFullscreen ? '🗗' : '⛶')
+        }, isFullscreen ? '??' : '?')
       )
     }
 
@@ -12975,7 +13468,7 @@ window.resetNetflixMovies = () => {
     else if(view==='settings') content = e(Settings, { account, setView })
     else if(view==='home') content = e(Home)
     else if(view==='netflix-movies'){
-      // Só renderizar quando selectedCat estiver definido
+      // S� renderizar quando selectedCat estiver definido
       if (selectedCat) {
         content = e(NetflixMovies, { key: `vod-${getCatId(selectedCat)}`, contentType: 'vod', selectedCategory: selectedCat })
       } else {
@@ -13020,11 +13513,11 @@ window.resetNetflixMovies = () => {
     else if(view.endsWith('-categories')) content = e(Categories)
     else if(view==='channels' && selectedCat) content = e(Channels)
     else if(view==='serie-details' && selectedContent) content = e(SerieDetails, { contentData: selectedContent })
-    else if(view==='episodes' && selectedContent) content = e(EpisodesList, { seriesData: selectedContent })
+    else if(view==='episodes' && selectedContent) content = e(EpisodesList, { key: `series-${selectedContent.series_id}`, seriesData: selectedContent })
     else if(view==='player' && current) content = e(Player)
     else content = e('div', { className:'star-bg min-h-screen grid place-items-center text-white' }, 'Carregando...')
 
-    // Não mostrar header apenas na config (login), settings e no player
+    // N�o mostrar header apenas na config (login), settings e no player
     const showHeader = view !== 'config' && view !== 'player' && view !== 'settings'
     const showCategoryBar = showHeader && (
       view === 'netflix-movies' || view === 'vod-categories' ||
@@ -13050,7 +13543,7 @@ window.resetNetflixMovies = () => {
         setView: setView
       }),
 
-      // Barra de categorias de filmes e séries
+      // Barra de categorias de filmes e s�ries
       showCategoryBar && e(CategoryBar, { vodCats, seriesCats, view, setView, selectedCat, setSelectedCat, collections }),
 
       e('div', {
@@ -13064,7 +13557,7 @@ window.resetNetflixMovies = () => {
         content,
         e(TrailerModal),
         e(Toast),
-        // Indicador de navegação numérica (canal digitado)
+        // Indicador de navega��o num�rica (canal digitado)
         channelInput && e('div', { className: 'tv-channel-input' },
           e('div', { style: { fontSize: '24px', color: '#a855f7', marginBottom: '10px' } }, 'Canal'),
           channelInput
@@ -13080,7 +13573,7 @@ window.resetNetflixMovies = () => {
             // Abrir categoria Live 18+ se estava pendente
             if (window.__pendingLiveCategory) {
               const { cat, idx } = window.__pendingLiveCategory
-              // Usar a função que está no escopo do componente LiveCategories
+              // Usar a fun��o que est� no escopo do componente LiveCategories
               // Como estamos no App, precisamos disparar um evento customizado
               const event = new CustomEvent('openAdultLiveCategory', {
                 detail: { cat, idx }
@@ -13102,7 +13595,7 @@ window.resetNetflixMovies = () => {
   const root = ReactDOM.createRoot(document.getElementById('app'))
   root.render(e(App))
 
-  // Header agora está visível - código de remoção removido
+  // Header agora est� vis�vel - c�digo de remo��o removido
 
   // ===== Pequenos testes =====
   ;(function runTests(){
@@ -13111,7 +13604,7 @@ window.resetNetflixMovies = () => {
     try{
       assert('sanitizeServer adiciona http', sanitizeServer('example.com')==='http://example.com')
       assert('sanitizeServer remove barra final', sanitizeServer('http://a.com/')==='http://a.com')
-      assert('sanitizeServer mantém https', sanitizeServer('https://a.com').startsWith('https://'))
+      assert('sanitizeServer mant�m https', sanitizeServer('https://a.com').startsWith('https://'))
       assert('buildURL concatena segmentos', buildURL('http://a.com', ['x','y'])==='http://a.com/x/y')
       assert('buildURL remove barras extras', buildURL('http://a.com/', ['/x/','/y/'])==='http://a.com/x/y')
       assert('formatEPGTime string HH:MM', formatEPGTime('08:30')==='08:30')
@@ -13121,17 +13614,17 @@ window.resetNetflixMovies = () => {
       // Normalizadores
       assert('toArray aceita array', Array.isArray(toArray([{a:1}])))
       assert('toArray aceita objeto-indexado', Array.isArray(toArray({0:{a:1},1:{a:2}})))
-      assert('getCatId cobre vários campos', getCatId({category_id:123})===123 && getCatId({id:9})===9)
+      assert('getCatId cobre v�rios campos', getCatId({category_id:123})===123 && getCatId({id:9})===9)
       // Quality variants
       assert('extractBaseName remove qualidade', extractBaseName('Globo HD')==='Globo')
-      assert('extractBaseName remove qualidade FHD²', extractBaseName('SBT FHD²')==='SBT')
+      assert('extractBaseName remove qualidade FHD�', extractBaseName('SBT FHD�')==='SBT')
       assert('detectQuality identifica HD', detectQuality('Globo HD')==='HD')
       assert('detectQuality retorna null sem sufixo', detectQuality('Globo')===null)
       // Extras
       assert('toArray(null) => []', Array.isArray(toArray(null)) && toArray(null).length===0)
       assert('getCatId CategoryID/categoryid', getCatId({CategoryID:7})===7 && getCatId({categoryid:8})===8)
       assert('maskUrlCredentials mascara path credenciais', !(/\/live\/[\w-]+\/[\w-]+\//.test(maskUrlCredentials('http://x/live/u/p/999.m3u8'))))
-      assert('formatEPGTime inválido => "--:--"', formatEPGTime('abc')==='--:--' && formatEPGTime(null)==='--:--')
+      assert('formatEPGTime inv�lido => "--:--"', formatEPGTime('abc')==='--:--' && formatEPGTime(null)==='--:--')
       assert('getCatId null => null', getCatId(null)===null)
       // Novo: contagem de categorias
       const tmp={}; ['1','2','1'].forEach(id=> tmp[id]=(tmp[id]||0)+1)
