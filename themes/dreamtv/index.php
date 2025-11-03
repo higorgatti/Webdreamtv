@@ -541,7 +541,7 @@ header("Expires: 0");
       position: relative;
       width: 100%;
       height: 100vh;
-      overflow-y: auto;
+      overflow-y: hidden;
       overflow-x: hidden;
     }
 
@@ -3080,7 +3080,7 @@ header("Expires: 0");
       if (view === 'live-categories' || view === 'channels') return 'channels'
       if (view === 'adult-content' || view === 'adult-categories') return 'adult'
       if (view === 'netflix-movies' || view === 'vod-categories') return 'movies'
-      if (view === 'netflix-series' || view === 'series-categories') return 'series'
+      if (view === 'netflix-series' || view === 'series-categories' || view === 'serie-details' || view === 'episodes') return 'series'
       if (view === 'netflix-novelas' || view === 'novelas-categories') return 'novelas'
       if (view === 'netflix-animes' || view === 'animes-categories') return 'animes'
       if (view === 'netflix-desenhos' || view === 'desenhos-categories') return 'desenhos'
