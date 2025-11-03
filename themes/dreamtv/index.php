@@ -1,4 +1,4 @@
-<!-- CACHE-BUST: 2025-11-03 19:20:21 -->
+<!-- CACHE-BUST: 2025-11-03 19:45:31 -->
 <?php
 // LIMPAR OPCACHE DO PHP COMPLETAMENTE
 if (function_exists('opcache_reset')) {
