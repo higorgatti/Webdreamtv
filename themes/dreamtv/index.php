@@ -1,4 +1,4 @@
-<!-- CACHE-BUST: 2025-11-03 17:09:58 -->
+<!-- CACHE-BUST: 2025-11-03 17:38:09 -->
 <?php
 // LIMPAR OPCACHE DO PHP COMPLETAMENTE
 if (function_exists('opcache_reset')) {
@@ -571,7 +571,7 @@ header("Expires: 0");
     .serie-detail-content {
       position: relative;
       z-index: 1;
-      padding: 100px 60px 60px 60px;
+      padding: 80px 60px 40px 60px;
       max-width: 1400px;
     }
 
