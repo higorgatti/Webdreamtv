@@ -1,4 +1,4 @@
-<!-- CACHE-BUST: 2025-11-03 17:38:09 -->
+<!-- CACHE-BUST: 2025-11-03 17:58:42 -->
 <?php
 // LIMPAR OPCACHE DO PHP COMPLETAMENTE
 if (function_exists('opcache_reset')) {
@@ -12341,7 +12341,7 @@ window.resetNetflixMovies = () => {
           },
             seriesData.tmdb_rating && e('span', {
               style: { color: '#fbbf24', fontWeight: 'bold' }
-            }, `? ${(seriesData.tmdb_rating * 10).toFixed(1)}%`),
+            }, `⭐ ${(seriesData.tmdb_rating * 10).toFixed(1)}%`),
             seriesData.tmdb_year && e('span', null, seriesData.tmdb_year),
             seriesData.ageRating && e('span', {
               style: {
@@ -12488,7 +12488,7 @@ window.resetNetflixMovies = () => {
                         alignItems: 'center',
                         gap: '4px'
                       }
-                    }, '⭐', season.voteAverage.toFixed(1))
+                    }, `⭐ ${season.voteAverage.toFixed(1)}`)
                   ),
 
                   // Sinopse
@@ -12710,7 +12710,7 @@ window.resetNetflixMovies = () => {
                         gap: '4px',
                         fontWeight: 'bold'
                       }
-                    }, '⭐', typeof rating === 'number' ? rating.toFixed(1) : rating)
+                    }, `⭐ ${typeof rating === 'number' ? rating.toFixed(1) : rating}`)
                   ),
 
                   // Sinopse (TMDB PT-BR priorizado)
@@ -12787,7 +12787,7 @@ window.resetNetflixMovies = () => {
       const displaySynopsis = tmdb_overview || tmdb_plot || synopsis || plot || 'Sinopse n�o dispon�vel.'
       const displayBackdrop = tmdb_backdrop || backdrop || cover || stream_icon || 'https://via.placeholder.com/1920x1080/1a1a1a/ffffff?text=Sem+Imagem'
       const displayGenres = tmdb_genres || (genre ? genre.split(',').map(g => g.trim()).join(', ') : 'Drama')
-      const displayRating = tmdb_rating ? `? ${(tmdb_rating * 10).toFixed(0)}%` : (rating || '�')
+      const displayRating = tmdb_rating ? `⭐ ${(tmdb_rating * 10).toFixed(0)}%` : (rating || '—')
       const displayDirector = tmdb_director || null
       const displayRuntime = tmdb_runtime ? `${tmdb_runtime} min` : null
 
