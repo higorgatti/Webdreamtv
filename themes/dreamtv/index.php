@@ -5340,8 +5340,6 @@ header("Expires: 0");
 
           // Pré-carregar categorias em background ap�s auto-login
           preloadAllCategories()
-          // DESABILITADO: pré-carregamento de conte�do (causava loop infinito)
-          // preloadTopVodContent()
         }).catch(err=> setError(explainLoginError(err.message||String(err))))
       }
     },[])
@@ -5482,8 +5480,6 @@ header("Expires: 0");
 
         // Pré-carregar categorias em background ap�s login
         preloadAllCategories()
-        // DESABILITADO: pré-carregamento de conte�do (causava loop infinito)
-        // preloadTopVodContent()
       }catch(err){
         setError(explainLoginError(err.message||String(err)))
       }finally{
@@ -6360,14 +6356,6 @@ function Home(){
                       listItemId: channel.stream_id || channel.id
                     })
                     await loadEpg(channelToPlay.stream_id || channelToPlay.id, selectedDay)
-
-                    // ?? FULLSCREEN AUTOM�TICO DESABILITADO - usuário controla via botão F
-                    // setTimeout(()=>{
-                    //   const container = document.getElementById('playerContainer')
-                    //   if(container && !document.fullscreenElement){
-                    //     container.requestFullscreen().catch(()=>{})
-                    //   }
-                    // }, 500)
                   }catch(err){
                     setSelectedChannel({
                       ...channel,
@@ -8093,279 +8081,6 @@ function Home(){
                   boxShadow: '0 0 12px rgba(52, 211, 153, 0.3)'
                 }
               }, isFullscreen ? 'Sair da Tela Cheia' : 'Full Screen')
-            )
-          )
-        ),
-
-        // OVERLAY DESABILITADO (ser� refeito)
-        false && e('div', {
-          style: {
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 60%, transparent 100%)',
-            padding: '60px 30px 30px',
-            zIndex: 99999,
-            pointerEvents: 'none'
-          }
-        },
-          e('div', {
-            style: {
-              maxWidth: '1400px',
-              margin: '0 auto',
-              pointerEvents: 'auto'
-            }
-          },
-            // Nome do canal (topo)
-            e('div', {
-              style: {
-                textAlign: 'center',
-                marginBottom: '20px'
-              }
-            },
-              e('div', {
-                style: {
-                  display: 'inline-block',
-                  backgroundColor: 'rgba(30, 40, 60, 0.9)',
-                  padding: '8px 24px',
-                  borderRadius: '20px',
-                  fontSize: '16px',
-                  fontWeight: '700',
-                  color: '#fff',
-                  letterSpacing: '1px'
-                }
-              }, (channel?.name || 'CANAL').toUpperCase())
-            ),
-
-            // Container principal
-            e('div', {
-              style: {
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                backgroundColor: 'rgba(15, 20, 30, 0.92)',
-                borderRadius: '16px',
-                padding: '24px 32px',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.6)'
-              }
-            },
-              // ESQUERDA: Número + Logo + Programa Atual
-              e('div', {
-                style: {
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '20px',
-                  flex: 1
-                }
-              },
-                // Número do canal
-                e('div', {
-                  style: {
-                    fontSize: '32px',
-                    fontWeight: '700',
-                    color: '#fff',
-                    minWidth: '60px',
-                    textAlign: 'center'
-                  }
-                }, String(channel?.num || channel?.stream_id || '—')),
-
-                // Logo do canal
-                channel?.stream_icon && e('img', {
-                  src: channel.stream_icon,
-                  style: {
-                    width: '56px',
-                    height: '56px',
-                    borderRadius: '50%',
-                    backgroundColor: '#fff',
-                    padding: '4px',
-                    objectFit: 'contain'
-                  }
-                }),
-
-                // Programa atual
-                e('div', {
-                  style: {
-                    flex: 1,
-                    minWidth: 0
-                  }
-                },
-                  // Título + AO VIVO
-                  e('div', {
-                    style: {
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      marginBottom: '6px'
-                    }
-                  },
-                    e('div', {
-                      style: {
-                        fontSize: '20px',
-                        fontWeight: '700',
-                        color: '#fff',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis'
-                      }
-                    }, currentProg?.title || 'Programa Atual'),
-                    e('div', {
-                      style: {
-                        backgroundColor: '#E50914',
-                        color: '#fff',
-                        fontSize: '11px',
-                        fontWeight: '800',
-                        padding: '4px 10px',
-                        borderRadius: '4px',
-                        letterSpacing: '0.5px'
-                      }
-                    }, 'AO VIVO')
-                  ),
-
-                  // Hor�rios
-                  currentProg && e('div', {
-                    style: {
-                      fontSize: '14px',
-                      color: '#aaa',
-                      marginBottom: '8px'
-                    }
-                  }, `${currentProg.start || '00:00'} � ${currentProg.end || '00:00'}`),
-
-                  // Barra de progresso
-                  currentProg && e('div', {
-                    style: {
-                      width: '100%',
-                      height: '5px',
-                      backgroundColor: 'rgba(255,255,255,0.2)',
-                      borderRadius: '3px',
-                      overflow: 'hidden'
-                    }
-                  },
-                    e('div', {
-                      style: {
-                        width: `${currentProg.progress || 0}%`,
-                        height: '100%',
-                        backgroundColor: '#E50914',
-                        transition: 'width 1s linear'
-                      }
-                    })
-                  )
-                )
-              ),
-
-              // CENTRO: Próximo programa
-              nextProg && e('div', {
-                style: {
-                  marginLeft: '32px',
-                  marginRight: '32px',
-                  minWidth: '200px'
-                }
-              },
-                e('div', {
-                  style: {
-                    backgroundColor: 'rgba(60, 70, 90, 0.8)',
-                    padding: '4px 12px',
-                    borderRadius: '6px',
-                    fontSize: '11px',
-                    fontWeight: '700',
-                    color: '#fff',
-                    marginBottom: '6px',
-                    display: 'inline-block'
-                  }
-                }, 'PR�XIMO'),
-                e('div', {
-                  style: {
-                    fontSize: '14px',
-                    color: '#aaa',
-                    marginBottom: '4px'
-                  }
-                }, `${nextProg.start || '00:00'} � ${nextProg.end || '00:00'}`),
-                e('div', {
-                  style: {
-                    fontSize: '15px',
-                    fontWeight: '600',
-                    color: '#fff',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    maxWidth: '250px'
-                  }
-                }, nextProg.title)
-              ),
-
-              // DIREITA: Hora + Resolução
-              e('div', {
-                style: {
-                  textAlign: 'right',
-                  minWidth: '100px'
-                }
-              },
-                e('div', {
-                  style: {
-                    fontSize: '28px',
-                    fontWeight: '700',
-                    color: '#fff',
-                    marginBottom: '4px'
-                  }
-                }, currentTime),
-                e('div', {
-                  style: {
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    color: '#aaa'
-                  }
-                }, videoResolution)
-              )
-            ),
-
-            // BOT�ES DE QUALIDADE
-            availableQualities.length > 0 && e('div', {
-              style: {
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '12px',
-                marginTop: '20px'
-              }
-            },
-              e('div', {
-                style: {
-                  fontSize: '13px',
-                  fontWeight: '600',
-                  color: '#aaa',
-                  marginRight: '8px'
-                }
-              }, 'QUALIDADE:'),
-
-              availableQualities.map(quality =>
-                e('button', {
-                  key: quality,
-                  onClick: () => switchQuality(quality),
-                  style: {
-                    backgroundColor: selectedQuality === quality ? '#E50914' : 'rgba(60, 70, 90, 0.8)',
-                    color: '#fff',
-                    border: 'none',
-                    padding: '8px 20px',
-                    borderRadius: '6px',
-                    fontSize: '13px',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    outline: 'none',
-                    letterSpacing: '0.5px'
-                  },
-                  onMouseEnter: (e) => {
-                    if(selectedQuality !== quality) {
-                      e.target.style.backgroundColor = 'rgba(80, 90, 110, 0.9)'
-                    }
-                  },
-                  onMouseLeave: (e) => {
-                    if(selectedQuality !== quality) {
-                      e.target.style.backgroundColor = 'rgba(60, 70, 90, 0.8)'
-                    }
-                  }
-                }, quality)
-              )
             )
           )
         )
@@ -13057,36 +12772,6 @@ window.resetNetflixMovies = () => {
           }
         }
       },[hlsObj])
-
-      // ?? FULLSCREEN AUTOM�TICO DESABILITADO
-      // Agora o usuário controla quando quer fullscreen (botão F ou duplo clique)
-      /*
-      useEffect(() => {
-        const enterFullscreen = async () => {
-          const video = videoRef.current
-          if (!video) return
-
-          try {
-            if (video.requestFullscreen) {
-              await video.requestFullscreen()
-            } else if (video.webkitRequestFullscreen) {
-              await video.webkitRequestFullscreen()
-            } else if (video.mozRequestFullScreen) {
-              await video.mozRequestFullScreen()
-            } else if (video.msRequestFullscreen) {
-              await video.msRequestFullscreen()
-            } else if (video.webkitEnterFullscreen) {
-              // iOS Safari
-              video.webkitEnterFullscreen()
-            }
-          } catch (err) {
-          }
-        }
-
-        // Delay para garantir que o vídeo est� carregado
-        setTimeout(enterFullscreen, 300)
-      }, [current])
-      */
 
       // Handler ESC - volta para a view anterior
       useEffect(() => {
