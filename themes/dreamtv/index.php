@@ -1569,15 +1569,15 @@ header("Expires: 0");
     if(!channelName) return ''
     // Remove sufixos de qualidade: FHD, FHD�, HD, HD�, SD, SD�
     const cleanName = channelName
-      .replace(/\s*\(?(FHD�|FHD|HD�|HD|SD�|SD)\)?$/i, '')
-      .replace(/\s*\[(FHD�|FHD|HD�|HD|SD�|SD)\]$/i, '')
+      .replace(/\s*\(?(FHD²|FHD|HD²|HD|SD²|SD)\)?$/i, '')
+      .replace(/\s*\[(FHD²|FHD|HD²|HD|SD²|SD)\]$/i, '')
       .trim()
     return cleanName || channelName
   }
 
   function detectQuality(channelName){
     if(!channelName) return null
-    const match = channelName.match(/(FHD�|FHD|HD�|HD|SD�|SD)$/i)
+    const match = channelName.match(/(FHD²|FHD|HD²|HD|SD²|SD)$/i)
     if(match) return match[1].toUpperCase()
     // Se n�o tem sufixo, considera Original
     return null
@@ -6633,7 +6633,7 @@ function Home(){
                           return favorites[channelId] && e('div', {
                             className: 'px-2 py-[2px] rounded text-[11px] font-bold',
                             style: { backgroundColor: '#FFD700', color: '#000000' }
-                          }, '?')
+                          }, '⭐')
                         })(),
                         // Badge REC vermelho se canal tem playback
                         item.hasPlayback && e('div', {
