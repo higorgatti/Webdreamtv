@@ -7011,7 +7011,7 @@ function Home(){
       const currentQualityRef = useRef(null) // Ref para n�o causar re-render ao trocar qualidade
       const pendingQualityChangeRef = useRef(null) // Ref para armazenar mudan�a de qualidade pendente durante fullscreen
       const [isFullscreen, setIsFullscreen] = useState(false)
-      const [videoResolution, setVideoResolution] = useState('1920�1080')
+      const [videoResolution, setVideoResolution] = useState('1920×1080')
       const hideTimeoutRef = useRef(null)
       const [availableQualities, setAvailableQualities] = useState([])
       const [loadError, setLoadError] = useState(null) // Estado para erro de carregamento
@@ -7022,10 +7022,10 @@ function Home(){
       // Mapeamento de qualidade para resolução
       const getResolutionFromQuality = (quality) => {
         const qualityUpper = (quality || '').toUpperCase()
-        if(qualityUpper.includes('FHD')) return '1920�1080'
-        if(qualityUpper.includes('HD')) return '1280�720'
-        if(qualityUpper.includes('SD')) return '854�480'
-        return '1920�1080' // Default
+        if(qualityUpper.includes('FHD')) return '1920×1080'
+        if(qualityUpper.includes('HD')) return '1280×720'
+        if(qualityUpper.includes('SD')) return '854×480'
+        return '1920×1080' // Default
       }
 
       // ========== FUN��ES HELPER ==========
