@@ -45,38 +45,75 @@ header("Expires: 0");
     })();
   </script>
   <script>
-    // FORÇAR RELOAD COMPLETO - VERSÃO 3.0
-    const VERSAO_CODIGO = '3.0.<?php echo time(); ?>';
+    // VERSÃO DO CÓDIGO
+    const VERSAO_CODIGO = '3.1.<?php echo time(); ?>';
     console.log('🔄 VERSÃO DO CÓDIGO:', VERSAO_CODIGO);
 
-
-    // ===== LIMPEZA AGRESSIVA DE CACHE - PRIMEIRO! =====
-    (async function() {
-      console.log('🧹🧹🧹 LIMPEZA TOTAL DE CACHE INICIANDO...');
-      
-      // 1. Service Workers
-      if ('serviceWorker' in navigator) {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        for (let r of regs) { await r.unregister(); console.log('✅ SW removido:', r.scope); }
-      }
-      
-      // 2. Cache API
-      if ('caches' in window) {
-        const names = await caches.keys();
-        for (let n of names) { await caches.delete(n); console.log('✅ Cache removido:', n); }
-      }
-      
-      console.log('🎉🎉🎉 CACHE LIMPO! Forçando reload...');
-      
-      // Forçar reload UMA vez
-      if (!sessionStorage.getItem('cache_cleared_v3')) {
-        sessionStorage.setItem('cache_cleared_v3', '1');
-        setTimeout(() => location.reload(true), 300);
-      }
-    })();
-    
-    // Limpar cache ao carregar
+    // ℹ️ Limpeza de cache removida - agora usa Service Worker para cache persistente
+    // Para limpar cache manualmente, use: clearTMDBCache() no console
   </script>
+
+  <!-- Service Worker - Cache de imagens TMDB -->
+  <script>
+    // Registrar Service Worker para cache de imagens
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw-cache.js')
+          .then(registration => {
+            console.log('✅ Service Worker registrado para cache de imagens TMDB')
+            console.log('   Escopo:', registration.scope)
+
+            // Verificar atualizações a cada 1 hora
+            setInterval(() => {
+              registration.update()
+            }, 60 * 60 * 1000)
+
+            // Função global para limpar cache
+            window.clearTMDBCache = () => {
+              const messageChannel = new MessageChannel()
+              messageChannel.port1.onmessage = (event) => {
+                if (event.data.success) {
+                  console.log('🧹 Cache do TMDB limpo com sucesso!')
+                  alert('Cache limpo! A página será recarregada.')
+                  location.reload()
+                }
+              }
+
+              if (registration.active) {
+                registration.active.postMessage(
+                  { action: 'clearCache' },
+                  [messageChannel.port2]
+                )
+              }
+            }
+
+            // Função global para ver estatísticas do cache
+            window.getTMDBCacheStats = () => {
+              const messageChannel = new MessageChannel()
+              messageChannel.port1.onmessage = (event) => {
+                console.log('📊 Estatísticas do Cache TMDB:')
+                console.log('   Imagens:', event.data.images)
+                console.log('   APIs:', event.data.api)
+                console.log('   Total:', event.data.total)
+              }
+
+              if (registration.active) {
+                registration.active.postMessage(
+                  { action: 'getCacheStats' },
+                  [messageChannel.port2]
+                )
+              }
+            }
+          })
+          .catch(error => {
+            console.error('❌ Erro ao registrar Service Worker:', error)
+          })
+      })
+    } else {
+      console.warn('⚠️ Service Worker não suportado neste navegador')
+    }
+  </script>
+
   <!-- React UMD -->
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -1184,20 +1221,7 @@ header("Expires: 0");
   }
 
 
-  // ===== LIMPEZA AGRESSIVA DE CACHE API =====
-  (async function forceCleanCacheAPI() {
-    console.log('🧹 Limpando Cache API...');
-    if ('caches' in window) {
-      const cacheNames = await caches.keys();
-      for (let cacheName of cacheNames) {
-        await caches.delete(cacheName);
-        console.log('✅ Cache removido:', cacheName);
-      }
-    }
-    console.log('🎉 Cache API limpo!');
-  })();
-
-    // ===== LIMPAR CACHE TMDB ANTIGO (com títulos " - 2025") =====
+  // ===== LIMPAR CACHE TMDB ANTIGO (com títulos " - 2025") =====
   try {
     const oldCache = localStorage.getItem('tmdb_cache')
     if(oldCache) {
@@ -3139,12 +3163,12 @@ header("Expires: 0");
       if (view === 'home') return 'home'
       if (view === 'live-categories' || view === 'channels') return 'channels'
       if (view === 'adult-content' || view === 'adult-categories') return 'adult'
-      if (view === 'netflix-movies' || view === 'vod-categories') return 'movies'
+      if (view === 'netflix-movies' || view === 'vod-categories' || view === 'movie-details') return 'movies'
       if (view === 'netflix-series' || view === 'series-categories' || view === 'serie-details' || view === 'episodes') return 'series'
-      if (view === 'netflix-novelas' || view === 'novelas-categories') return 'novelas'
-      if (view === 'netflix-animes' || view === 'animes-categories') return 'animes'
-      if (view === 'netflix-desenhos' || view === 'desenhos-categories') return 'desenhos'
-      if (view === 'netflix-show' || view === 'show-categories') return 'show'
+      if (view === 'netflix-novelas' || view === 'novelas-categories' || view === 'novela-details') return 'novelas'
+      if (view === 'netflix-animes' || view === 'animes-categories' || view === 'anime-details') return 'animes'
+      if (view === 'netflix-desenhos' || view === 'desenhos-categories' || view === 'desenho-details') return 'desenhos'
+      if (view === 'netflix-show' || view === 'show-categories' || view === 'show-details') return 'show'
       if (view === 'collections') return 'collections'
       return 'home'
     }
@@ -3844,12 +3868,12 @@ header("Expires: 0");
     useEffect(() => {
       if (view === 'home') setActiveMenu('home')
       else if (view === 'channels' || view === 'live-categories') setActiveMenu('channels')
-      else if (view === 'netflix-movies' || view === 'vod-categories') setActiveMenu('movies')
+      else if (view === 'netflix-movies' || view === 'vod-categories' || view === 'movie-details') setActiveMenu('movies')
       else if (view === 'series-categories' || view === 'netflix-series' || view === 'serie-details' || view === 'episodes') setActiveMenu('series')
-      else if (view === 'novelas-categories' || view === 'netflix-novelas') setActiveMenu('novelas')
-      else if (view === 'animes-categories' || view === 'netflix-animes') setActiveMenu('animes')
-      else if (view === 'desenhos-categories' || view === 'netflix-desenhos') setActiveMenu('desenhos')
-      else if (view === 'show-categories' || view === 'netflix-show') setActiveMenu('show')
+      else if (view === 'novelas-categories' || view === 'netflix-novelas' || view === 'novela-details') setActiveMenu('novelas')
+      else if (view === 'animes-categories' || view === 'netflix-animes' || view === 'anime-details') setActiveMenu('animes')
+      else if (view === 'desenhos-categories' || view === 'netflix-desenhos' || view === 'desenho-details') setActiveMenu('desenhos')
+      else if (view === 'show-categories' || view === 'netflix-show' || view === 'show-details') setActiveMenu('show')
       else if (view === 'collections') setActiveMenu('collections')
       else if (view === 'config') setActiveMenu('config')
     }, [view])
@@ -4166,8 +4190,6 @@ header("Expires: 0");
   const seriesStateUpdated = new Set()
 
   function App(){
-    console.log('[App] 🔄 RENDERIZANDO')
-
     const [view,setViewRaw] = useState('config')
     const [showParentalPin, setShowParentalPin] = useState(false)
     const [pendingAdultView, setPendingAdultView] = useState(false)
@@ -4348,6 +4370,25 @@ header("Expires: 0");
     const [selectedCat,setSelectedCat] = useState(null)
     const [items,setItems] = useState([])
     const [query,setQuery] = useState('')
+
+    // Estado reativo para viewingCollectionMovies (atualiza quando estado global mudar)
+    const [viewingCollectionMovies, setViewingCollectionMoviesLocal] = useState(false)
+
+    // Escutar mudanças no estado global de viewingCollectionMovies
+    useEffect(() => {
+      const checkViewingState = () => {
+        const isViewing = window.__netflixMoviesState?.viewingCollectionMovies || false
+        setViewingCollectionMoviesLocal(isViewing)
+      }
+
+      // Verificar inicialmente
+      checkViewingState()
+
+      // Verificar a cada 100ms (polling leve)
+      const interval = setInterval(checkViewingState, 100)
+
+      return () => clearInterval(interval)
+    }, [])
 
     // Inicializar selectedCat com primeira categoria priorit�ria quando vodCats ou seriesCats carregar
     useEffect(() => {
@@ -9250,24 +9291,7 @@ window.resetNetflixMovies = () => {
             ...state,
             [sectionId]: finalValue
           }
-          // 
 
-          // ===== DESABILITADO: N�o atualizar featured movie durante scroll horizontal =====
-          // Isso causava re-renders (piscadas) a cada clique na seta
-          // O featured movie s� muda ao trocar de categoria (teclas ??)
-          // if (section && section.movies.length > 0) {
-          //   const centerPosition = Math.abs(finalValue) + (viewportWidth / 2)
-          //   const centerMovieIndex = Math.floor(centerPosition / cardWidth)
-          //   if (centerMovieIndex >= 0 && centerMovieIndex < section.movies.length) {
-          //     const newFeaturedMovie = section.movies[centerMovieIndex]
-          //     const newFeaturedId = newFeaturedMovie.stream_id || newFeaturedMovie.id
-          //     if (newFeaturedId !== globalState.featuredMovieId) {
-          //       window.updateNetflixMoviesState({ featuredMovieId: newFeaturedId })
-          //     }
-          //   }
-          // }
-
-          // ===== CORRIGIDO: Retornar o estado que j� criamos =====
           return newState
         })
       }
@@ -9489,14 +9513,15 @@ window.resetNetflixMovies = () => {
               const backdropUrl = getValidBackdrop()
 
               const movieData = {
-                id: enrichedMovie.series_id || enrichedMovie.stream_id,
+                id: enrichedMovie.tmdb_id || enrichedMovie.series_id || enrichedMovie.stream_id,
                 name: enrichedMovie.name || enrichedMovie.title,
                 imageUrl: backdropUrl,
                 rating: enrichedMovie.tmdb_rating ? (enrichedMovie.tmdb_rating * 10).toFixed(0) : '85',
                 releaseDate: enrichedMovie.tmdb_year || enrichedMovie.year || '2024',
                 runtime: enrichedMovie.tmdb_runtime || enrichedMovie.duration || '',
                 overview: enrichedMovie.tmdb_overview || enrichedMovie.plot || enrichedMovie.description || 'Sem descrição disponível',
-                genres: enrichedMovie.tmdb_genres || enrichedMovie.genre || 'Filme'
+                genres: enrichedMovie.tmdb_genres || enrichedMovie.genre || 'Filme',
+                tmdb_cast: enrichedMovie.tmdb_cast || null  // Cache do elenco para evitar buscar novamente
               }
 
               // Armazenar no cache GLOBAL
@@ -9919,14 +9944,8 @@ window.resetNetflixMovies = () => {
         const [isHovered, setIsHovered] = useState(false)
         const isHoveredRef = useRef(false) // Mant�m estado durante re-renders
         const [enrichedMovie, setEnrichedMovie] = useState(movie)
-        // Estados para trailer DENTRO do card (estilo Netflix)
-        const [showTrailerInCard, setShowTrailerInCard] = useState(false)
-        const [cardTrailerUrl, setCardTrailerUrl] = useState(null)
-        const [isMuted, setIsMuted] = useState(false)
-        const trailerContainerRef = useRef(null)
         const cardRef = useRef(null)
         const isEnrichingRef = useRef(false) // Evitar m�ltiplas chamadas de enriquecimento
-        // isFocused removido - apenas hover do mouse ativa o efeito
 
         // Sincronizar enrichedMovie com prop movie quando ela muda (j� vem enriquecida do initMovies)
         useEffect(() => {
@@ -9953,42 +9972,6 @@ window.resetNetflixMovies = () => {
             })
           }
         }, [movie.stream_id])
-
-        // Buscar e mostrar trailer DENTRO DO CARD (estilo Netflix)
-        // ===== OTIMIZA��O: Usar ref para evitar recria��es desnecess�rias do timer =====
-        const tmdbIdRef = useRef(enrichedMovie.tmdb_id)
-        useEffect(() => {
-          tmdbIdRef.current = enrichedMovie.tmdb_id
-        }, [enrichedMovie.tmdb_id])
-
-        useEffect(() => {
-          let timeoutId = null
-
-          if (isHoveredRef.current && tmdbIdRef.current) {
-            // Delay de 1500ms (1.5s) como Netflix
-            timeoutId = setTimeout(async () => {
-              if (isHoveredRef.current) {
-                const trailerUrl = await getTMDBTrailer(tmdbIdRef.current, 'movie')
-                if (trailerUrl && isHoveredRef.current) {
-                  setCardTrailerUrl(trailerUrl)
-                  setShowTrailerInCard(true)
-                }
-              }
-            }, 1500)
-          } else if (!isHoveredRef.current) {
-            // Limpar trailer quando sair do hover
-            setShowTrailerInCard(false)
-            setCardTrailerUrl(null)
-            setIsMuted(false)
-          }
-
-          return () => {
-            if (timeoutId) {
-              clearTimeout(timeoutId)
-              // 
-            }
-          }
-        }, [isHovered])
 
         // Helper: Format runtime (minutes to "1h 33min")
         const formatRuntime = (minutes) => {
@@ -10022,14 +10005,24 @@ window.resetNetflixMovies = () => {
 
             // ===== NAVEGAR PARA P�GINA DE DETALHES =====
 
+            // BUSCAR DO CACHE GLOBAL (tem backdrop completo)
+            const movieId = movie.series_id || movie.stream_id || movie.id
+            const cachedMovie = window.__enrichedMoviesCache ? window.__enrichedMoviesCache[movieId] : null
+
             // Preparar dados enriquecidos para página de detalhes
             const contentData = {
-              ...enrichedMovie,
               ...movie,
+              ...enrichedMovie,
+              // Se tem cache, usar backdrop, tmdb_id E tmdb_cast do cache
+              ...(cachedMovie ? {
+                tmdb_backdrop: cachedMovie.imageUrl,
+                backdrop: cachedMovie.imageUrl,
+                tmdb_id: cachedMovie.id || movie.tmdb_id || enrichedMovie.tmdb_id,
+                tmdb_cast: cachedMovie.tmdb_cast || enrichedMovie.tmdb_cast  // Usar cast do cache se disponível
+              } : {}),
               series_id: isSeriesMode ? (movie.series_id || movie.stream_id || movie.id) : null,
               stream_id: movie.stream_id || movie.id
             }
-
 
             // Se for série, buscar info adicional da API (episódios, temporadas)
             if (isSeriesMode) {
@@ -10052,9 +10045,36 @@ window.resetNetflixMovies = () => {
               }
             }
 
+            // Determinar qual view de detalhes e view de origem baseado na view atual
+            let detailsView = 'movie-details'
+            let sourceView = 'netflix-movies'
+
+            if (view.includes('series') || view === 'netflix-series') {
+              detailsView = 'serie-details'
+              sourceView = 'netflix-series'
+            } else if (view.includes('novelas') || view === 'netflix-novelas') {
+              detailsView = 'novela-details'
+              sourceView = 'netflix-novelas'
+            } else if (view.includes('animes') || view === 'netflix-animes') {
+              detailsView = 'anime-details'
+              sourceView = 'netflix-animes'
+            } else if (view.includes('desenhos') || view === 'netflix-desenhos') {
+              detailsView = 'desenho-details'
+              sourceView = 'netflix-desenhos'
+            } else if (view.includes('show') || view === 'netflix-show') {
+              detailsView = 'show-details'
+              sourceView = 'netflix-show'
+            } else if (view.includes('movies') || view === 'netflix-movies' || view.includes('vod')) {
+              detailsView = 'movie-details'
+              sourceView = 'netflix-movies'
+            }
+
+            // Adicionar sourceView ao contentData para saber de onde voltar
+            contentData.sourceView = sourceView
+
             // Navegar para página de detalhes
             setSelectedContent(contentData)
-            setView('serie-details')
+            setView(detailsView)
           },
           onMouseEnter: () => {
             // Ao passar o mouse, atualiza backdrop (APENAS SE MUDOU)
@@ -10089,8 +10109,6 @@ window.resetNetflixMovies = () => {
                   height: '100%',
                   objectFit: 'cover',
                   display: 'block',
-                  filter: isHovered ? 'brightness(0.4)' : 'brightness(1)',
-                  transition: 'filter 0.3s ease',
                   pointerEvents: 'none',
                   borderRadius: '8px'
                 }
@@ -10105,9 +10123,7 @@ window.resetNetflixMovies = () => {
                   justifyContent: 'center',
                   flexDirection: 'column',
                   gap: '10px',
-                  borderRadius: '8px',
-                  filter: isHovered ? 'brightness(0.4)' : 'brightness(1)',
-                  transition: 'filter 0.3s ease'
+                  borderRadius: '8px'
                 }
               },
                 e('div', {
@@ -10133,50 +10149,7 @@ window.resetNetflixMovies = () => {
           // Badge "L" para legendado
           enrichedMovie.isLegendado && e('span', {
             className: 'lang-badge'
-          }, 'L'),
-
-          // Trailer NO TOPO do card (estilo Netflix)
-          showTrailerInCard && cardTrailerUrl && e('div', {
-            ref: trailerContainerRef,
-            onClick: (ev) => {
-              ev.stopPropagation()
-              // Abrir em tela cheia
-              const elem = trailerContainerRef.current
-              if (elem) {
-                if (elem.requestFullscreen) {
-                  elem.requestFullscreen()
-                } else if (elem.webkitRequestFullscreen) {
-                  elem.webkitRequestFullscreen()
-                } else if (elem.mozRequestFullScreen) {
-                  elem.mozRequestFullScreen()
-                } else if (elem.msRequestFullscreen) {
-                  elem.msRequestFullscreen()
-                }
-              }
-            },
-            style: {
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '60%',
-              overflow: 'hidden',
-              zIndex: 1,
-              cursor: 'pointer',
-              backgroundColor: '#000'
-            }
-          },
-            e('iframe', {
-              src: cardTrailerUrl + `?autoplay=1&mute=${isMuted ? 1 : 0}&controls=1&rel=0&modestbranding=1&loop=1&playlist=` + cardTrailerUrl.split('/embed/')[1],
-              allow: 'autoplay; encrypted-media; fullscreen',
-              allowFullScreen: true,
-              style: {
-                width: '100%',
-                height: '100%',
-                border: 'none'
-              }
-            })
-          ),
+          }, 'L')
 
         ) // End card container
       }, (prevProps, nextProps) => {
@@ -10252,25 +10225,6 @@ window.resetNetflixMovies = () => {
             return () => clearTimeout(timeoutId)
           }
         }, [currentMargin, maxScroll, visibleCount, movies.length])
-
-        // ===== DESABILITADO: Atualizar filme em destaque durante scroll (causava piscadas) =====
-        // useEffect(() => {
-        //   const timeoutId = setTimeout(() => {
-        //     if (movies.length === 0 || currentMargin === 0) return
-        //     const viewportWidth = window.innerWidth - 80
-        //     const cardWidth = 280
-        //     const centerPosition = Math.abs(currentMargin) + (viewportWidth / 2)
-        //     const centerMovieIndex = Math.floor(centerPosition / cardWidth)
-        //     if (centerMovieIndex >= 0 && centerMovieIndex < movies.length) {
-        //       const newFeaturedMovie = movies[centerMovieIndex]
-        //       const newFeaturedId = newFeaturedMovie.stream_id || newFeaturedMovie.id
-        //       if (newFeaturedId !== globalState.featuredMovieId) {
-        //         window.updateNetflixMoviesState({ featuredMovieId: newFeaturedId })
-        //       }
-        //     }
-        //   }, 300)
-        //   return () => clearTimeout(timeoutId)
-        // }, [currentMargin, movies])
 
         // Adicionar suporte para scroll com mouse wheel (horizontal ou vertical com Shift)
         const handleWheel = (e) => {
@@ -10456,16 +10410,7 @@ window.resetNetflixMovies = () => {
                           }
                         }
 
-                        // ===== DESABILITADO: get_vod_info muito lento =====
-                        // Retornar apenas dados b�sicos, enriquecimento TMDB acontece depois
-                        // try {
-                        //   const info = await apiCall('get_vod_info', { vod_id: movie.stream_id })
-                        //   ...
-                        // } catch (err) {
-                        //   
-                        // }
-
-                        // Fallback
+                        // Fallback: retornar dados básicos
                         return {
                           index,
                           movie: {
@@ -11861,12 +11806,8 @@ window.resetNetflixMovies = () => {
 
     // ===== COMPONENTE: LISTAGEM DE EPIS�DIOS =====
     const EpisodesList = React.memo(function EpisodesList({ seriesData }) {
-      console.log('[EpisodesList] ========== COMPONENTE MONTADO/RENDERIZADO ==========')
-
       const seriesId = seriesData?.series_id
       const cacheKey = `series_${seriesId}`
-
-      console.log('[EpisodesList] 🔍 seriesId:', seriesId, 'cacheKey:', cacheKey)
 
       // Inicializar estado diretamente do cache, se existir
       const [selectedSeason, setSelectedSeason] = useState(() => {
@@ -11887,28 +11828,8 @@ window.resetNetflixMovies = () => {
       const [tmdbSeriesId, setTmdbSeriesId] = useState(() => seriesCache[cacheKey]?.tmdbSeriesId || null)
       const [tmdbEpisodesCache, setTmdbEpisodesCache] = useState({})
 
-      console.log('[EpisodesList] 📊 Estado ATUAL - loading:', loading, 'seasonsData.length:', seasonsData.length, 'error:', error)
-
-      // Monitor de mudanças de estado
-      useEffect(() => {
-        console.log('[EpisodesList] 🔔 selectedSeason mudou para:', selectedSeason)
-      }, [selectedSeason])
-
-      useEffect(() => {
-        console.log('[EpisodesList] 🔔 seasonsData mudou, length:', seasonsData.length)
-      }, [seasonsData])
-
-      useEffect(() => {
-        console.log('[EpisodesList] 🔔 loading mudou para:', loading)
-      }, [loading])
-
-      useEffect(() => {
-        console.log('[EpisodesList] 🔔 error mudou para:', error)
-      }, [error])
-
       // Buscar informações completas da série (temporadas + episódios)
       useEffect(() => {
-        console.log('[EpisodesList] 🎬 useEffect EXECUTADO')
 
         let checkCacheInterval = null
         let timeoutId = null
@@ -11922,11 +11843,8 @@ window.resetNetflixMovies = () => {
 
           // VERIFICAÇÃO GLOBAL: Se já está carregando, aguardar
           if (seriesLoadingState.has(seriesId)) {
-            console.log('[EpisodesList] ✋ Série já está sendo carregada, aguardando dados no cache...')
-
             // Verificar se já foi atualizado por outra instância
             if (seriesStateUpdated.has(seriesId)) {
-              console.log('[EpisodesList] ⚠️ Estados já foram atualizados por outra instância, usando cache diretamente')
               if (seriesCache[cacheKey]) {
                 setSeasonsData(seriesCache[cacheKey].seasons)
                 if (seriesCache[cacheKey].seasons.length > 0) {
@@ -11941,7 +11859,6 @@ window.resetNetflixMovies = () => {
             checkCacheInterval = setInterval(() => {
               if (seriesCache[cacheKey] && !seriesStateUpdated.has(seriesId)) {
                 seriesStateUpdated.add(seriesId) // Marcar GLOBALMENTE como atualizado
-                console.log('[EpisodesList] ✅ Dados agora disponíveis no cache!')
                 clearInterval(checkCacheInterval)
                 clearTimeout(timeoutId) // Limpar timeout
 
@@ -11954,7 +11871,6 @@ window.resetNetflixMovies = () => {
                   setSelectedSeason(seriesCache[cacheKey].seasons[0].seasonNumber)
                 }
                 setLoading(false)
-                console.log('[EpisodesList] 🏁 Estados atualizados do cache!')
               }
             }, 100) // Verificar a cada 100ms
 
@@ -11973,20 +11889,14 @@ window.resetNetflixMovies = () => {
 
           // Marcar como carregando IMEDIATAMENTE
           seriesLoadingState.add(seriesId)
-          console.log('[EpisodesList] 🔒 Bloqueando série:', seriesId)
 
           // Verificar se já está no cache
           if (seriesCache[cacheKey]) {
-            console.log('[EpisodesList] ✅ Dados já no cache para série:', seriesId)
             return
           }
 
           try {
-            console.log('[EpisodesList] 🌐 Buscando dados da API para série:', seriesId)
-
             const data = await apiCall('get_series_info', { series_id: seriesId })
-
-            console.log('[EpisodesList] ✅ API retornou dados para série:', seriesId, data)
 
             // Buscar dados do TMDB em PT-BR para obter posters e episódios corretos
             let tmdbSeasonsPTBR = []
@@ -12001,24 +11911,18 @@ window.resetNetflixMovies = () => {
 
                 // Passo 1: Buscar série pelo nome
                 const searchUrl = `https://api.themoviedb.org/3/search/tv?api_key=${tmdbApiKey}&language=pt-BR&query=${encodeURIComponent(seriesName)}`
-                console.log('[EpisodesList] 🔍 Buscando série no TMDB:', seriesName)
 
                 const searchResponse = await fetch(searchUrl)
                 const searchData = await searchResponse.json()
 
-                console.log('[EpisodesList] 📊 Resultados encontrados:', searchData.results?.length || 0)
-
                 if (searchData.results && searchData.results.length > 0) {
                   tmdbSeriesId = searchData.results[0].id
-                  console.log('[EpisodesList] ✅ Série encontrada no TMDB, ID:', tmdbSeriesId)
 
                   // Passo 2: Buscar detalhes da série em PT-BR
                   const detailsUrl = `https://api.themoviedb.org/3/tv/${tmdbSeriesId}?api_key=${tmdbApiKey}&language=pt-BR`
                   const detailsResponse = await fetch(detailsUrl)
                   const tmdbData = await detailsResponse.json()
                   tmdbSeasonsPTBR = tmdbData.seasons || []
-
-                  console.log('[EpisodesList] 🇧🇷 TMDB PT-BR temporadas:', tmdbSeasonsPTBR.length)
                 } else {
                   console.warn('[EpisodesList] ⚠️ Série não encontrada no TMDB:', seriesName)
                 }
@@ -12027,14 +11931,8 @@ window.resetNetflixMovies = () => {
               }
             }
 
-            console.log('[EpisodesList] 🔍 data.seasons:', data?.seasons)
-            console.log('[EpisodesList] 🔍 data.episodes:', data?.episodes)
-            console.log('[EpisodesList] 🔍 Tipo de data.episodes:', typeof data?.episodes, 'É array?', Array.isArray(data?.episodes))
-
             // Usar data.episodes que contém os episódios REAIS do servidor IPTV
             const seasonsSource = data?.episodes
-
-            console.log('[EpisodesList] 📦 seasonsSource encontrado:', seasonsSource ? 'SIM' : 'NÃO', seasonsSource)
 
             if (seasonsSource) {
               // Função para decodificar UTF-8 mal codificado
@@ -12058,11 +11956,6 @@ window.resetNetflixMovies = () => {
                   // Fallback: dados do servidor IPTV (pode estar em inglês)
                   const tmdbSeasonData = data?.seasons?.find(s => s.season_number === seasonNumber) || {}
 
-                  console.log(`[EpisodesList] 📺 Temporada ${seasonNumber}:`)
-                  console.log(`  - tmdbSeasonPTBR.poster_path:`, tmdbSeasonPTBR.poster_path)
-                  console.log(`  - tmdbSeasonData.cover_big:`, tmdbSeasonData.cover_big)
-                  console.log(`  - tmdbSeasonData.cover:`, tmdbSeasonData.cover)
-
                   // Decidir qual poster usar (priorizar TMDB PT-BR)
                   let posterPath = null
                   let posterSource = 'none'
@@ -12082,8 +11975,6 @@ window.resetNetflixMovies = () => {
                     posterPath = tmdbSeasonData.poster_path
                     posterSource = 'IPTV poster_path'
                   }
-
-                  console.log(`  ✅ Poster escolhido: ${posterPath} (fonte: ${posterSource})`)
 
                   return {
                     seasonNumber,
@@ -12110,8 +12001,6 @@ window.resetNetflixMovies = () => {
                 seriesData: data.info
               }
 
-              console.log('[EpisodesList] 🎬 Temporadas processadas:', seasonsArray.length, seasonsArray)
-
               // Atualizar estado apenas uma vez
               setSeasonsData(seasonsArray)
               if (tmdbSeriesId) {
@@ -12122,11 +12011,8 @@ window.resetNetflixMovies = () => {
               if (seasonsArray.length > 0) {
                 setSelectedSeason(seasonsArray[0].seasonNumber)
               }
-
-              console.log('[EpisodesList] ✅ Estados atualizados! Desligando loading...')
             }
             setLoading(false)
-            console.log('[EpisodesList] 🏁 Loading = false')
           } catch (err) {
             console.error('[EpisodesList] ? Erro ao carregar série:', seriesId, err)
             setError('Erro ao carregar episódios')
@@ -12138,7 +12024,6 @@ window.resetNetflixMovies = () => {
 
         // Cleanup: limpar timers quando componente desmontar
         return () => {
-          console.log('[EpisodesList] 🧹 Limpando timers no cleanup')
           if (checkCacheInterval) clearInterval(checkCacheInterval)
           if (timeoutId) clearTimeout(timeoutId)
         }
@@ -12151,7 +12036,6 @@ window.resetNetflixMovies = () => {
         // Verificar se já tem no cache
         const episodesCacheKey = `tmdb_${tmdbSeriesId}_s${selectedSeason}`
         if (tmdbEpisodesCache[episodesCacheKey]) {
-          console.log('[EpisodesList] 📺 Episódios do TMDB já em cache para temporada', selectedSeason)
           return
         }
 
@@ -12161,13 +12045,10 @@ window.resetNetflixMovies = () => {
             const tmdbApiKey = (localStorage.getItem('tmdb_api_key') || '7e61dfdf698b31e14082e80a0ca9f9fa').replace(/['"]/g, '')
             const seasonUrl = `https://api.themoviedb.org/3/tv/${tmdbSeriesId}/season/${selectedSeason}?api_key=${tmdbApiKey}&language=pt-BR`
 
-            console.log('[EpisodesList] 🎬 Buscando episódios TMDB PT-BR para temporada', selectedSeason)
-
             const response = await fetch(seasonUrl)
             const seasonData = await response.json()
 
             if (seasonData.episodes) {
-              console.log('[EpisodesList] ✅ Episódios TMDB encontrados:', seasonData.episodes.length)
 
               // Armazenar no cache
               setTmdbEpisodesCache(prev => ({
@@ -12275,13 +12156,32 @@ window.resetNetflixMovies = () => {
           e('button', {
             onClick: () => setView('netflix-movies'),
             style: {
-              padding: '12px 24px',
-              background: '#e50914',
-              border: 'none',
-              borderRadius: '4px',
+              position: 'fixed',
+              top: '75px',
+              left: '40px',
+              zIndex: 1000,
+              background: 'rgba(20, 20, 20, 0.9)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
               color: '#fff',
-              fontSize: '16px',
-              cursor: 'pointer'
+              fontSize: '15px',
+              padding: '10px 20px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease',
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
+            },
+            onMouseEnter: (e) => {
+              e.target.style.background = '#a855f7'
+              e.target.style.transform = 'scale(1.05)'
+            },
+            onMouseLeave: (e) => {
+              e.target.style.background = 'rgba(20, 20, 20, 0.9)'
+              e.target.style.transform = 'scale(1)'
             }
           }, '← Voltar')
         )
@@ -12365,17 +12265,32 @@ window.resetNetflixMovies = () => {
           e('button', {
             onClick: () => setView('serie-details'),
             style: {
-              background: 'rgba(255,255,255,0.1)',
-              border: 'none',
+              position: 'fixed',
+              top: '75px',
+              left: '40px',
+              zIndex: 1000,
+              background: 'rgba(20, 20, 20, 0.9)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
               color: '#fff',
+              fontSize: '15px',
               padding: '10px 20px',
-              borderRadius: '4px',
+              borderRadius: '6px',
               cursor: 'pointer',
-              fontSize: '16px',
-              marginBottom: '20px',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px'
+              justifyContent: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease',
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
+            },
+            onMouseEnter: (e) => {
+              e.target.style.background = '#a855f7'
+              e.target.style.transform = 'scale(1.05)'
+            },
+            onMouseLeave: (e) => {
+              e.target.style.background = 'rgba(20, 20, 20, 0.9)'
+              e.target.style.transform = 'scale(1)'
             }
           }, '← Voltar'),
 
@@ -12801,6 +12716,7 @@ window.resetNetflixMovies = () => {
       const [showEpisodes, setShowEpisodes] = useState(false)
       const [tmdbTrailerUrl, setTmdbTrailerUrl] = useState(null)
       const [loadingTrailer, setLoadingTrailer] = useState(false)
+      const [fetchedTmdbCast, setFetchedTmdbCast] = useState(null)
 
       if (!contentData) {
         return e('div', { className: 'serie-detail-page' },
@@ -12838,7 +12754,8 @@ window.resetNetflixMovies = () => {
         tmdb_director,
         tmdb_runtime,
         series_id,
-        stream_id
+        stream_id,
+        sourceView
       } = contentData
 
       // Dados processados - PRIORIZAR TMDB
@@ -12851,26 +12768,17 @@ window.resetNetflixMovies = () => {
       const displayDirector = tmdb_director || null
       const displayRuntime = tmdb_runtime ? `${tmdb_runtime} min` : null
 
-      // ===== CORRE��O: Garantir que cast seja sempre um array =====
-      let displayCast = tmdb_cast || cast || []
+      // ===== APENAS MOSTRAR ELENCO SE TIVER FOTOS DO TMDB =====
+      // PRIORIDADE: 1) fetchedTmdbCast (array do TMDB com fotos), 2) tmdb_cast (se tiver fotos)
+      let displayCast = []
 
-      // Se cast � string (formato antigo: "Nome1, Nome2, Nome3"), converter para array de objetos
-      if (typeof displayCast === 'string') {
-        displayCast = displayCast.split(',').map(name => ({
-          name: name.trim(),
-          profile_path: null,
-          character: null
-        }))
-      } else if (!Array.isArray(displayCast)) {
-        displayCast = []
+      // Usar apenas se for array do TMDB com fotos
+      if (Array.isArray(fetchedTmdbCast) && fetchedTmdbCast.length > 0) {
+        displayCast = fetchedTmdbCast
+      } else if (Array.isArray(tmdb_cast) && tmdb_cast.length > 0 && tmdb_cast[0].profile_path) {
+        displayCast = tmdb_cast
       }
-
-      // Garantir que cada item tenha as propriedades necess�rias
-      displayCast = displayCast.map(actor => ({
-        name: actor.name || actor,
-        profile_path: actor.profile_path || null,
-        character: actor.character || null
-      }))
+      // Se cast é string (sem fotos), NÃO usar - deixar vazio
 
       const displayEpisodes = episodes_count || '—'
       const displaySeasons = seasons_count || '—'
@@ -12902,6 +12810,38 @@ window.resetNetflixMovies = () => {
 
         fetchTrailer()
       }, [contentData])
+
+      // Buscar elenco do TMDB se cast não tiver fotos
+      useEffect(() => {
+        if (!contentData.tmdb_id) return
+        if (fetchedTmdbCast !== null) return
+
+        // Verificar se já tem cast com fotos do TMDB
+        if (tmdb_cast && Array.isArray(tmdb_cast) && tmdb_cast.length > 0 && tmdb_cast[0].profile_path) {
+          return
+        }
+
+        const type = series_id ? 'tv' : 'movie'
+        const tmdbApiKey = '7e61dfdf698b31e14082e80a0ca9f9fa'
+        const url = `https://api.themoviedb.org/3/${type}/${contentData.tmdb_id}/credits?api_key=${tmdbApiKey}&language=pt-BR`
+
+        fetch(url)
+          .then(res => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}`)
+            return res.json()
+          })
+          .then(data => {
+            if (data.cast && data.cast.length > 0) {
+              setFetchedTmdbCast(data.cast.slice(0, 10))
+            } else {
+              setFetchedTmdbCast('no_data')
+            }
+          })
+          .catch(err => {
+            console.error('Erro ao buscar cast:', err)
+            setFetchedTmdbCast('error')
+          })
+      }, [contentData.tmdb_id, series_id, fetchedTmdbCast, tmdb_cast])
 
       // Handlers
       const handleWatch = () => {
@@ -12958,32 +12898,33 @@ window.resetNetflixMovies = () => {
 
         // Botão Voltar
         e('button', {
-          onClick: () => setView('netflix-series'),
+          onClick: () => setView(sourceView || (series_id ? 'netflix-series' : 'netflix-movies')),
           style: {
             position: 'fixed',
-            top: '100px',
-            left: '20px',
+            top: '75px',
+            left: '40px',
             zIndex: 1000,
-            background: '#141414',
-            border: 'none',
+            background: 'rgba(20, 20, 20, 0.9)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
             color: '#fff',
-            fontSize: '16px',
-            padding: '12px 24px',
-            borderRadius: '8px',
+            fontSize: '15px',
+            padding: '10px 20px',
+            borderRadius: '6px',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '8px',
             transition: 'all 0.2s ease',
-            fontWeight: '500'
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
           },
           onMouseEnter: (e) => {
-            e.target.style.background = '#1a1a1a'
+            e.target.style.background = '#a855f7'
             e.target.style.transform = 'scale(1.05)'
           },
           onMouseLeave: (e) => {
-            e.target.style.background = '#141414'
+            e.target.style.background = 'rgba(20, 20, 20, 0.9)'
             e.target.style.transform = 'scale(1)'
           }
         }, '← Voltar'),
@@ -13047,24 +12988,31 @@ window.resetNetflixMovies = () => {
           ),
 
           // Seção Elenco
-          displayCast.length > 0 && e('div', { className: 'serie-detail-cast-section' },
+          (() => {
+            if (displayCast.length === 0) {
+              return null
+            }
+
+            return e('div', { className: 'serie-detail-cast-section' },
             e('h2', null, 'Elenco'),
 
             e('div', { className: 'serie-detail-cast-carousel' },
-              displayCast.map((actor, idx) =>
-                e('div', {
+              displayCast.map((actor, idx) => {
+                return e('div', {
                   key: `cast-${idx}`,
                   className: 'serie-detail-cast-card',
                   onClick: () => handleCastClick(actor)
                 },
+                  // Foto do TMDB
                   e('img', {
-                    src: actor.profile_path
-                      ? `https://image.tmdb.org/t/p/w185${actor.profile_path}`
-                      : 'https://via.placeholder.com/140x200/333/666?text=Sem+Foto',
+                    src: `https://image.tmdb.org/t/p/w185${actor.profile_path}`,
                     alt: actor.name,
                     loading: 'lazy',
-                    onError: (e) => {
-                      e.target.src = 'https://via.placeholder.com/140x200/333/666?text=' + encodeURIComponent(actor.name.substring(0, 1))
+                    style: {
+                      width: '100%',
+                      height: '200px',
+                      objectFit: 'cover',
+                      borderRadius: '8px'
                     }
                   }),
                   e('p', {
@@ -13082,9 +13030,10 @@ window.resetNetflixMovies = () => {
                     }
                   }, actor.character)
                 )
-              )
+              })
             )
           )
+          })()
         )
       )
     }
@@ -13412,7 +13361,7 @@ window.resetNetflixMovies = () => {
             ev.target.style.background = 'rgba(255, 255, 255, 0.2)'
             ev.target.style.transform = 'scale(1)'
           }
-        }, '?'),
+        }, '×'),
 
         // Video container
         e('div', {
@@ -13555,10 +13504,76 @@ window.resetNetflixMovies = () => {
       content = e(NetflixMovies, { key: 'series-show', contentType: 'series', categoryFilter: 'show' })
     }
     else if(view==='collections'){
-      if (selectedCat) {
-        content = e(NetflixMovies, { key: `collections-${getCatId(selectedCat)}`, contentType: 'vod', selectedCategory: selectedCat })
+      const collectionContent = selectedCat
+        ? e(NetflixMovies, { key: `collections-${getCatId(selectedCat)}`, contentType: 'vod', selectedCategory: selectedCat })
+        : e(NetflixMovies, { key: 'vod-collections', contentType: 'vod' })
+
+      // Adicionar botão Voltar APENAS quando estiver visualizando filmes de uma coleção específica
+      // Usar estado reativo ao invés de ler direto do window
+      if (viewingCollectionMovies) {
+        content = e('div', { style: { position: 'relative' } },
+          // Botão Voltar
+          e('button', {
+            onClick: () => {
+              // Voltar para lista de coleções e restaurar backdrop
+              if (window.updateNetflixMoviesState) {
+                // Buscar primeira coleção para restaurar backdrop
+                const collections = window.__netflixMoviesState?.collections || []
+                let backdropToRestore = null
+
+                if (collections.length > 0) {
+                  const firstCollection = collections[0]
+                  backdropToRestore = {
+                    name: firstCollection.name,
+                    overview: firstCollection.overview || `Coleção com ${firstCollection.movies?.length || 0} filmes`,
+                    backdrop: firstCollection.backdrop,
+                    poster: firstCollection.poster,
+                    backdrop_path: null
+                  }
+                }
+
+                window.updateNetflixMoviesState({
+                  viewingCollectionMovies: false,
+                  selectedCollectionMovies: [],
+                  heroBackdrop: backdropToRestore
+                })
+              }
+            },
+            style: {
+              position: 'fixed',
+              top: '75px',
+              left: '40px',
+              zIndex: 1000,
+              background: 'rgba(20, 20, 20, 0.9)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              color: '#fff',
+              fontSize: '15px',
+              padding: '10px 20px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease',
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
+            },
+            onMouseEnter: (e) => {
+              e.currentTarget.style.background = '#a855f7'
+              e.currentTarget.style.transform = 'scale(1.05)'
+            },
+            onMouseLeave: (e) => {
+              e.currentTarget.style.background = '#141414'
+              e.currentTarget.style.transform = 'scale(1)'
+            }
+          }, '← Voltar'),
+          // Conteúdo da coleção específica
+          collectionContent
+        )
       } else {
-        content = e(NetflixMovies, { key: 'vod-collections', contentType: 'vod' })
+        // Sem botão voltar na tela principal de coleções
+        content = collectionContent
       }
     }
     else if(view==='adult-content'){
@@ -13573,6 +13588,11 @@ window.resetNetflixMovies = () => {
     else if(view.endsWith('-categories')) content = e(Categories)
     else if(view==='channels' && selectedCat) content = e(Channels)
     else if(view==='serie-details' && selectedContent) content = e(SerieDetails, { contentData: selectedContent })
+    else if(view==='movie-details' && selectedContent) content = e(SerieDetails, { contentData: selectedContent })
+    else if(view==='novela-details' && selectedContent) content = e(SerieDetails, { contentData: selectedContent })
+    else if(view==='anime-details' && selectedContent) content = e(SerieDetails, { contentData: selectedContent })
+    else if(view==='desenho-details' && selectedContent) content = e(SerieDetails, { contentData: selectedContent })
+    else if(view==='show-details' && selectedContent) content = e(SerieDetails, { contentData: selectedContent })
     else if(view==='episodes' && selectedContent) content = e(EpisodesList, { key: `series-${selectedContent.series_id}`, seriesData: selectedContent })
     else if(view==='player' && current) content = e(Player)
     else content = e('div', { className:'star-bg min-h-screen grid place-items-center text-white' }, 'Carregando...')
