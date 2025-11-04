@@ -426,7 +426,7 @@ header("Expires: 0");
       position: relative;
     }
 
-    /* Ajustes para telas com sidebar - garantir que conte�do n�o sobreponha */
+    /* Ajustes para telas com sidebar - garantir que conteúdo não sobreponha */
     .main-with-sidebar .star-bg {
       min-height: 100vh;
       width: 100% !important;
@@ -467,7 +467,7 @@ header("Expires: 0");
       cursor: none !important;
     }
 
-    /* Remover hover states em modo TV (n�o h� mouse) */
+    /* Remover hover states em modo TV (não há mouse) */
     body.tv-mode .card:hover,
     body.tv-mode .sidebar-btn:hover,
     body.tv-mode button:hover {
@@ -5188,7 +5188,7 @@ header("Expires: 0");
           return enriched
         }
 
-        // Silenciar - n�o poluir console (filme n�o encontrado no TMDB � normal)
+        // Silenciar - n�o poluir console (filme não encontrado no TMDB � normal)
         window.__enrichmentCache.set(cacheKey, movieWithLangType)
         return movieWithLangType
 
@@ -6652,7 +6652,7 @@ function Home(){
                 e(LiveVideo, { channel:selectedChannel, epg:epg, onDbl:()=>toggleFullscreen('#liveVideo'), type: 'live', isFavorite: isFavorite, toggleFavorite: toggleFavorite })
               ),
               e('div', { className:'space-y-2 max-h-[500px] overflow-y-auto scrollbar-hide pr-2 pb-4' },
-                (epg && epg.length>0 ? epg : Array.from({length:4}).map((_,i)=>({ id:'empty'+i, title:'Programa n�o encontrado', start:'--:--', end:'--:--' }))).map((pg,i)=>{
+                (epg && epg.length>0 ? epg : Array.from({length:4}).map((_,i)=>({ id:'empty'+i, title:'Programa não encontrado', start:'--:--', end:'--:--' }))).map((pg,i)=>{
                   // Determinar se � passado, atual ou futuro usando TIMESTAMPS (mais preciso)
                   const now = new Date()
                   const startTime = pg.start_timestamp ? new Date(pg.start_timestamp * 1000) : null
@@ -6687,7 +6687,7 @@ function Home(){
                   const endFormatted = formatEPGTime(pg.stop_timestamp || pg.end)
 
                   // Decodificar título (Base64 se necessário)
-                  const programTitle = decodeMaybeBase64(pg.title) || 'Programa n�o encontrado'
+                  const programTitle = decodeMaybeBase64(pg.title) || 'Programa não encontrado'
 
                   // 3 ESTADOS VISUAIS:
                   // 1. ATUAL (ao vivo agora) ? texto VERDE + bolinha verde preenchida
@@ -7735,22 +7735,22 @@ function Home(){
                 padding: 'clamp(12px,1.6vw,18px) clamp(16px,2vw,28px)',
                 filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.4))',
                 display: 'grid',
-                gridTemplateColumns: 'auto auto 1fr 1fr auto',
+                gridTemplateColumns: 'auto 1fr 1fr auto',
                 alignItems: 'center',
                 gap: 'clamp(10px,1.4vw,18px)',
                 width: '100%',
                 maxWidth: '1400px'
               }
             },
-              // Col 1: N� do canal
-              e('div', {
-                style: {
-                  fontSize: 'clamp(22px,2vw,28px)',
-                  fontWeight: '600',
-                  color: '#FFFFFF'
-                }
-              }, String(channel?.num || '---')),
-
+              // // Col 1: N� do canal
+              // e('div', {
+              // style: {
+              // fontSize: 'clamp(22px,2vw,28px)',
+              // fontWeight: '600',
+              // color: '#FFFFFF'
+              // }
+              // }, String(channel?.num || '---')),
+              // 
               // Col 2: Logo do canal
               channel?.stream_icon && e('img', {
                 src: channel.stream_icon,
@@ -8127,7 +8127,7 @@ function Home(){
                     minWidth: '60px',
                     textAlign: 'center'
                   }
-                }, String(channel?.num || channel?.stream_id || '�')),
+                }, String(channel?.num || channel?.stream_id || '—')),
 
                 // Logo do canal
                 channel?.stream_icon && e('img', {
@@ -8646,7 +8646,7 @@ window.resetNetflixMovies = () => {
             if (firstMovieId) {
               window.updateNetflixMoviesState({
                 featuredMovieId: firstMovieId,
-                heroBackdrop: null // Garantir que n�o h� backdrop de coleção
+                heroBackdrop: null // Garantir que não há backdrop de coleção
               })
             }
           }
@@ -8788,7 +8788,7 @@ window.resetNetflixMovies = () => {
             // ===== IMPORTANTE: SEMPRE carregar categorias para garantir filtro correto =====
             let categories = []
 
-            // Sempre buscar da API para garantir que n�o h� cache incorreto
+            // Sempre buscar da API para garantir que não há cache incorreto
             const raw = await apiCall(apiAction)
             const catsArray = toArray(raw)
 
@@ -8807,7 +8807,7 @@ window.resetNetflixMovies = () => {
               selectedCategories = categories.filter(cat => getCatId(cat) === catId)
 
               if (selectedCategories.length === 0) {
-                console.warn('[NETFLIX-MOVIES] Categoria n�o encontrada (ID:', catId, ') - usando todas as categorias como fallback')
+                console.warn('[NETFLIX-MOVIES] Categoria não encontrada (ID:', catId, ') - usando todas as categorias como fallback')
                 // FALLBACK: Usar todas as categorias em vez de mostrar erro
                 selectedCategories = categories
               }
@@ -9224,7 +9224,7 @@ window.resetNetflixMovies = () => {
           const totalWidth = totalMovies * cardWidth
           const maxScroll = Math.min(0, -(totalWidth - viewportWidth))
 
-          // Se n�o h� necessidade de scroll (tudo cabe na tela), n�o faz nada
+          // Se não há necessidade de scroll (tudo cabe na tela), n�o faz nada
           if (totalWidth <= viewportWidth) {
             return state
           }
@@ -9694,7 +9694,7 @@ window.resetNetflixMovies = () => {
                       color: '#46d369',
                       fontWeight: 700
                     }
-                  }, displayMovie.tmdb_rating ? `? ${(displayMovie.tmdb_rating * 10).toFixed(0)}%` : `${displayMovie.rating}% relevante`),
+                  }, displayMovie.tmdb_rating ? `⭐ ${(displayMovie.tmdb_rating * 10).toFixed(0)}%` : `${displayMovie.rating}% relevante`),
 
                   // Ano
                   (displayMovie.tmdb_year || displayMovie.releaseDate) && e('span', {
@@ -10290,7 +10290,7 @@ window.resetNetflixMovies = () => {
               const totalWidth = visibleMovies.length * cardWidth
               const maxScroll = Math.min(0, -(totalWidth - viewportWidth))
 
-              // Se n�o h� necessidade de scroll (tudo cabe), retorna sem mudar
+              // Se não há necessidade de scroll (tudo cabe), retorna sem mudar
               if (totalWidth <= viewportWidth) return state
 
               // Aplica o scroll
@@ -11215,7 +11215,7 @@ window.resetNetflixMovies = () => {
               }),
               e('div', { key:'hint', className:'col-span-full text-center text-xs text-gray-400 mt-3 py-2' }, '↑ ↓ ← → Navegar | Enter Reproduzir | ESC Voltar')
             ]
-          : e('div', { className:'text-center text-gray-400 col-span-full mt-12' }, 'Nenhum conte�do nesta categoria')
+          : e('div', { className:'text-center text-gray-400 col-span-full mt-12' }, 'Nenhum conteúdo nesta categoria')
         )
       )
     }
@@ -11498,7 +11498,7 @@ window.resetNetflixMovies = () => {
                       fontSize: '12px',
                       fontWeight: '600'
                     }
-                  }, `? ${item.rating}`)
+                  }, `⭐ ${item.rating}`)
                 ),
 
                 e('p', {
@@ -12843,7 +12843,7 @@ window.resetNetflixMovies = () => {
 
       // Dados processados - PRIORIZAR TMDB
       const displayTitle = title || name || 'Sem título'
-      const displayYear = tmdb_year || year || '�'
+      const displayYear = tmdb_year || year || '—'
       const displaySynopsis = tmdb_overview || tmdb_plot || synopsis || plot || 'Sinopse n�o disponível.'
       const displayBackdrop = tmdb_backdrop || backdrop || cover || stream_icon || 'https://via.placeholder.com/1920x1080/1a1a1a/ffffff?text=Sem+Imagem'
       const displayGenres = tmdb_genres || (genre ? genre.split(',').map(g => g.trim()).join(', ') : 'Drama')
@@ -12872,8 +12872,8 @@ window.resetNetflixMovies = () => {
         character: actor.character || null
       }))
 
-      const displayEpisodes = episodes_count || '�'
-      const displaySeasons = seasons_count || '�'
+      const displayEpisodes = episodes_count || '—'
+      const displaySeasons = seasons_count || '—'
 
       // Buscar trailer do TMDB se n�o existir trailer_url do servidor
       useEffect(() => {
