@@ -1,4 +1,4 @@
-<!-- CACHE-BUST: 2025-11-03 20:10:43 -->
+<!-- CACHE-BUST: 2025-11-03 22:25:00 -->
 <?php
 // LIMPAR OPCACHE DO PHP COMPLETAMENTE
 if (function_exists('opcache_reset')) {
@@ -7,6 +7,9 @@ if (function_exists('opcache_reset')) {
 if (function_exists('opcache_invalidate')) {
     opcache_invalidate(__FILE__, true);
 }
+
+// Forçar UTF-8 no header HTTP
+header("Content-Type: text/html; charset=UTF-8");
 
 // Desabilitar TODO cache do PHP/Apache
 header("Cache-Control: no-cache, no-store, must-revalidate, max-age=0");
@@ -25,21 +28,64 @@ header("Expires: 0");
   <meta http-equiv="Expires" content="0" />
   <!-- VERSÃO: SÉRIE FIX v3.0 - CACHE BUSTED 2025-11-02 18:10:00 -->
   <script>
+    // ===== CACHE-BUST AGRESSIVO VIA URL =====
+    (function() {
+      const url = new URL(window.location.href);
+      const cacheBust = url.searchParams.get('v');
+      const currentVersion = '<?php echo time(); ?>';
+      
+      // Se não tem parâmetro v ou está desatualizado, recarregar com novo v
+      if (!cacheBust || cacheBust !== currentVersion) {
+        console.log('🔄 Forçando cache-bust via URL... v=' + currentVersion);
+        url.searchParams.set('v', currentVersion);
+        window.location.replace(url.toString());
+      } else {
+        console.log('✅ Versão atualizada (v=' + cacheBust + ')');
+      }
+    })();
+  </script>
+  <script>
     // FORÇAR RELOAD COMPLETO - VERSÃO 3.0
     const VERSAO_CODIGO = '3.0.<?php echo time(); ?>';
     console.log('🔄 VERSÃO DO CÓDIGO:', VERSAO_CODIGO);
 
+
+    // ===== LIMPEZA AGRESSIVA DE CACHE - PRIMEIRO! =====
+    (async function() {
+      console.log('🧹🧹🧹 LIMPEZA TOTAL DE CACHE INICIANDO...');
+      
+      // 1. Service Workers
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for (let r of regs) { await r.unregister(); console.log('✅ SW removido:', r.scope); }
+      }
+      
+      // 2. Cache API
+      if ('caches' in window) {
+        const names = await caches.keys();
+        for (let n of names) { await caches.delete(n); console.log('✅ Cache removido:', n); }
+      }
+      
+      console.log('🎉🎉🎉 CACHE LIMPO! Forçando reload...');
+      
+      // Forçar reload UMA vez
+      if (!sessionStorage.getItem('cache_cleared_v3')) {
+        sessionStorage.setItem('cache_cleared_v3', '1');
+        setTimeout(() => location.reload(true), 300);
+      }
+    })();
+    
     // Limpar cache ao carregar
   </script>
   <!-- React UMD -->
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <!-- Tailwind CSS instalado via NPM (ver tailwind.config.js) -->
-  <!-- Para produ��o, compile com: npx tailwindcss -i ./src/input.css -o ./dist/output.css -->
+  <!-- Para produção, compile com: npx tailwindcss -i ./src/input.css -o ./dist/output.css -->
   <!-- Mantendo CDN apenas para desenvolvimento r�pido -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Players de v�deo dispon�veis -->
+  <!-- Players de vídeo disponíveis -->
   <!-- HLS.js para m3u8 no Chrome/Firefox/Edge -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
 
@@ -97,7 +143,7 @@ header("Expires: 0");
       overflow-x: hidden;
     }
 
-    /* Header agora est� vis�vel - CSS removido */
+    /* Header agora est� visível - CSS removido */
 
     /* ===== LAYOUT COM SIDEBAR FIXA ===== */
     :root {
@@ -128,7 +174,7 @@ header("Expires: 0");
       border-right: 1px solid rgba(168, 85, 247, 0.1);
     }
 
-    /* Bot�es da sidebar */
+    /* Botões da sidebar */
     .sidebar-btn {
       position: relative;
       width: 50px;
@@ -295,7 +341,7 @@ header("Expires: 0");
       place-items:center !important;
     }
 
-    /* Overlay em FULLSCREEN - garantir que apare�a sobre o v�deo */
+    /* Overlay em FULLSCREEN - garantir que apare�a sobre o vídeo */
     :fullscreen > .absolute,
     :-webkit-full-screen > .absolute,
     :-moz-full-screen > .absolute,
@@ -428,14 +474,14 @@ header("Expires: 0");
       transform: none !important;
     }
 
-    /* Focus vis�vel para navega��o por controle remoto */
+    /* Focus visível para navegação por controle remoto */
     body.tv-mode *:focus {
       outline: 4px solid #a855f7 !important;
       outline-offset: 4px;
       box-shadow: 0 0 20px rgba(168, 85, 247, 0.6) !important;
     }
 
-    /* Indicador de foco customizado para bot�es */
+    /* Indicador de foco customizado para botões */
     body.tv-mode button:focus,
     body.tv-mode [role="button"]:focus {
       background: rgba(168, 85, 247, 0.3) !important;
@@ -493,7 +539,7 @@ header("Expires: 0");
       font-size: 18px !important;
     }
 
-    /* Indicador de navega��o num�rica (para digita��o de canal) */
+    /* Indicador de navegação num�rica (para digita��o de canal) */
     .tv-channel-input {
       position: fixed;
       top: 50%;
@@ -513,7 +559,7 @@ header("Expires: 0");
       min-width: 300px;
     }
 
-    /* Indicador de bot�o pressionado */
+    /* Indicador de botão pressionado */
     @keyframes button-press {
       0% { transform: scale(1); }
       50% { transform: scale(0.95); }
@@ -831,7 +877,7 @@ header("Expires: 0");
         transform: translateX(0);
       }
 
-      /* Bot�o hamburger para abrir sidebar */
+      /* Botão hamburger para abrir sidebar */
       .mobile-menu-btn {
         display: block !important;
         position: fixed;
@@ -856,11 +902,11 @@ header("Expires: 0");
       /* Header mobile */
       header {
         padding: 0 10px !important;
-        padding-left: 55px !important; /* Espa�o para o bot�o hamburger */
+        padding-left: 55px !important; /* Espa�o para o botão hamburger */
       }
 
       header nav {
-        display: none !important; /* Esconder navega��o em mobile */
+        display: none !important; /* Esconder navegação em mobile */
       }
 
       header input[type="text"] {
@@ -1037,7 +1083,7 @@ header("Expires: 0");
     window.__queueStats = () => ({ running, queued: queue.length, inflight: inflight.size, tokens });
   })();
 
-  // ===== lib/normalizeTitle.js - Normaliza��o de t�tulos =====
+  // ===== lib/normalizeTitle.js - Normaliza��o de títulos =====
   window.prepareForTMDB = function(title) {
     if (!title) return { searchTitle: '', year: null, displayTitle: '', isLegendado: false, langType: 'dublado' };
 
@@ -1137,7 +1183,21 @@ header("Expires: 0");
     })
   }
 
-  // ===== LIMPAR CACHE TMDB ANTIGO (com t�tulos " - 2025") =====
+
+  // ===== LIMPEZA AGRESSIVA DE CACHE API =====
+  (async function forceCleanCacheAPI() {
+    console.log('🧹 Limpando Cache API...');
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      for (let cacheName of cacheNames) {
+        await caches.delete(cacheName);
+        console.log('✅ Cache removido:', cacheName);
+      }
+    }
+    console.log('🎉 Cache API limpo!');
+  })();
+
+    // ===== LIMPAR CACHE TMDB ANTIGO (com títulos " - 2025") =====
   try {
     const oldCache = localStorage.getItem('tmdb_cache')
     if(oldCache) {
@@ -1194,7 +1254,7 @@ header("Expires: 0");
         this.platform = 'Chromecast'
       }
 
-      // N�O detectar por resolu��o - computadores tamb�m t�m 1080p/4K
+      // N�O detectar por resolução - computadores tamb�m t�m 1080p/4K
       // N�O detectar por gamepad - gamers usam no PC
 
       if (this.isTV) {
@@ -1224,7 +1284,7 @@ header("Expires: 0");
     OK: [13, 'Enter'],
     BACK: [8, 27, 461, 10009, 'Backspace', 'Escape'], // 461=webOS back, 10009=Tizen back
 
-    // N�meros
+    // Números
     NUM_0: [48, 96, '0'],
     NUM_1: [49, 97, '1'],
     NUM_2: [50, 98, '2'],
@@ -1236,7 +1296,7 @@ header("Expires: 0");
     NUM_8: [56, 104, '8'],
     NUM_9: [57, 105, '9'],
 
-    // Bot�es coloridos (Smart TVs)
+    // Botões coloridos (Smart TVs)
     RED: [403, 'Red', 'ColorF0Red'],
     GREEN: [404, 'Green', 'ColorF1Green'],
     YELLOW: [405, 'Yellow', 'ColorF2Yellow'],
@@ -1254,13 +1314,13 @@ header("Expires: 0");
     MENU: [18, 'Menu'],
     GUIDE: [458, 'Guide'],
 
-    // Verifica se tecla/c�digo corresponde a um comando
+    // Verifica se tecla/código corresponde a um comando
     matches(keyMap, event) {
       return keyMap.includes(event.keyCode) || keyMap.includes(event.key) || keyMap.includes(event.code)
     }
   }
 
-  // Sistema de navega��o por foco (para controle remoto)
+  // Sistema de navegação por foco (para controle remoto)
   const FocusNavigator = {
     currentIndex: 0,
     items: [],
@@ -1347,22 +1407,22 @@ header("Expires: 0");
 
   function getNetflixCategoryDisplayName(categoryKey){
     const names = {
-      'trending': 'Tend�ncias agora',
+      'trending': 'Tendências agora',
       'popular': 'Populares',
       'top10': 'Top 10 no Brasil',
-      'recent': 'Lan�ados recentemente',
+      'recent': 'Lançados recentemente',
       'continue': 'Continuar assistindo',
       'recommended': 'Porque voc� assistiu',
-      'action': 'A��o',
-      'comedy': 'Com�dia',
+      'action': 'Ação',
+      'comedy': 'Comédia',
       'drama': 'Drama',
       'horror': 'Terror',
-      'scifi': 'Fic��o cient�fica e fantasia',
+      'scifi': 'Ficção cient�fica e fantasia',
       'romance': 'Romance',
-      'documentary': 'Document�rios',
-      'kids': 'Crian�as e fam�lia',
+      'documentary': 'Documentários',
+      'kids': 'Crianças e família',
       'anime': 'Animes',
-      'classics': 'Cl�ssicos'
+      'classics': 'Clássicos'
     }
     return names[categoryKey] || categoryKey
   }
@@ -1435,7 +1495,7 @@ header("Expires: 0");
     try{
       // Tentar decodificar base64
       const decoded = atob(text)
-      // Verificar se � texto v�lido (n�o bin�rio)
+      // Verificar se � texto válido (n�o bin�rio)
       if(/^[\x20-\x7E\u00A0-\uFFFF\s]*$/.test(decoded)){
         return decoded
       }
@@ -1483,7 +1543,7 @@ header("Expires: 0");
     let decoded = decodeBase64(text)
     // 2. Decodificar HTML entities
     decoded = decodeHtml(decoded)
-    // 3. Corrigir encoding UTF-8 (por �ltimo) - APENAS se tiver caracteres problem�ticos
+    // 3. Corrigir encoding UTF-8 (por Último) - APENAS se tiver caracteres problem�ticos
     // N�O aplicar em texto simples ASCII para evitar quebrar "SP2" ? "Hy"
     if(/[��-�]/.test(decoded)){
       decoded = fixEncoding(decoded)
@@ -1576,7 +1636,7 @@ header("Expires: 0");
     return group ? group.variants : []
   }
 
-  // ===== Pool de Requisi��es & Retry =====
+  // ===== Pool de Requisições & Retry =====
   let inFlightRequests = 0
   const MAX_CONCURRENT_REQUESTS = 6
 
@@ -1610,7 +1670,7 @@ header("Expires: 0");
 
   // ===== Xtream Codes API Client =====
   // Cliente completo para API Xtream Codes com controle de concorr�ncia,
-  // retry autom�tico, timeout e cancelamento de requisi��es.
+  // retry autom�tico, timeout e cancelamento de requisições.
   //
   // IMPORTANTE: Este m�dulo N�O altera layout/UI - apenas camada de dados.
 
@@ -1623,7 +1683,7 @@ header("Expires: 0");
       epg: null
     }
 
-    // Cancelar requisi��o anterior do mesmo tipo
+    // Cancelar requisição anterior do mesmo tipo
     function cancelPrevious(type) {
       if (activeRequests[type]) {
         activeRequests[type].abort()
@@ -1820,7 +1880,7 @@ header("Expires: 0");
         return fetchWithAbort(url, 'epg', 30000) // 30s timeout para EPG completo
       },
 
-      // Cancelar todas as requisi��es em andamento
+      // Cancelar todas as requisições em andamento
       cancelAll() {
         Object.values(activeRequests).forEach(controller => {
           if (controller) controller.abort()
@@ -1959,7 +2019,7 @@ header("Expires: 0");
                !catName.includes('show')
       })
     } else if (isSeriesView) {
-      // Na view de s�ries: REMOVER categorias 18+
+      // Na view de séries: REMOVER categorias 18+
       categories = categories.filter(cat => {
         const catName = (cat.category_name || cat.name || '').toLowerCase().trim()
         return !catName.startsWith('18+')
@@ -2028,7 +2088,7 @@ header("Expires: 0");
     // Combinar: priorit�rias primeiro, depois as outras
     const orderedCats = [...sortedPriorityCats, ...otherCats]
 
-    // Inicializar categoria selecionada IMEDIATAMENTE quando categorias estiverem dispon�veis
+    // Inicializar categoria selecionada IMEDIATAMENTE quando categorias estiverem disponíveis
     useEffect(() => {
       if (orderedCats.length > 0) {
         // Collections n�o deve auto-selecionar categoria (deve mostrar "Todas")
@@ -2042,7 +2102,7 @@ header("Expires: 0");
     if (!isMoviesView && !isSeriesView && !isCollectionsView && !isAdultView) return null
     if (categories.length === 0) return null
 
-    // Se n�o tem categoria selecionada mas h� categorias dispon�veis, usar a primeira temporariamente
+    // Se n�o tem categoria selecionada mas h� categorias disponíveis, usar a primeira temporariamente
     const displayCat = selectedCat || (orderedCats.length > 0 ? orderedCats[0] : null)
     const selectedCatName = selectedCat
       ? fixEncoding(selectedCat.category_name || selectedCat.name || 'Categoria')
@@ -2056,7 +2116,7 @@ header("Expires: 0");
         zIndex: 999
       }
     },
-      // Bot�o "Categorias" com dropdown
+      // Botão "Categorias" com dropdown
       e('div', {
         style: {
           position: 'relative'
@@ -2105,7 +2165,7 @@ header("Expires: 0");
             border: '1px solid rgba(255, 255, 255, 0.1)'
           }
         },
-          // Op��o "TODAS" apenas para Collections
+          // Opção "TODAS" apenas para Collections
           ...(isCollectionsView ? [
             e('div', {
               key: 'all',
@@ -2113,7 +2173,7 @@ header("Expires: 0");
                 setSelectedCat(null)
                 setShowDropdown(false)
 
-                // Ao selecionar "TODAS", mostrar backdrop da primeira cole��o dispon�vel
+                // Ao selecionar "TODAS", mostrar backdrop da primeira coleção disponível
                 if (collections && collections.length > 0) {
                   const firstCollection = collections[0]
 
@@ -2159,7 +2219,7 @@ header("Expires: 0");
                 setSelectedCat(cat)
                 setShowDropdown(false)
 
-                // Se estamos em Collections, atualizar hero/backdrop para primeira cole��o da categoria
+                // Se estamos em Collections, atualizar hero/backdrop para primeira coleção da categoria
                 if (isCollectionsView && collections && collections.length > 0) {
                   const selectedGenreId = getCatId(cat)
 
@@ -2187,9 +2247,9 @@ header("Expires: 0");
 
                   const searchGenres = genreNames[selectedGenreId] || []
 
-                  // Filtrar cole��es que t�m esse g�nero (verificar nos FILMES da cole��o)
+                  // Filtrar coleções que t�m esse g�nero (verificar nos FILMES da coleção)
                   const filteredCollections = collections.filter(collection => {
-                    // Verificar se algum filme da cole��o tem o g�nero no tmdb_genres (string)
+                    // Verificar se algum filme da coleção tem o g�nero no tmdb_genres (string)
                     const hasGenre = collection.movies && collection.movies.some(movie => {
                       if (movie.tmdb_genres) {
                         const movieGenres = movie.tmdb_genres.toLowerCase()
@@ -2201,7 +2261,7 @@ header("Expires: 0");
                     return hasGenre
                   })
 
-                  // Se encontrou cole��es com esse g�nero, usar backdrop da primeira cole��o
+                  // Se encontrou coleções com esse g�nero, usar backdrop da primeira coleção
                   if (filteredCollections.length > 0) {
                     const firstCollection = filteredCollections[0]
 
@@ -2307,7 +2367,7 @@ header("Expires: 0");
           color: '#b3b3b3',
           marginBottom: '60px'
         }
-      }, 'Digite o c�digo pin'),
+      }, 'Digite o código pin'),
 
       // PIN boxes
       e('div', {
@@ -2402,16 +2462,16 @@ header("Expires: 0");
         )
       ),
 
-      // C�digo padr�o
+      // Código padr�o
       e('p', {
         style: {
           fontSize: '14px',
           color: '#666',
           marginBottom: '20px'
         }
-      }, 'C�digo pin padr�o: 0000'),
+      }, 'Código pin padr�o: 0000'),
 
-      // Bot�o voltar
+      // Botão voltar
       onCancel && e('button', {
         onClick: onCancel,
         style: {
@@ -2445,7 +2505,7 @@ header("Expires: 0");
     const [showPinChange, setShowPinChange] = useState(false)
     const [newPin, setNewPin] = useState('')
 
-    // Players dispon�veis
+    // Players disponíveis
     const players = [
       'Clappr Player (Recommended)',
       'Video.js Player',
@@ -2455,7 +2515,7 @@ header("Expires: 0");
     ]
     const systems = ['M3U8', 'TS']
 
-    // Fun��o para formatar timestamp Unix para data/hora
+    // Função para formatar timestamp Unix para data/hora
     const formatDateTime = (timestamp) => {
       if (!timestamp) return 'N/A'
       const date = new Date(timestamp * 1000)
@@ -2492,7 +2552,7 @@ header("Expires: 0");
           margin: '0 auto'
         }
       },
-        // T�tulo
+        // Título
         e('h1', {
           style: {
             fontSize: '36px',
@@ -2500,7 +2560,7 @@ header("Expires: 0");
             marginBottom: '40px',
             color: '#fff'
           }
-        }, 'Configura��es'),
+        }, 'Configurações'),
 
         e('div', {
           style: {
@@ -2509,7 +2569,7 @@ header("Expires: 0");
             gap: '40px'
           }
         },
-          // Coluna esquerda - Bot�es
+          // Coluna esquerda - Botões
           e('div', {
             style: {
               display: 'flex',
@@ -2517,7 +2577,7 @@ header("Expires: 0");
               gap: '12px'
             }
           },
-            // Bot�o: Dados da conta
+            // Botão: Dados da conta
             e('button', {
               style: {
                 padding: '18px 24px',
@@ -2538,7 +2598,7 @@ header("Expires: 0");
               }
             }, 'Dados da conta'),
 
-            // Bot�o: Informa��es do aplicativo
+            // Botão: Informações do aplicativo
             e('button', {
               style: {
                 padding: '18px 24px',
@@ -2557,9 +2617,9 @@ header("Expires: 0");
               onMouseLeave: (ev) => {
                 ev.target.style.background = 'rgba(40, 40, 40, 0.8)'
               }
-            }, 'Informa��es do aplicativo'),
+            }, 'Informações do aplicativo'),
 
-            // Bot�o: Alterar C�digo Pin
+            // Botão: Alterar Código Pin
             e('button', {
               onClick: () => {
                 setShowPinChange(!showPinChange)
@@ -2584,9 +2644,9 @@ header("Expires: 0");
               onMouseLeave: (ev) => {
                 ev.target.style.background = showPinChange ? 'rgba(60, 60, 60, 0.8)' : 'rgba(40, 40, 40, 0.8)'
               }
-            }, 'Alterar C�digo Pin'),
+            }, 'Alterar Código Pin'),
 
-            // Bot�o: Alterar Player
+            // Botão: Alterar Player
             e('button', {
               onClick: () => {
                 setShowPlayerOptions(!showPlayerOptions)
@@ -2611,7 +2671,7 @@ header("Expires: 0");
               }
             }, 'Alterar Player'),
 
-            // Bot�o: Alterar Sistema
+            // Botão: Alterar Sistema
             e('button', {
               onClick: () => {
                 setShowSystemOptions(!showSystemOptions)
@@ -2636,7 +2696,7 @@ header("Expires: 0");
               }
             }, 'Alterar Sistema'),
 
-            // Bot�o: Recarregar o Sistema
+            // Botão: Recarregar o Sistema
             e('button', {
               onClick: () => window.location.reload(),
               style: {
@@ -2658,7 +2718,7 @@ header("Expires: 0");
               }
             }, 'Recarregar o Sistema'),
 
-            // Bot�o: Limpar Armazenamento
+            // Botão: Limpar Armazenamento
             e('button', {
               onClick: () => {
                 if (confirm('Deseja limpar todo o armazenamento local? Isso vai fazer logout.')) {
@@ -2746,7 +2806,7 @@ header("Expires: 0");
             )
           ),
 
-          // Coluna direita - Op��es de Player/Sistema ou Informa��es da conta
+          // Coluna direita - Opções de Player/Sistema ou Informações da conta
           e('div', {
             style: {
               background: 'rgba(40, 40, 40, 0.6)',
@@ -2757,7 +2817,7 @@ header("Expires: 0");
               gap: '12px'
             }
           },
-            // Mostrar op��es de Player se estiver ativo
+            // Mostrar opções de Player se estiver ativo
             showPlayerOptions ? players.map(player =>
               e('button', {
                 key: player,
@@ -2791,7 +2851,7 @@ header("Expires: 0");
                 selectedPlayer === player && e('span', { style: { fontSize: '20px' } }, '?')
               )
             )
-            // Mostrar op��es de Sistema se estiver ativo
+            // Mostrar opções de Sistema se estiver ativo
             : showSystemOptions ? systems.map(system =>
               e('button', {
                 key: system,
@@ -2842,14 +2902,14 @@ header("Expires: 0");
                     marginBottom: '15px',
                     fontWeight: '600'
                   }
-                }, 'Alterar C�digo PIN'),
+                }, 'Alterar Código PIN'),
                 e('p', {
                   style: {
                     color: '#b3b3b3',
                     fontSize: '14px',
                     marginBottom: '20px'
                   }
-                }, 'Digite um novo c�digo PIN de 4 d�gitos'),
+                }, 'Digite um novo código PIN de 4 d�gitos'),
                 e('input', {
                   type: 'password',
                   maxLength: 4,
@@ -2945,7 +3005,7 @@ header("Expires: 0");
                 }
               }, '⚠️ Importante: Este PIN é usado para controle parental na categoria 18+. Guarde-o em local seguro.')
             ]
-            // Caso contr�rio, mostrar informa��es da conta
+            // Caso contr�rio, mostrar informações da conta
             : [
             // Status
             e('div', {
@@ -2960,7 +3020,7 @@ header("Expires: 0");
               e('span', { style: { color: '#4CAF50', fontSize: '16px', fontWeight: '600' } }, 'Active')
             ),
 
-            // Nome de usu�rio
+            // Nome de usuário
             e('div', {
               style: {
                 display: 'flex',
@@ -2969,7 +3029,7 @@ header("Expires: 0");
                 borderBottom: '1px solid rgba(255,255,255,0.1)'
               }
             },
-              e('span', { style: { color: '#aaa', fontSize: '16px' } }, 'Nome de usu�rio'),
+              e('span', { style: { color: '#aaa', fontSize: '16px' } }, 'Nome de usuário'),
               e('span', { style: { color: '#fff', fontSize: '16px', fontWeight: '600' } }, account?.username || 'N/A')
             ),
 
@@ -2986,7 +3046,7 @@ header("Expires: 0");
               e('span', { style: { color: '#fff', fontSize: '16px' } }, formatDateTime(account?.created_at))
             ),
 
-            // Data de expira��o
+            // Data de expiração
             e('div', {
               style: {
                 display: 'flex',
@@ -2995,7 +3055,7 @@ header("Expires: 0");
                 borderBottom: '1px solid rgba(255,255,255,0.1)'
               }
             },
-              e('span', { style: { color: '#aaa', fontSize: '16px' } }, 'Data de expira��o'),
+              e('span', { style: { color: '#aaa', fontSize: '16px' } }, 'Data de expiração'),
               e('span', { style: { color: '#fff', fontSize: '16px' } }, formatDateTime(account?.exp_date))
             ),
 
@@ -3013,7 +3073,7 @@ header("Expires: 0");
           )
         ),
 
-        // Footer com vers�o
+        // Footer com versão
         e('div', {
           style: {
             position: 'fixed',
@@ -3026,7 +3086,7 @@ header("Expires: 0");
           }
         },
           e('span', null, 'IPTV'),
-          e('span', null, 'Vers�o: 1.6.0')
+          e('span', null, 'Versão: 1.6.0')
         )
       )
     )
@@ -3041,33 +3101,33 @@ header("Expires: 0");
     // Lista de avatares de personagens - usar imagens locais
     const avatars = [
       // Animes
-      { id: 'naruto', name: 'Naruto', url: 'avatars/naruto.png', emoji: '??', gradient: 'linear-gradient(135deg, #f39c12, #e67e22)' },
-      { id: 'luffy', name: 'Luffy', url: 'avatars/luffy.png', emoji: '??', gradient: 'linear-gradient(135deg, #e74c3c, #c0392b)' },
-      { id: 'goku', name: 'Goku', url: 'avatars/goku.png', emoji: '??', gradient: 'linear-gradient(135deg, #f39c12, #d35400)' },
-      { id: 'deku', name: 'Deku', url: 'avatars/deku.png', emoji: '??', gradient: 'linear-gradient(135deg, #2ecc71, #27ae60)' },
-      { id: 'tanjiro', name: 'Tanjiro', url: 'avatars/tanjiro.png', emoji: '???', gradient: 'linear-gradient(135deg, #16a085, #1abc9c)' },
-      { id: 'eren', name: 'Eren', url: 'avatars/eren.png', emoji: '??', gradient: 'linear-gradient(135deg, #8e44ad, #9b59b6)' },
-      { id: 'saitama', name: 'Saitama', url: 'avatars/saitama.png', emoji: '??', gradient: 'linear-gradient(135deg, #f1c40f, #f39c12)' },
-      { id: 'itachi', name: 'Itachi', url: 'avatars/itachi.png', emoji: '??', gradient: 'linear-gradient(135deg, #c0392b, #e74c3c)' },
-      { id: 'levi', name: 'Levi', url: 'avatars/levi.png', emoji: '?', gradient: 'linear-gradient(135deg, #34495e, #2c3e50)' },
-      { id: 'vegeta', name: 'Vegeta', url: 'avatars/vegeta.png', emoji: '??', gradient: 'linear-gradient(135deg, #2980b9, #3498db)' },
-      // Her�is
-      { id: 'ironman', name: 'Iron Man', url: 'avatars/ironman.png', emoji: '??', gradient: 'linear-gradient(135deg, #e74c3c, #f39c12)' },
-      { id: 'batman', name: 'Batman', url: 'avatars/batman.png', emoji: '??', gradient: 'linear-gradient(135deg, #2c3e50, #34495e)' },
-      { id: 'joker', name: 'Joker', url: 'avatars/joker.png', emoji: '??', gradient: 'linear-gradient(135deg, #9b59b6, #8e44ad)' },
-      { id: 'spiderman', name: 'Spider-Man', url: 'avatars/spiderman.png', emoji: '???', gradient: 'linear-gradient(135deg, #e74c3c, #c0392b)' },
-      { id: 'thanos', name: 'Thanos', url: 'avatars/thanos.png', emoji: '??', gradient: 'linear-gradient(135deg, #9b59b6, #8e44ad)' },
-      { id: 'deadpool', name: 'Deadpool', url: 'avatars/deadpool.png', emoji: '??', gradient: 'linear-gradient(135deg, #c0392b, #e74c3c)' }
+      { id: 'naruto', name: 'Naruto', url: 'avatars/naruto.png', emoji: '🍜', gradient: 'linear-gradient(135deg, #f39c12, #e67e22)' },
+      { id: 'luffy', name: 'Luffy', url: 'avatars/luffy.png', emoji: '🏴‍☠️', gradient: 'linear-gradient(135deg, #e74c3c, #c0392b)' },
+      { id: 'goku', name: 'Goku', url: 'avatars/goku.png', emoji: '💫', gradient: 'linear-gradient(135deg, #f39c12, #d35400)' },
+      { id: 'deku', name: 'Deku', url: 'avatars/deku.png', emoji: '💪', gradient: 'linear-gradient(135deg, #2ecc71, #27ae60)' },
+      { id: 'tanjiro', name: 'Tanjiro', url: 'avatars/tanjiro.png', emoji: '🗡️', gradient: 'linear-gradient(135deg, #16a085, #1abc9c)' },
+      { id: 'eren', name: 'Eren', url: 'avatars/eren.png', emoji: '⚔️', gradient: 'linear-gradient(135deg, #8e44ad, #9b59b6)' },
+      { id: 'saitama', name: 'Saitama', url: 'avatars/saitama.png', emoji: '👊', gradient: 'linear-gradient(135deg, #f1c40f, #f39c12)' },
+      { id: 'itachi', name: 'Itachi', url: 'avatars/itachi.png', emoji: '🔥', gradient: 'linear-gradient(135deg, #c0392b, #e74c3c)' },
+      { id: 'levi', name: 'Levi', url: 'avatars/levi.png', emoji: '⚔️', gradient: 'linear-gradient(135deg, #34495e, #2c3e50)' },
+      { id: 'vegeta', name: 'Vegeta', url: 'avatars/vegeta.png', emoji: '⚡', gradient: 'linear-gradient(135deg, #2980b9, #3498db)' },
+      // Heróis
+      { id: 'ironman', name: 'Iron Man', url: 'avatars/ironman.png', emoji: '🦾', gradient: 'linear-gradient(135deg, #e74c3c, #f39c12)' },
+      { id: 'batman', name: 'Batman', url: 'avatars/batman.png', emoji: '🦇', gradient: 'linear-gradient(135deg, #2c3e50, #34495e)' },
+      { id: 'joker', name: 'Joker', url: 'avatars/joker.png', emoji: '🃏', gradient: 'linear-gradient(135deg, #9b59b6, #8e44ad)' },
+      { id: 'spiderman', name: 'Spider-Man', url: 'avatars/spiderman.png', emoji: '🕷️', gradient: 'linear-gradient(135deg, #e74c3c, #c0392b)' },
+      { id: 'thanos', name: 'Thanos', url: 'avatars/thanos.png', emoji: '💎', gradient: 'linear-gradient(135deg, #9b59b6, #8e44ad)' },
+      { id: 'deadpool', name: 'Deadpool', url: 'avatars/deadpool.png', emoji: '⚔️', gradient: 'linear-gradient(135deg, #c0392b, #e74c3c)' }
     ]
 
-    // Fun��o para formatar data de vencimento
+    // Função para formatar data de vencimento
     const formatExpDate = (timestamp) => {
       if (!timestamp) return 'Sem data'
       const date = new Date(timestamp * 1000)
       return date.toLocaleDateString('pt-BR')
     }
 
-    // Fun��o para selecionar avatar
+    // Função para selecionar avatar
     const handleAvatarSelect = (avatar) => {
       setSelectedAvatar(avatar)
       setShowAvatarSelector(false)
@@ -3122,7 +3182,7 @@ header("Expires: 0");
         e('span', { style: { color: '#fff' } }, 'TV')
       ),
 
-      // Menu de navega��o
+      // Menu de navegação
       e('nav', {
         style: {
           display: 'flex',
@@ -3262,7 +3322,7 @@ header("Expires: 0");
             if (window.updateNetflixMoviesState) {
               window.updateNetflixMoviesState({
                 showCollectionsView: true,
-                heroBackdrop: null  // Limpar heroBackdrop ao entrar em cole��es
+                heroBackdrop: null  // Limpar heroBackdrop ao entrar em coleções
               })
             }
           },
@@ -3310,7 +3370,7 @@ header("Expires: 0");
         )
       ),
 
-      // �rea direita - Campo de busca e configura��es
+      // Área direita - Campo de busca e configura��es
       e('div', {
         style: {
           display: 'flex',
@@ -3416,7 +3476,7 @@ header("Expires: 0");
                   overflow: 'hidden'
                 }
               }, !selectedAvatar && (account?.username || 'H').charAt(0).toUpperCase()),
-              // Info do usu�rio
+              // Info do usuário
               e('div', {
                 style: {
                   flex: 1
@@ -3429,7 +3489,7 @@ header("Expires: 0");
                     fontWeight: '600',
                     marginBottom: '4px'
                   }
-                }, account?.username || 'Usu�rio'),
+                }, account?.username || 'Usuário'),
                 e('div', {
                   style: {
                     color: '#f47521',
@@ -3440,11 +3500,11 @@ header("Expires: 0");
                     gap: '4px'
                   }
                 },
-                  e('span', { style: { fontSize: '14px' } }, '??'),
+                  e('span', { style: { fontSize: '14px' } }, '📅'),
                   'Vence: ' + formatExpDate(account?.exp_date)
                 )
               ),
-              // �cone de editar
+              // ícone de editar
               e('div', {
                 onClick: () => {
                   setShowProfileMenu(false)
@@ -3462,10 +3522,10 @@ header("Expires: 0");
                 onMouseLeave: (e) => {
                   e.currentTarget.style.color = '#b3b3b3'
                 }
-              }, '??')
+              }, '✏️')
             ),
 
-            // Op��es do menu
+            // Opções do menu
             e('div', {
               style: {
                 padding: '8px 0'
@@ -3494,11 +3554,11 @@ header("Expires: 0");
                   e.currentTarget.style.background = 'transparent'
                 }
               },
-                e('span', { style: { fontSize: '18px' } }, '??'),
+                e('span', { style: { fontSize: '18px' } }, '👤'),
                 'Trocar de Perfil'
               ),
 
-              // Configura��es
+              // Configurações
               e('div', {
                 onClick: () => {
                   setView('settings')
@@ -3521,8 +3581,8 @@ header("Expires: 0");
                   e.currentTarget.style.background = 'transparent'
                 }
               },
-                e('span', { style: { fontSize: '18px' } }, '??'),
-                'Configura��es'
+                e('span', { style: { fontSize: '18px' } }, '⚙️'),
+                'Configurações'
               ),
 
               // Separador
@@ -3557,11 +3617,11 @@ header("Expires: 0");
                   e.currentTarget.style.background = 'transparent'
                 }
               },
-                e('span', { style: { fontSize: '18px' } }, '??'),
+                e('span', { style: { fontSize: '18px' } }, '📋'),
                 'Fila'
               ),
 
-              // Hist�rico
+              // Histórico
               e('div', {
                 onClick: () => {
                   alert('Funcionalidade em breve!')
@@ -3584,8 +3644,8 @@ header("Expires: 0");
                   e.currentTarget.style.background = 'transparent'
                 }
               },
-                e('span', { style: { fontSize: '18px' } }, '??'),
-                'Hist�rico'
+                e('span', { style: { fontSize: '18px' } }, '🕒'),
+                'Histórico'
               ),
 
               // Separador
@@ -3597,7 +3657,7 @@ header("Expires: 0");
                 }
               }),
 
-              // Notifica��es
+              // Notificações
               e('div', {
                 onClick: () => {
                   alert('Funcionalidade em breve!')
@@ -3620,8 +3680,8 @@ header("Expires: 0");
                   e.currentTarget.style.background = 'transparent'
                 }
               },
-                e('span', { style: { fontSize: '18px' } }, '??'),
-                'Notifica��es'
+                e('span', { style: { fontSize: '18px' } }, '🔔'),
+                'Notificações'
               ),
 
               // Separador
@@ -3658,7 +3718,7 @@ header("Expires: 0");
                   e.currentTarget.style.background = 'transparent'
                 }
               },
-                e('span', { style: { fontSize: '18px' } }, '??'),
+                e('span', { style: { fontSize: '18px' } }, '🚪'),
                 'Sair'
               )
             )
@@ -3694,7 +3754,7 @@ header("Expires: 0");
               overflowY: 'auto'
             }
           },
-            // T�tulo
+            // Título
             e('div', {
               style: {
                 display: 'flex',
@@ -3728,7 +3788,7 @@ header("Expires: 0");
                 onMouseLeave: (e) => {
                   e.currentTarget.style.color = '#b3b3b3'
                 }
-              }, '�')
+              }, '×')
             ),
 
             // Grid de avatares
@@ -3780,7 +3840,7 @@ header("Expires: 0");
     const [activeMenu, setActiveMenu] = useState('home')
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-    // Atualizar �cone ativo baseado na view atual
+    // Atualizar ícone ativo baseado na view atual
     useEffect(() => {
       if (view === 'home') setActiveMenu('home')
       else if (view === 'channels' || view === 'live-categories') setActiveMenu('channels')
@@ -3794,13 +3854,13 @@ header("Expires: 0");
       else if (view === 'config') setActiveMenu('config')
     }, [view])
 
-    // Usando emoji para �cones (sem depend�ncia de bibliotecas externas)
+    // Usando emoji para ícones (sem depend�ncia de bibliotecas externas)
 
     const menuItems = [
-      { id: 'home', icon: '??', title: 'Home', action: () => setView('home') },
-      { id: 'channels', icon: '??', title: 'TV Ao Vivo', action: () => setView('live-categories') },
-      { id: 'movies', icon: '??', title: 'Filmes', action: () => {
-        // Desativar modo cole��es ao voltar para filmes
+      { id: 'home', icon: '🏠', title: 'Home', action: () => setView('home') },
+      { id: 'channels', icon: '📡', title: 'TV Ao Vivo', action: () => setView('live-categories') },
+      { id: 'movies', icon: '🎬', title: 'Filmes', action: () => {
+        // Desativar modo coleções ao voltar para filmes
         if (window.updateNetflixMoviesState) {
           // Pegar o primeiro filme da categoria atual
           const firstSection = window.__netflixMoviesState?.sectionsMovies?.[0]
@@ -3809,8 +3869,8 @@ header("Expires: 0");
 
           window.updateNetflixMoviesState({
             showCollectionsView: false,
-            heroBackdrop: null, // Limpar backdrop de cole��es
-            viewingCollectionMovies: false, // Sair do modo de visualiza��o de cole��o
+            heroBackdrop: null, // Limpar backdrop de coleções
+            viewingCollectionMovies: false, // Sair do modo de visualiza��o de coleção
             currentCategoryIndex: 0, // Voltar para primeira categoria
             featuredMovieId: firstMovieId || window.__netflixMoviesState?.featuredMovieId // Setar primeiro filme
           })
@@ -3818,7 +3878,7 @@ header("Expires: 0");
         setView('netflix-movies')
       }},
       { id: 'series', icon: '📺', title: 'Séries', action: () => {
-        // Desativar modo cole��es
+        // Desativar modo coleções
         if (window.updateNetflixMoviesState) {
           const firstSection = window.__netflixMoviesState?.sectionsMovies?.[0]
           const firstMovie = firstSection?.movies?.[0]
@@ -3834,8 +3894,8 @@ header("Expires: 0");
         }
         setView('netflix-series')
       }},
-      { id: 'novelas', icon: '??', title: 'Novelas', action: () => {
-        // Desativar modo cole��es
+      { id: 'novelas', icon: '💃', title: 'Novelas', action: () => {
+        // Desativar modo coleções
         if (window.updateNetflixMoviesState) {
           const firstSection = window.__netflixMoviesState?.sectionsMovies?.[0]
           const firstMovie = firstSection?.movies?.[0]
@@ -3851,8 +3911,8 @@ header("Expires: 0");
         }
         setView('netflix-novelas')
       }},
-      { id: 'animes', icon: '??', title: 'Animes', action: () => {
-        // Desativar modo cole��es
+      { id: 'animes', icon: '⚡', title: 'Animes', action: () => {
+        // Desativar modo coleções
         if (window.updateNetflixMoviesState) {
           const firstSection = window.__netflixMoviesState?.sectionsMovies?.[0]
           const firstMovie = firstSection?.movies?.[0]
@@ -3868,8 +3928,8 @@ header("Expires: 0");
         }
         setView('netflix-animes')
       }},
-      { id: 'desenhos', icon: '??', title: 'Desenhos', action: () => {
-        // Desativar modo cole��es
+      { id: 'desenhos', icon: '🎨', title: 'Desenhos', action: () => {
+        // Desativar modo coleções
         if (window.updateNetflixMoviesState) {
           const firstSection = window.__netflixMoviesState?.sectionsMovies?.[0]
           const firstMovie = firstSection?.movies?.[0]
@@ -3886,15 +3946,15 @@ header("Expires: 0");
         setView('netflix-desenhos')
       }},
       { id: 'collections', icon: '📚', title: 'Coleções', action: () => {
-        // ===== N�O RESETAR: Precisamos dos filmes j� carregados para construir cole��es =====
-        // Apenas ativar o modo de cole��es (o useEffect vai carregar automaticamente)
+        // ===== N�O RESETAR: Precisamos dos filmes j� carregados para construir coleções =====
+        // Apenas ativar o modo de coleções (o useEffect vai carregar automaticamente)
         setView('collections')
         if (window.updateNetflixMoviesState) {
           window.updateNetflixMoviesState({ showCollectionsView: true })
         }
       }},
-      { id: 'show', icon: '??', title: 'Show', action: () => {
-        // Desativar modo cole��es
+      { id: 'show', icon: '🎤', title: 'Show', action: () => {
+        // Desativar modo coleções
         if (window.updateNetflixMoviesState) {
           const firstSection = window.__netflixMoviesState?.sectionsMovies?.[0]
           const firstMovie = firstSection?.movies?.[0]
@@ -3930,13 +3990,13 @@ header("Expires: 0");
         }, e('span', { style: { fontSize: '24px' } }, item.icon))
       ),
 
-      // Configura��es no final
+      // Configurações no final
       e('button', {
         className: `sidebar-btn ${activeMenu === 'config' ? 'active' : ''}`,
-        'data-tooltip': 'Configura��es',
+        'data-tooltip': 'Configurações',
         onClick: () => setView('config'),
         style: { marginTop: 'auto' }
-      }, e('span', { style: { fontSize: '24px' } }, '??'))
+      }, e('span', { style: { fontSize: '24px' } }, '⚙️'))
     )
   }
 
@@ -3965,7 +4025,7 @@ header("Expires: 0");
           return
         }
 
-        // SETAS - Navega��o
+        // SETAS - Navegação
         if (RemoteKeyMap.matches(RemoteKeyMap.ARROW_UP, event)) {
           event.preventDefault()
           handlers.onUp?.()
@@ -4004,12 +4064,12 @@ header("Expires: 0");
           return
         }
 
-        // N�MEROS 0-9 - Navega��o direta por canal
+        // N�MEROS 0-9 - Navegação direta por canal
         for (let num = 0; num <= 9; num++) {
           if (RemoteKeyMap.matches(RemoteKeyMap[`NUM_${num}`], event)) {
             event.preventDefault()
 
-            // Acumular n�meros digitados
+            // Acumular números digitados
             const newInput = channelInput + num
             setChannelInput(newInput)
 
@@ -4094,15 +4154,15 @@ header("Expires: 0");
     return { channelInput }
   }
 
-  // Vari�vel global para rastrear o �ltimo canal carregado no player
+  // Vari�vel global para rastrear o Último canal carregado no player
   let lastLoadedChannel = { id: null, playback_url: null }
   // Vari�vel global para preservar a inst�ncia do HLS entre re-renders
   let globalHlsInstance = null
-  // Cache global para dados de s�ries (evitar re-fetch)
+  // Cache global para dados de séries (evitar re-fetch)
   const seriesCache = {}
-  // Set global para rastrear s�ries que est�o sendo ou j� foram carregadas
+  // Set global para rastrear séries que est�o sendo ou j� foram carregadas
   const seriesLoadingState = new Set()
-  // Set global para rastrear s�ries que j� tiveram estado atualizado (evitar m�ltiplas atualiza��es)
+  // Set global para rastrear séries que j� tiveram estado atualizado (evitar m�ltiplas atualiza��es)
   const seriesStateUpdated = new Set()
 
   function App(){
@@ -4141,21 +4201,21 @@ header("Expires: 0");
     })
 
     // ===== RATE LIMITER INTELIGENTE PARA TMDB =====
-    // TMDB tem limite de ~40 requisi��es por 10 segundos
+    // TMDB tem limite de ~40 requisições por 10 segundos
     const tmdbRateLimiter = useRef({
-      queue: [],           // Fila de requisi��es pendentes
+      queue: [],           // Fila de requisições pendentes
       processing: false,   // Flag de processamento
-      requestTimes: [],    // Timestamps das �ltimas requisi��es
-      maxRequests: 35,     // M�ximo de requisi��es (seguro: 35/10s)
+      requestTimes: [],    // Timestamps das Últimas requisições
+      maxRequests: 35,     // Máximo de requisições (seguro: 35/10s)
       timeWindow: 10000    // Janela de tempo (10 segundos)
     })
 
     // ===== BATCHING DE REQUISI��ES TMDB =====
-    // Agrupa m�ltiplas requisi��es em lotes para evitar rate limit
+    // Agrupa m�ltiplas requisições em lotes para evitar rate limit
     const tmdbBatcher = useRef({
       pending: new Map(),  // Map de promises pendentes (evita duplicatas)
       timeout: null,       // Timeout para processar batch
-      batchDelay: 100      // Delay para agrupar requisi��es (100ms)
+      batchDelay: 100      // Delay para agrupar requisições (100ms)
     })
 
     // Sincronizar configura��o com XCClient
@@ -4187,11 +4247,11 @@ header("Expires: 0");
       },
       onLeft: () => {
         // Navegar para esquerda (pode ser EPG ou sidebar)
-        // Deixar navega��o nativa do browser
+        // Deixar navegação nativa do browser
       },
       onRight: () => {
         // Navegar para direita (pode ser EPG ou detalhes)
-        // Deixar navega��o nativa do browser
+        // Deixar navegação nativa do browser
       },
       onSelect: () => {
         // Simular clique no elemento focado
@@ -4215,23 +4275,23 @@ header("Expires: 0");
         // TODO: Implementar l�gica de sele��o direta de canal
       },
       onRed: () => {
-        // Bot�o vermelho: Favoritos
+        // Botão vermelho: Favoritos
         // TODO: Implementar tela de favoritos
       },
       onGreen: () => {
-        // Bot�o verde: Guia EPG completo
+        // Botão verde: Guia EPG completo
         setView('live-categories')
       },
       onYellow: () => {
-        // Bot�o amarelo: Configura��es
+        // Botão amarelo: Configurações
         setView('config')
       },
       onBlue: () => {
-        // Bot�o azul: Busca
+        // Botão azul: Busca
         // TODO: Implementar tela de busca global
       },
       onPlayPause: () => {
-        // Controlar reprodu��o do v�deo
+        // Controlar reprodução do vídeo
         const video = document.querySelector('video')
         if (video) {
           if (video.paused) {
@@ -4242,7 +4302,7 @@ header("Expires: 0");
         }
       },
       onStop: () => {
-        // Parar reprodu��o e voltar
+        // Parar reprodução e voltar
         if (view === 'player') {
           setView('home')
         }
@@ -4314,7 +4374,7 @@ header("Expires: 0");
                  !catName.includes('show')
         })
       } else if (isSeriesView) {
-        // Na view de s�ries: REMOVER categorias 18+
+        // Na view de séries: REMOVER categorias 18+
         categories = categories.filter(cat => {
           const catName = (cat.category_name || cat.name || '').toLowerCase().trim()
           return !catName.startsWith('18+')
@@ -4386,7 +4446,7 @@ header("Expires: 0");
     }, [view])
 
     const [current,setCurrent] = useState(null)
-    const [selectedContent, setSelectedContent] = useState(null) // Para p�gina de detalhes
+    const [selectedContent, setSelectedContent] = useState(null) // Para página de detalhes
 
     // Trailer modal (global)
     const [trailerUrl, setTrailerUrl] = useState(null)
@@ -4428,7 +4488,7 @@ header("Expires: 0");
       }
     }
 
-    // Cache para requisi��es da API (evitar loops)
+    // Cache para requisições da API (evitar loops)
     const apiCache = {}
     const CACHE_DURATION = 5 * 60 * 1000 // 5 minutos
 
@@ -4439,7 +4499,7 @@ header("Expires: 0");
       const cacheKey = `${action}_${JSON.stringify(params || {})}`
       const now = Date.now()
 
-      // Verificar se existe no cache e ainda � v�lido
+      // Verificar se existe no cache e ainda � válido
       if(apiCache[cacheKey] && (now - apiCache[cacheKey].timestamp) < CACHE_DURATION){
         return apiCache[cacheKey].data
       }
@@ -4448,7 +4508,7 @@ header("Expires: 0");
       const usp = new URLSearchParams({ username:cfg.username, password:cfg.password, action, ...(params||{}) })
       const url = 'api.php?' + usp.toString()
 
-      // Usar pool de requisi��es + retry
+      // Usar pool de requisições + retry
       return await withRequestPool(async () => {
         return await withRetry(async () => {
           try {
@@ -4477,7 +4537,7 @@ header("Expires: 0");
       if(!hasEpisodes){
         try{ const alt = await apiCall('get_series_info', { series: seriesId }); if(alt) data = alt }catch{}
       }
-      if(!data) throw new Error('Falha ao obter informa��es da s�rie')
+      if(!data) throw new Error('Falha ao obter informações da série')
       return data
     }
 
@@ -4495,10 +4555,10 @@ header("Expires: 0");
       const cached = getMemCache('search', cacheKey)
       if (cached) return cached
 
-      // ===== NOVO: Usar batching para evitar requisi��es duplicadas =====
+      // ===== NOVO: Usar batching para evitar requisições duplicadas =====
       return batchedTMDBRequest(`search_${cacheKey}`, async () => {
         try{
-          // ===== SANITIZER AGRESSIVO: Remove sufixos comuns de t�tulos VOD =====
+          // ===== SANITIZER AGRESSIVO: Remove sufixos comuns de títulos VOD =====
           let cleanTitle = title
             .replace(/\s*\([LDlD]\)/gi, '')    // Remove (L) (D) de legendado/dublado
             .replace(/\s*\((HD|FHD|4K|CAM|WEB-DL|BluRay|BRRip|DVDRip)\)/gi, '') // Qualidade entre par�nteses
@@ -4547,16 +4607,16 @@ header("Expires: 0");
 
     // ===== FUN��ES DE PERFORMANCE TMDB =====
 
-    // Rate Limiter com Concorr�ncia: Garante que n�o ultrapassamos 35 req/10s E m�ximo 6 simult�neas
+    // Rate Limiter com Concorr�ncia: Garante que n�o ultrapassamos 35 req/10s E máximo 6 simult�neas
     async function rateLimitedFetch(url, requestType = 'unknown') {
       const limiter = tmdbRateLimiter.current
 
-      // Inicializar contador de requisi��es simult�neas
+      // Inicializar contador de requisições simult�neas
       if (!limiter.running) limiter.running = 0
       if (!limiter.queue) limiter.queue = []
       const MAX_CONCURRENT = 6
 
-      // Se j� estamos no m�ximo de concorr�ncia, enfileirar
+      // Se j� estamos no máximo de concorr�ncia, enfileirar
       if (limiter.running >= MAX_CONCURRENT) {
         return new Promise((resolve, reject) => {
           limiter.queue.push(() => rateLimitedFetch(url, requestType).then(resolve).catch(reject))
@@ -4576,10 +4636,10 @@ header("Expires: 0");
         return rateLimitedFetch(url, requestType) // Tentar novamente
       }
 
-      // Incrementar contador de requisi��es simult�neas
+      // Incrementar contador de requisições simult�neas
       limiter.running++
 
-      // Registrar requisi��o no rate limit
+      // Registrar requisição no rate limit
       limiter.requestTimes.push(Date.now())
 
       try {
@@ -4589,15 +4649,15 @@ header("Expires: 0");
         // Decrementar contador
         limiter.running--
 
-        // Processar pr�ximo item da fila
+        // Processar próximo item da fila
         if (limiter.queue.length > 0 && limiter.running < MAX_CONCURRENT) {
           const next = limiter.queue.shift()
-          setTimeout(() => next(), 0) // Processar na pr�xima tick
+          setTimeout(() => next(), 0) // Processar na próxima tick
         }
       }
     }
 
-    // Batching: Agrupa requisi��es duplicadas (evita buscar mesmo filme 2x)
+    // Batching: Agrupa requisições duplicadas (evita buscar mesmo filme 2x)
     function batchedTMDBRequest(key, fetchFunction) {
       const batcher = tmdbBatcher.current
 
@@ -4632,7 +4692,7 @@ header("Expires: 0");
       // Tentar localStorage como fallback
       const cacheKey = type === 'search' ? key : `details_${key}`
       if (tmdbCache[cacheKey]) {
-        // Copiar para mem�ria para pr�ximas leituras
+        // Copiar para mem�ria para próximas leituras
         if (type === 'search') {
           cache.search[key] = tmdbCache[cacheKey]
         } else {
@@ -4659,16 +4719,16 @@ header("Expires: 0");
     }
 
     // ===== LAZY LOADING INTELIGENTE DE IMAGENS =====
-    // Pr�-carrega imagens de forma controlada para evitar overhead
+    // Pré-carrega imagens de forma controlada para evitar overhead
     const imagePreloader = useRef({
       loaded: new Set(),    // URLs j� carregadas
       loading: new Set(),   // URLs sendo carregadas no momento
       queue: [],           // Fila de URLs para carregar
       processing: false,   // Flag de processamento
-      maxConcurrent: 6     // M�ximo de imagens simult�neas
+      maxConcurrent: 6     // Máximo de imagens simult�neas
     })
 
-    // Pr�-carrega uma imagem (retorna promise)
+    // Pré-carrega uma imagem (retorna promise)
     function preloadImage(url) {
       const preloader = imagePreloader.current
 
@@ -4709,7 +4769,7 @@ header("Expires: 0");
       })
     }
 
-    // Pr�-carrega m�ltiplas imagens em lotes controlados
+    // Pré-carrega m�ltiplas imagens em lotes controlados
     async function preloadImagesInBatches(urls) {
       const preloader = imagePreloader.current
       const validUrls = urls.filter(url => url && !preloader.loaded.has(url))
@@ -4732,7 +4792,7 @@ header("Expires: 0");
       }
     }
 
-    // Buscar detalhes completos do TMDB (g�neros, dura��o, etc.) em pt-BR - OTIMIZADO
+    // Buscar detalhes completos do TMDB (g�neros, duração, etc.) em pt-BR - OTIMIZADO
     async function getTMDBDetails(tmdb_id, type = 'movie'){
       let apiKey = localStorage.getItem('tmdb_api_key')
       if(!apiKey || apiKey === '""' || apiKey === '') {
@@ -4758,7 +4818,7 @@ header("Expires: 0");
         // Se tem formato antigo, n�o retornar - continuar para busca nova
       }
 
-      // ===== NOVO: Usar batching para evitar requisi��es duplicadas =====
+      // ===== NOVO: Usar batching para evitar requisições duplicadas =====
       return batchedTMDBRequest(`details_${cacheKey}`, async () => {
         try{
           // ===== BUSCAR DETALHES + CR�DITOS (elenco e diretor) =====
@@ -4793,7 +4853,7 @@ header("Expires: 0");
             original_language: data.original_language?.toUpperCase() || null, // ===== NOVO: Idioma =====
             status: data.status || null, // ===== NOVO: Status (Released, etc) =====
             tmdb_id: data.id,
-            belongs_to_collection: data.belongs_to_collection || null // Informa��o da cole��o
+            belongs_to_collection: data.belongs_to_collection || null // Informação da coleção
           }
 
           // ===== OTIMIZA��O: Fallback para EN-US se PT-BR n�o tiver overview =====
@@ -4802,9 +4862,9 @@ header("Expires: 0");
               const urlEn = `https://api.themoviedb.org/3/${type}/${tmdb_id}?api_key=${apiKey}&language=en-US`
               const resEn = await rateLimitedFetch(urlEn, `details-en:${tmdb_id}`)
               const dataEn = await resEn.json()
-              result.overview = dataEn.overview || 'Sem descri��o dispon�vel.'
+              result.overview = dataEn.overview || 'Sem descrição disponível.'
             } catch(errEn) {
-              result.overview = 'Sem descri��o dispon�vel.'
+              result.overview = 'Sem descrição disponível.'
             }
           }
 
@@ -4882,7 +4942,7 @@ header("Expires: 0");
     }
 
     // ===== COLE��ES TMDB =====
-    // Identificar e agrupar cole��es a partir dos filmes locais
+    // Identificar e agrupar coleções a partir dos filmes locais
     async function findCollectionsInMovies(movies) {
       const collectionsMap = new Map()
 
@@ -4911,7 +4971,7 @@ header("Expires: 0");
       return result
     }
 
-    // Buscar informa��es completas de uma cole��o
+    // Buscar informações completas de uma coleção
     async function getTMDBCollection(collection_id) {
       let apiKey = localStorage.getItem('tmdb_api_key')
       if(!apiKey || apiKey === '""' || apiKey === '') {
@@ -4939,7 +4999,7 @@ header("Expires: 0");
           overview: data.overview,
           poster: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : null,
           backdrop: data.backdrop_path ? `https://image.tmdb.org/t/p/original${data.backdrop_path}` : null,
-          parts: data.parts || [] // Array de filmes da cole��o
+          parts: data.parts || [] // Array de filmes da coleção
         }
 
         // Fallback para en-US se pt-BR n�o tiver overview
@@ -4968,7 +5028,7 @@ header("Expires: 0");
       // Remove aspas se tiver
       apiKey = apiKey.replace(/"/g, '')
 
-      // Detectar tipo de conte�do (s�rie ou filme) automaticamente
+      // Detectar tipo de conte�do (série ou filme) automaticamente
       const tmdbType = contentType === 'series' || movie.series_id ? 'tv' : 'movie'
 
       // ===== GUARD: Verificar cache de enriquecimento PRIMEIRO =====
@@ -5155,7 +5215,7 @@ header("Expires: 0");
       return 'Não foi possível autenticar com essas credenciais/URL.'
     }
 
-    // Carregamento pontual por se��o
+    // Carregamento pontual por seção
     async function loadCatsByType(type){
       try{
         if(type==='live'){
@@ -5185,7 +5245,7 @@ header("Expires: 0");
       }catch{ /* silencioso: se falhar, mostramos 0 ou cat.total */ }
     }
 
-    // S� busca quando a view entrar E se ainda n�o tiver sido pr�-carregado
+    // S� busca quando a view entrar E se ainda n�o tiver sido pré-carregado
     useEffect(()=>{
       // Com o preload, as categorias j� estar�o carregadas na maioria dos casos
       // S� carrega se realmente estiver vazio (fallback)
@@ -5216,7 +5276,7 @@ header("Expires: 0");
       }
     }, [view])
 
-    // Ao carregar as categorias do Live, abrimos a 1� e, se necess�rio, buscamos contagens
+    // Ao carregar as categorias do Live, abrimos a 1� e, se necessário, buscamos contagens
     useEffect(()=>{
       if(view==='live-categories' && liveCats.length>0){
         if(!selectedLiveCat && !autoOpenLiveRef.current){
@@ -5237,15 +5297,15 @@ header("Expires: 0");
           setAccount(info.user_info||info)
           setView('home')
 
-          // Pr�-carregar categorias em background ap�s auto-login
+          // Pré-carregar categorias em background ap�s auto-login
           preloadAllCategories()
-          // DESABILITADO: pr�-carregamento de conte�do (causava loop infinito)
+          // DESABILITADO: pré-carregamento de conte�do (causava loop infinito)
           // preloadTopVodContent()
         }).catch(err=> setError(explainLoginError(err.message||String(err))))
       }
     },[])
 
-    // Pr�-carregar TODAS as categorias em paralelo com cache localStorage
+    // Pré-carregar TODAS as categorias em paralelo com cache localStorage
     async function preloadAllCategories(){
       const CACHE_KEY = 'categories_cache_v1'
       const CACHE_DURATION = 60 * 60 * 1000 // 1 hora em ms
@@ -5330,7 +5390,7 @@ header("Expires: 0");
       }
     }
 
-    // Pr�-carregar conte�do das 3 primeiras categorias de VOD em background
+    // Pré-carregar conte�do das 3 primeiras categorias de VOD em background
     async function preloadTopVodContent(){
       try{
         // Pegar as 3 primeiras categorias de VOD
@@ -5379,9 +5439,9 @@ header("Expires: 0");
         setAccount(info.user_info||info)
         setView('home')
 
-        // Pr�-carregar categorias em background ap�s login
+        // Pré-carregar categorias em background ap�s login
         preloadAllCategories()
-        // DESABILITADO: pr�-carregamento de conte�do (causava loop infinito)
+        // DESABILITADO: pré-carregamento de conte�do (causava loop infinito)
         // preloadTopVodContent()
       }catch(err){
         setError(explainLoginError(err.message||String(err)))
@@ -5401,7 +5461,7 @@ header("Expires: 0");
         }else if(type==='vod'){
           const data = await apiCall('get_vod_streams', { category_id: getCatId(cat) })
           setItems(toArray(data))
-        }else{ // series -> lista de s�ries
+        }else{ // series -> lista de séries
           const data = await apiCall('get_series', { category_id: getCatId(cat) })
           setItems(toArray(data))
         }
@@ -5411,11 +5471,11 @@ header("Expires: 0");
 
     // ===== PLAYBACK / CATCH-UP API (MOCK - SUBSTITUIR POR SUA API REAL) =====
 
-    // Retorna os dias que t�m grava��es dispon�veis para um canal
+    // Retorna os dias que t�m gravações disponíveis para um canal
     function getRecordedDays(channelId){
       // TODO: Chamar sua API real
       // Exemplo: GET /api/recordings/days?channel_id=123
-      // Por enquanto, retorna �ltimos 4 dias como mock (3 dias atr�s at� hoje)
+      // Por enquanto, retorna Últimos 4 dias como mock (3 dias atr�s at� hoje)
       const days = []
       for(let offset = -3; offset <= 0; offset++){ // -3, -2, -1, 0
         const d = new Date()
@@ -5432,7 +5492,7 @@ header("Expires: 0");
         return null
       }
 
-      // Converter timestamps Unix para segundos se necess�rio
+      // Converter timestamps Unix para segundos se necessário
       const start = typeof startUtc === 'number' ? startUtc : parseInt(startUtc)
       const end = endUtc ? (typeof endUtc === 'number' ? endUtc : parseInt(endUtc)) : start + 3600
       const durationInSeconds = end - start
@@ -5456,7 +5516,7 @@ header("Expires: 0");
       return url
     }
 
-    // Verifica se um programa est� gravado/dispon�vel
+    // Verifica se um programa est� gravado/disponível
     function isProgramRecorded(program, channel, selectedDayOffset){
       // Verificar se o canal tem tv_archive habilitado
       const hasTvArchive = channel && (channel.tv_archive === 1 || channel.tv_archive === "1")
@@ -5466,9 +5526,9 @@ header("Expires: 0");
       }
 
       // Apenas programas passados ou atuais podem ser reproduzidos
-      // Programas futuros n�o t�m grava��o ainda
+      // Programas futuros n�o t�m gravação ainda
       if(selectedDayOffset >= -7 && selectedDayOffset <= 0){
-        return true // Canal tem playback e programa est� dispon�vel (�ltimos 7 dias)
+        return true // Canal tem playback e programa est� disponível (Últimos 7 dias)
       }
 
       return false // Muito antigo ou futuro
@@ -5478,7 +5538,7 @@ header("Expires: 0");
     async function openLiveCategory(cat, switchLeft = true){
       // ?? BLOQUEIO TOTAL: Se j� est� na mesma categoria com canal tocando, n�o fazer NADA
       if(selectedLiveCat && getCatId(selectedLiveCat) === getCatId(cat) && selectedChannel) {
-        // Apenas mudar o modo para channels se necess�rio
+        // Apenas mudar o modo para channels se necessário
         if(switchLeft && liveLeftMode !== 'channels') setLiveLeftMode('channels')
         return
       }
@@ -5524,7 +5584,7 @@ header("Expires: 0");
           const baseName = firstChannel.baseName
 
 
-          // Buscar �ltima qualidade preferida para este canal
+          // Buscar Última qualidade preferida para este canal
           const preferredQuality = channelVariants[baseName]
           const variants = getVariantsForChannel(fullList, baseName)
 
@@ -5586,7 +5646,7 @@ header("Expires: 0");
         }
 
         const norm = toArray(list).map((it,idx)=>{
-          // Pegar o t�tulo de v�rios campos poss�veis
+          // Pegar o título de v�rios campos poss�veis
           const rawTitle = it.title || it.name || it.has_archive || ''
           const rawDesc = it.description || it.desc || ''
 
@@ -5600,7 +5660,7 @@ header("Expires: 0");
 
           return {
             id: it.id || it.event_id || idx,
-            title: decodedTitle || 'Sem programa��o dispon�vel',
+            title: decodedTitle || 'Sem programação disponível',
             start: formatEPGTime(startTime),
             end: formatEPGTime(endTime),
             description: decodedDesc,
@@ -5648,19 +5708,19 @@ header("Expires: 0");
           const ext = (item.container_extension || 'mp4').replace(/\.+/,'')
           url = buildURL(cfg.server, ['movie', cfg.username, cfg.password, id + '.' + ext])
           isHls = /m3u8/i.test(ext)
-        }else{ // s�ries: precisamos buscar epis�dios primeiro
+        }else{ // séries: precisamos buscar episódios primeiro
           const sInfo = await apiCallSeriesInfo(id)
           const seasons = (sInfo.episodes && typeof sInfo.episodes === 'object') ? sInfo.episodes : {}
           const firstSeason = Object.keys(seasons).sort((a,b)=>Number(a)-Number(b))[0]
           const eps = seasons[firstSeason] || []
           const ep = eps[0]
-          if(!ep) throw new Error('Sem epis�dios dispon�veis para esta s�rie')
+          if(!ep) throw new Error('Sem episódios disponíveis para esta série')
           const epId = ep.id || ep.episode_id || ep.stream_id || id
           const ext = (ep.container_extension || 'mp4').replace(/\.+/,'')
           url = buildURL(cfg.server, ['series', cfg.username, cfg.password, epId + '.' + ext])
           isHls = /m3u8/i.test(ext)
         }
-        setCurrent({ name: item.name || item.title || 'Reprodu��o', url, isHls })
+        setCurrent({ name: item.name || item.title || 'Reprodução', url, isHls })
         setView('player')
       }catch(err){ setError(err.message) }
     }
@@ -5678,7 +5738,7 @@ header("Expires: 0");
     }
 
 // ===== NOVA HOME MODERNA ESTILO NETFLIX =====
-// Esta � a nova vers�o da fun��o Home() para substituir a atual no index.php
+// Esta � a nova versão da fun��o Home() para substituir a atual no index.php
 
 function Home(){
   const [topMovies, setTopMovies] = useState([])
@@ -5698,10 +5758,10 @@ function Home(){
         const moviesWithPosters = moviesData.results.filter(m => m.poster_path)
         setTopMovies(moviesWithPosters.slice(0, 10))
 
-        // Buscar s�ries populares
+        // Buscar séries populares
         const seriesRes = await fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${tmdbKey}&language=pt-BR&page=1`)
         const seriesData = await seriesRes.json()
-        // Filtrar apenas s�ries que t�m poster
+        // Filtrar apenas séries que t�m poster
         const seriesWithPosters = seriesData.results.filter(s => s.poster_path)
         setTopSeries(seriesWithPosters.slice(0, 10))
 
@@ -5752,7 +5812,7 @@ function Home(){
         }
       }, 'Top 10 filmes hoje'),
 
-      // Container do carrossel com bot�es
+      // Container do carrossel com botões
       e('div', {
         style: {
           position: 'relative',
@@ -5783,7 +5843,7 @@ function Home(){
                 position: 'relative'
               }
             },
-              // N�mero grande � esquerda
+              // Número grande � esquerda
               e('div', {
                 style: {
                   fontSize: '280px',
@@ -5794,7 +5854,7 @@ function Home(){
                   marginRight: '-80px',
                   zIndex: 1,
                   fontFamily: 'Arial, sans-serif',
-                  pointerEvents: 'none' // Permite clicar atrav�s do n�mero
+                  pointerEvents: 'none' // Permite clicar atrav�s do número
                 }
               }, (index + 1).toString()),
 
@@ -5923,14 +5983,14 @@ function Home(){
         }
       }, 'Top 10 séries hoje'),
 
-      // Container do carrossel com bot�es
+      // Container do carrossel com botões
       e('div', {
         style: {
           position: 'relative',
           paddingRight: '40px'
         }
       },
-        // Carrossel de s�ries
+        // Carrossel de séries
         e('div', {
           id: 'series-carousel',
           style: {
@@ -5954,7 +6014,7 @@ function Home(){
                 position: 'relative'
               }
             },
-              // N�mero grande � esquerda
+              // Número grande � esquerda
               e('div', {
                 style: {
                   fontSize: '280px',
@@ -5965,7 +6025,7 @@ function Home(){
                   marginRight: '-60px',
                   zIndex: 1,
                   fontFamily: 'Arial, sans-serif',
-                  pointerEvents: 'none' // Permite clicar atrav�s do n�mero
+                  pointerEvents: 'none' // Permite clicar atrav�s do número
                 }
               }, (index + 1).toString()),
 
@@ -5976,7 +6036,7 @@ function Home(){
                   zIndex: 2
                 }
               },
-                // Poster da s�rie
+                // Poster da série
                 e('img', {
                   src: serie.poster_path
                     ? `https://image.tmdb.org/t/p/w500${serie.poster_path}`
@@ -6126,9 +6186,9 @@ function Home(){
         window.dispatchEvent(new CustomEvent('favorites-updated'))
       }
 
-      // Helper: Decodificar Base64 se necess�rio (t�tulos EPG podem vir codificados)
+      // Helper: Decodificar Base64 se necessário (títulos EPG podem vir codificados)
       const decodeMaybeBase64 = (str) => {
-        if(!str || typeof str !== 'string') return 'Sem t�tulo'
+        if(!str || typeof str !== 'string') return 'Sem título'
 
         // Se j� parece texto normal (tem espa�os, acentos, letras), retorna direto
         if(/[\s\u00C0-\u00FF]/.test(str) || !/[A-Za-z0-9+/=]/.test(str)){
@@ -6138,7 +6198,7 @@ function Home(){
         // ESTRAT�GIA 1: Tentar decodificar Base64 simples
         try {
           const decoded = atob(str)
-          // Verificar se � texto v�lido UTF-8
+          // Verificar se � texto válido UTF-8
           if(decoded && /^[\x20-\x7E\u00C0-\u00FF]+$/.test(decoded)){
             return decoded
           }
@@ -6150,7 +6210,7 @@ function Home(){
               return utf8Decoded
             }
           } catch(e2) {
-            // Falhou UTF-8, tenta pr�xima estrat�gia
+            // Falhou UTF-8, tenta próxima estrat�gia
           }
 
           // ESTRAT�GIA 3: Dupla decodifica��o Base64
@@ -6167,7 +6227,7 @@ function Home(){
           return str
 
         } catch(e) {
-          // N�o � Base64 v�lido, retorna original
+          // N�o � Base64 válido, retorna original
           return str
         }
       }
@@ -6194,12 +6254,12 @@ function Home(){
         }
       }
 
-      // Atalhos de teclado para navega��o em categorias e canais
+      // Atalhos de teclado para navegação em categorias e canais
       useEffect(()=>{
         if(!isLive) return
 
         const handleKeyDown = (e)=>{
-          // Navega��o nas CATEGORIAS
+          // Navegação nas CATEGORIAS
           if(liveLeftMode==='categories' && liveCats.length>0){
             if(e.key==='ArrowDown'){
               e.preventDefault()
@@ -6219,7 +6279,7 @@ function Home(){
               setView('home')
             }
           }
-          // Navega��o nos CANAIS
+          // Navegação nos CANAIS
           else if(liveLeftMode==='channels' && liveStreams.length>0){
             if(e.key==='ArrowDown'){
               e.preventDefault()
@@ -6260,7 +6320,7 @@ function Home(){
                     })
                     await loadEpg(channelToPlay.stream_id || channelToPlay.id, selectedDay)
 
-                    // ?? FULLSCREEN AUTOM�TICO DESABILITADO - usu�rio controla via bot�o F
+                    // ?? FULLSCREEN AUTOM�TICO DESABILITADO - usuário controla via botão F
                     // setTimeout(()=>{
                     //   const container = document.getElementById('playerContainer')
                     //   if(container && !document.fullscreenElement){
@@ -6312,7 +6372,7 @@ function Home(){
         return ()=> window.removeEventListener('openAdultLiveCategory', handleOpenAdultCategory)
       }, [isLive])
 
-      // Scroll autom�tico para item focado (APENAS dentro do container, sem afetar a p�gina)
+      // Scroll autom�tico para item focado (APENAS dentro do container, sem afetar a página)
       useEffect(()=>{
         if(liveLeftMode==='categories' && liveCats.length>0){
           const cat = liveCats[focusedCatIdx]
@@ -6327,12 +6387,12 @@ function Home(){
               const containerScrollTop = container.scrollTop
               const containerHeight = container.clientHeight
 
-              // Rolar apenas se necess�rio
+              // Rolar apenas se necessário
               if(elOffsetBottom > containerScrollTop + containerHeight){
-                // Elemento est� abaixo da �rea vis�vel
+                // Elemento est� abaixo da Área visível
                 container.scrollTo({ top: elOffsetBottom - containerHeight, behavior:'smooth' })
               }else if(elOffsetTop < containerScrollTop){
-                // Elemento est� acima da �rea vis�vel
+                // Elemento est� acima da Área visível
                 container.scrollTo({ top: elOffsetTop, behavior:'smooth' })
               }
             }
@@ -6350,12 +6410,12 @@ function Home(){
               const containerScrollTop = container.scrollTop
               const containerHeight = container.clientHeight
 
-              // Rolar apenas se necess�rio
+              // Rolar apenas se necessário
               if(elOffsetBottom > containerScrollTop + containerHeight){
-                // Elemento est� abaixo da �rea vis�vel
+                // Elemento est� abaixo da Área visível
                 container.scrollTo({ top: elOffsetBottom - containerHeight, behavior:'smooth' })
               }else if(elOffsetTop < containerScrollTop){
-                // Elemento est� acima da �rea vis�vel
+                // Elemento est� acima da Área visível
                 container.scrollTo({ top: elOffsetTop, behavior:'smooth' })
               }
             }
@@ -6452,7 +6512,7 @@ function Home(){
                       onClick:()=>{
                         // ?? BLOQUEIO TOTAL: Se j� est� na mesma categoria com canal tocando, n�o fazer NADA
                         if(isSelected && selectedChannel) {
-                          // Apenas trocar o modo se necess�rio, SEM chamar openLiveCategory
+                          // Apenas trocar o modo se necessário, SEM chamar openLiveCategory
                           if(liveLeftMode !== 'channels') {
                             setLiveLeftMode('channels')
                           }
@@ -6473,7 +6533,7 @@ function Home(){
                     },
                       e('div', {
                         className:'flex items-center justify-between',
-                        style: { pointerEvents: 'none' } // Permite clicks em toda a �rea do button
+                        style: { pointerEvents: 'none' } // Permite clicks em toda a Área do button
                       },
                         e('div', { className:'flex items-center gap-2' },
                           isAdultCategory && e('span', { style: { fontSize: '16px' } }, '🔞'),
@@ -6565,7 +6625,7 @@ function Home(){
                       e('div', { className:'flex items-center gap-3' },
                         // ID removido - mostrar apenas logo e nome
                         item.stream_icon ? e('img', { src:item.stream_icon, className:'w-8 h-8 object-contain rounded', alt:'' }) : e('div', { className:'w-8 h-8 rounded bg-zinc-600 grid place-items-center text-xs' }, 'TV'),
-                        e('div', { className:'flex-1 truncate font-semibold' }, item.baseName || item.name || 'Sem t�tulo'),
+                        e('div', { className:'flex-1 truncate font-semibold' }, item.baseName || item.name || 'Sem título'),
                         // Badge FAV dourada se canal est� nos favoritos
                         (() => {
                           const favorites = JSON.parse(localStorage.getItem('dreamtv_favorites') || '{}')
@@ -6626,7 +6686,7 @@ function Home(){
                   const startFormatted = formatEPGTime(pg.start_timestamp || pg.start)
                   const endFormatted = formatEPGTime(pg.stop_timestamp || pg.end)
 
-                  // Decodificar t�tulo (Base64 se necess�rio)
+                  // Decodificar título (Base64 se necessário)
                   const programTitle = decodeMaybeBase64(pg.title) || 'Programa n�o encontrado'
 
                   // 3 ESTADOS VISUAIS:
@@ -6714,7 +6774,7 @@ function Home(){
                     onClick: handleClick,
                     className:`px-3 py-3 flex items-center gap-3 transition-colors ${cursorClass} rounded-lg frost border ${borderColor}`
                   },
-                    // Bolinha indicadora (sempre vis�vel)
+                    // Bolinha indicadora (sempre visível)
                     e('span', {
                       className:`w-2.5 h-2.5 rounded-full flex-shrink-0 ${dotStyle}`
                     }),
@@ -6748,7 +6808,7 @@ function Home(){
                 return dayOffsets.map((offset)=> {
                   const isSelected = selectedDay === offset
 
-                  // Verificar se o dia tem grava��es dispon�veis
+                  // Verificar se o dia tem gravações disponíveis
                   const recordedDays = channelId ? getRecordedDays(channelId) : []
                   const targetDate = new Date()
                   targetDate.setDate(targetDate.getDate() + offset) // + offset porque dayNum() usa soma
@@ -6758,7 +6818,7 @@ function Home(){
                     const rd = new Date(d)
                     rd.setHours(0,0,0,0)
                     return rd.getTime() === targetDate.getTime()
-                  }) : false // Sem playback = n�o dispon�vel
+                  }) : false // Sem playback = n�o disponível
 
                   // Verificar se � dia futuro ou passado
                   const isFutureDay = offset > 0
@@ -6766,8 +6826,8 @@ function Home(){
 
                   // Desabilitar se:
                   // 1. Dia futuro (sempre bloqueado)
-                  // 2. Dia passado SEM playback (n�o tem grava��o)
-                  // 3. Dia passado COM playback mas sem grava��o dispon�vel
+                  // 2. Dia passado SEM playback (n�o tem gravação)
+                  // 3. Dia passado COM playback mas sem gravação disponível
                   const isDisabled = isFutureDay || (isPastDay && !hasPlayback) || (hasPlayback && !isAvailable)
 
                   const handleDayClick = ()=>{
@@ -6784,9 +6844,9 @@ function Home(){
 
                   // Tooltip din�mico
                   let tooltipText = ''
-                  if(isFutureDay) tooltipText = 'Data futura n�o dispon�vel'
+                  if(isFutureDay) tooltipText = 'Data futura n�o disponível'
                   else if(isPastDay && !hasPlayback) tooltipText = 'Canal sem playback'
-                  else if(hasPlayback && !isAvailable) tooltipText = 'Sem grava��es dispon�veis'
+                  else if(hasPlayback && !isAvailable) tooltipText = 'Sem gravações disponíveis'
 
                   return e('div', {
                     key:offset,
@@ -6959,7 +7019,7 @@ function Home(){
       const [volume, setVolume] = useState(100)
       const [isMuted, setIsMuted] = useState(false)
 
-      // Mapeamento de qualidade para resolu��o
+      // Mapeamento de qualidade para resolução
       const getResolutionFromQuality = (quality) => {
         const qualityUpper = (quality || '').toUpperCase()
         if(qualityUpper.includes('FHD')) return '1920�1080'
@@ -6970,7 +7030,7 @@ function Home(){
 
       // ========== FUN��ES HELPER ==========
 
-      // Formatar t�tulo da p�lula evitando redund�ncia (ex: "GLOBO SP HD HD" -> "GLOBO SP HD")
+      // Formatar título da p�lula evitando redund�ncia (ex: "GLOBO SP HD HD" -> "GLOBO SP HD")
       const formatPillTitle = (name, activeQuality) => {
         if(!name) return 'CANAL'
         const nameUpper = name.toUpperCase()
@@ -6981,9 +7041,9 @@ function Home(){
         return activeQuality ? `${nameUpper} ${activeQuality.toUpperCase()}` : nameUpper
       }
 
-      // Decodificar Base64 se necess�rio (t�tulos EPG podem vir codificados)
+      // Decodificar Base64 se necessário (títulos EPG podem vir codificados)
       const decodeMaybeBase64 = (str) => {
-        if(!str || typeof str !== 'string') return 'Sem t�tulo'
+        if(!str || typeof str !== 'string') return 'Sem título'
 
         // Se j� parece texto normal (tem espa�os, acentos, letras), retorna direto
         if(/[\s\u00C0-\u00FF]/.test(str) || !/[A-Za-z0-9+/=]/.test(str)){
@@ -6994,7 +7054,7 @@ function Home(){
         try {
           const decoded = atob(str)
 
-          // Verificar se � texto v�lido ASCII/UTF-8 simples
+          // Verificar se � texto válido ASCII/UTF-8 simples
           if(decoded && /^[\x20-\x7E]+$/.test(decoded)){
             // Texto ASCII puro (como "SP2") - retorna direto
             return decoded
@@ -7008,16 +7068,16 @@ function Home(){
                 return utf8Decoded
               }
             } catch(e2) {
-              // Falhou convers�o UTF-8, retorna decoded simples
+              // Falhou conversão UTF-8, retorna decoded simples
               return decoded
             }
           }
 
-          // Se decodificou mas n�o � texto v�lido, retorna original
+          // Se decodificou mas n�o � texto válido, retorna original
           return str
 
         } catch(e) {
-          // N�o � Base64 v�lido, retorna original
+          // N�o � Base64 válido, retorna original
           return str
         }
       }
@@ -7032,7 +7092,7 @@ function Home(){
         }
       }, [channel?.stream_id, channel?.id])
 
-      // Detectar variantes dispon�veis
+      // Detectar variantes disponíveis
       useEffect(()=>{
         if(!channel || !channel.allVariants) return
         const qualities = channel.allVariants.map(v => v.quality).filter(Boolean)
@@ -7081,12 +7141,12 @@ function Home(){
         const currentPlaybackUrl = channel?.playback_url || null
 
         if(channel && lastLoadedChannel.id === currentChannelId && lastLoadedChannel.playback_url === currentPlaybackUrl) {
-          // Restaurar hlsRef da vari�vel global se necess�rio
+          // Restaurar hlsRef da vari�vel global se necessário
           if(!hlsRef.current && globalHlsInstance) {
             hlsRef.current = globalHlsInstance
           }
 
-          // ?? Se o v�deo est� sem dados (readyState: 0), significa que o elemento foi recriado
+          // ?? Se o vídeo est� sem dados (readyState: 0), significa que o elemento foi recriado
           // Precisamos reconectar o HLS ao novo elemento
           if(hlsRef.current && v.readyState === 0) {
             try {
@@ -7097,7 +7157,7 @@ function Home(){
               }, 100)
             } catch(err) {}
           } else if(v.paused && hlsRef.current) {
-            // V�deo apenas pausado, retomar play
+            // Vídeo apenas pausado, retomar play
             v.play().catch(err => {})
           }
 
@@ -7121,22 +7181,22 @@ function Home(){
           return
         }
 
-        // Debounce: aguardar 200ms antes de iniciar o v�deo
+        // Debounce: aguardar 200ms antes de iniciar o vídeo
         // Isso evita m�ltiplas inicializa��es quando o estado muda rapidamente
         loadTimeout = setTimeout(()=>{
           if(cancelled) return
 
-          // Usar playback_url se dispon�vel (modo playback de programa gravado)
+          // Usar playback_url se disponível (modo playback de programa gravado)
           const url = channel.playback_url || buildURL(cfg.server, ['live', cfg.username, cfg.password, (channel.stream_id||channel.id)+'.m3u8'])
 
           const canNative = v.canPlayType('application/vnd.apple.mpegURL')
 
-          // FOR�AR uso do HLS.js sempre que dispon�vel (melhor compatibilidade)
+          // FOR�AR uso do HLS.js sempre que disponível (melhor compatibilidade)
           if(window.Hls && window.Hls.isSupported()){
             // ? Configura��o otimizada para in�cio R�PIDO
             const h = new Hls({
               maxBufferLength: 10,        // Reduzido: 30s ? 10s (inicia 3x mais r�pido!)
-              maxMaxBufferLength: 20,      // Buffer m�ximo: 20s
+              maxMaxBufferLength: 20,      // Buffer máximo: 20s
               startPosition: -1,           // Come�ar do in�cio
               autoStartLoad: true,         // Carregar imediatamente
               enableWorker: true,          // Usar Web Worker (performance)
@@ -7150,12 +7210,12 @@ function Home(){
             h.on(window.Hls.Events.MANIFEST_PARSED, ()=>{
               if(cancelled) return
               retryCountRef.current = 0
-              // Salvar canal como �ltimo carregado com sucesso
+              // Salvar canal como Último carregado com sucesso
               lastLoadedChannel = { id: currentChannelId, playback_url: currentPlaybackUrl }
             })
             h.on(window.Hls.Events.ERROR, (event, data)=>{
               if(data.fatal && !cancelled){
-                // Tentar retry autom�tico (m�ximo 2 tentativas)
+                // Tentar retry autom�tico (máximo 2 tentativas)
                 if(retryCountRef.current < 2){
                   retryCountRef.current++
                   setTimeout(()=>{
@@ -7230,7 +7290,7 @@ function Home(){
         const currentIdx = channel.allVariants.findIndex(v => v.quality === selectedQuality)
         if(currentIdx === -1) return
 
-        // Tentar pr�xima qualidade
+        // Tentar próxima qualidade
         const nextVariant = channel.allVariants[currentIdx + 1] || channel.allVariants[0]
         if(nextVariant && nextVariant.quality !== selectedQuality){
           showToast(`Falha na qualidade ${selectedQuality}. Mudando para ${nextVariant.quality}...`)
@@ -7255,7 +7315,7 @@ function Home(){
 
         // ?? CR�TICO: N�O atualizar selectedChannel aqui para n�o sair do fullscreen!
         // O player troca a URL diretamente via HLS, n�o precisa re-render do pai
-        // A atualiza��o do state � feita apenas quando o usu�rio SAI do fullscreen
+        // A atualização do state � feita apenas quando o usuário SAI do fullscreen
 
         // Trocar a URL diretamente no HLS sem recriar o player (mant�m fullscreen)
         const v = vref.current
@@ -7263,7 +7323,7 @@ function Home(){
 
         const url = buildURL(cfg.server, ['live', cfg.username, cfg.password, (variant.stream_id||variant.id)+'.m3u8'])
 
-        // Atualizar resolu��o baseada na qualidade selecionada
+        // Atualizar resolução baseada na qualidade selecionada
         setVideoResolution(getResolutionFromQuality(quality))
 
         if(hlsRef.current){
@@ -7278,7 +7338,7 @@ function Home(){
         // Atualizar qualidade na ref (n�o causa re-render, mant�m fullscreen)
         currentQualityRef.current = quality
 
-        // For�ar re-render apenas dos bot�es (sem reconstruir o player container)
+        // For�ar re-render apenas dos botões (sem reconstruir o player container)
         setTimeout(()=> setSelectedQuality(quality), 100)
 
         // ? Atualizar selectedChannel APENAS quando n�o estiver em fullscreen
@@ -7373,7 +7433,7 @@ function Home(){
       }, [])
       
 
-      // Navega��o por teclado: atalhos do HUD
+      // Navegação por teclado: atalhos do HUD
       useEffect(()=>{
         if(!channel) return
 
@@ -7426,7 +7486,7 @@ function Home(){
             }
           }
 
-          // ? / ?: navega��o entre canais (placeholder)
+          // ? / ?: navegação entre canais (placeholder)
           if(e.key === 'ArrowLeft'){
             e.preventDefault()
           }
@@ -7456,7 +7516,7 @@ function Home(){
           setShowOverlay(false)
         }, 4000)
 
-        // Fun��o para reexibir overlay ao mover mouse/tecla
+        // Função para reexibir overlay ao mover mouse/tecla
         const handleActivity = ()=>{
           setShowOverlay(true)
           if(hideTimeoutRef.current){
@@ -7551,7 +7611,7 @@ function Home(){
 
       const currentProg = getCurrentProgram()
 
-      // Pr�ximo programa: encontrar o que vem depois do atual
+      // Próximo programa: encontrar o que vem depois do atual
       let nextProg = null
       if(currentProg && epg && epg.length > 0){
         const currentIdx = epg.findIndex(p => p.id === currentProg.id)
@@ -7588,7 +7648,7 @@ function Home(){
           toggleFullscreen()
         }
       },
-        // Viewport wrapper - centraliza o v�deo perfeitamente
+        // Viewport wrapper - centraliza o vídeo perfeitamente
         e('div', {
           className: 'player-viewport',
           tabIndex: -1,
@@ -7738,7 +7798,7 @@ function Home(){
                     }
                   }, channel?.playback_mode ? '⏮️ PLAYBACK' : 'AO VIVO')
                 ),
-                // Linha 2: T�tulo do programa (usa playback_program se estiver em modo playback)
+                // Linha 2: Título do programa (usa playback_program se estiver em modo playback)
                 e('div', {
                   style: {
                     fontSize: 'clamp(18px,2.2vw,26px)',
@@ -7771,7 +7831,7 @@ function Home(){
                 )
               ),
 
-              // Col 4: Pr�ximo programa (centro-direita)
+              // Col 4: Próximo programa (centro-direita)
               nextProg && e('div', {
                 style: {
                   display: 'flex',
@@ -7799,7 +7859,7 @@ function Home(){
                     }
                   }, 'NEXT')
                 ),
-                // T�tulo do pr�ximo + hor�rio
+                // Título do próximo + hor�rio
                 e('div', {
                   style: {
                     fontSize: 'clamp(14px,1.6vw,18px)',
@@ -7812,7 +7872,7 @@ function Home(){
                 }, `${decodeMaybeBase64(nextProg.title)} ${nextProg.start || ''} ⏱ ${nextProg.end || ''}`)
               ),
 
-              // Col 5: Hora + Resolu��o
+              // Col 5: Hora + Resolução
               e('div', {
                 style: {
                   textAlign: 'right'
@@ -8049,7 +8109,7 @@ function Home(){
                 boxShadow: '0 8px 32px rgba(0,0,0,0.6)'
               }
             },
-              // ESQUERDA: N�mero + Logo + Programa Atual
+              // ESQUERDA: Número + Logo + Programa Atual
               e('div', {
                 style: {
                   display: 'flex',
@@ -8058,7 +8118,7 @@ function Home(){
                   flex: 1
                 }
               },
-                // N�mero do canal
+                // Número do canal
                 e('div', {
                   style: {
                     fontSize: '32px',
@@ -8089,7 +8149,7 @@ function Home(){
                     minWidth: 0
                   }
                 },
-                  // T�tulo + AO VIVO
+                  // Título + AO VIVO
                   e('div', {
                     style: {
                       display: 'flex',
@@ -8152,7 +8212,7 @@ function Home(){
                 )
               ),
 
-              // CENTRO: Pr�ximo programa
+              // CENTRO: Próximo programa
               nextProg && e('div', {
                 style: {
                   marginLeft: '32px',
@@ -8192,7 +8252,7 @@ function Home(){
                 }, nextProg.title)
               ),
 
-              // DIREITA: Hora + Resolu��o
+              // DIREITA: Hora + Resolução
               e('div', {
                 style: {
                   textAlign: 'right',
@@ -8288,8 +8348,8 @@ if(typeof window.__netflixMoviesState === 'undefined') {
     currentViewKey: null, // ===== NOVO: Rastreia qual view est� carregada =====
     sectionsMovies: [],
     featuredMovieId: null,
-    totalCategories: 0, // Total de categorias dispon�veis
-    currentCategoryIndex: 0, // Categoria vis�vel atual
+    totalCategories: 0, // Total de categorias disponíveis
+    currentCategoryIndex: 0, // Categoria visível atual
     loading: false,
     errorMsg: '',
     marginContent: {}, // ===== NOVO: Estado de scroll horizontal persistente =====
@@ -8319,14 +8379,14 @@ window.__hoveredTrailer = {
   updateCallback: null
 }
 
-// Fun��o GLOBAL para atualizar estado e notificar todos os componentes
+// Função GLOBAL para atualizar estado e notificar todos os componentes
 window.updateNetflixMoviesState = (updates) => {
   Object.assign(window.__netflixMoviesState, updates)
   // Notificar todos os componentes montados
   window.__netflixMoviesListeners.forEach(listener => listener())
 }
 
-// Fun��o para resetar estado quando sair da view de filmes
+// Função para resetar estado quando sair da view de filmes
 window.resetNetflixMovies = () => {
   window.__netflixMoviesState = {
     initialized: false,
@@ -8340,7 +8400,7 @@ window.resetNetflixMovies = () => {
     showCollectionsView: false,
     selectedCollectionMovies: [],
     viewingCollectionMovies: false,
-    heroBackdrop: null, // Backdrop para mostrar no topo (cole��o ou filme)
+    heroBackdrop: null, // Backdrop para mostrar no topo (coleção ou filme)
     marginContent: {} // ===== NOVO: Resetar estado de scroll =====
   }
   // ===== LIMPAR CATEGORIAS FILTRADAS =====
@@ -8383,7 +8443,7 @@ window.resetNetflixMovies = () => {
         })
       }
 
-      // Fun��o para SectionMovies se registrar
+      // Função para SectionMovies se registrar
       const registerMarginListener = (sectionId, callback) => {
         marginListenersRef.current[sectionId] = callback
         return () => {
@@ -8394,13 +8454,13 @@ window.resetNetflixMovies = () => {
       const [focusedMovieIdx, setFocusedMovieIdx] = useState(0)
       const loadingCategoriesRef = useRef(new Set()) // M�ltiplas categorias carregando simultaneamente
 
-      // Estados para cole��es (usar estado global para persistir)
+      // Estados para coleções (usar estado global para persistir)
       const collections = globalState.collections || []
       const setCollections = (value) => {
         window.updateNetflixMoviesState({ collections: value })
       }
 
-      // Estados de visualiza��o de cole��es (tamb�m usar estado global)
+      // Estados de visualiza��o de coleções (tamb�m usar estado global)
       const showCollectionsView = globalState.showCollectionsView || false
       const setShowCollectionsView = (value) => {
         window.updateNetflixMoviesState({ showCollectionsView: value })
@@ -8422,7 +8482,7 @@ window.resetNetflixMovies = () => {
         window.updateNetflixMoviesState({ loadingCollections: value })
       }
 
-      // Fun��o para carregar �ndice de cole��es pr�-constru�do (INSTANT�NEO)
+      // Função para carregar �ndice de coleções pré-constru�do (INSTANT�NEO)
       const loadCollectionsFromJSON = async (setCollections) => {
         // Evitar m�ltiplas chamadas usando flag GLOBAL
         if (window.__collectionsLoadAttempted) {
@@ -8432,7 +8492,7 @@ window.resetNetflixMovies = () => {
         setLoadingCollections(true)
 
         try {
-          // URL do arquivo JSON (ajuste conforme necess�rio)
+          // URL do arquivo JSON (ajuste conforme necessário)
           const jsonUrl = './collections.json' // Coloque o arquivo na raiz do projeto
 
           const response = await fetch(jsonUrl)
@@ -8445,7 +8505,7 @@ window.resetNetflixMovies = () => {
           // Verificar se a resposta � realmente JSON
           const contentType = response.headers.get('content-type')
           if (!contentType || !contentType.includes('application/json')) {
-            throw new Error(`Tipo de conte�do inv�lido: ${contentType}. Esperado JSON, mas recebeu HTML ou outro formato.`)
+            throw new Error(`Tipo de conte�do inválido: ${contentType}. Esperado JSON, mas recebeu HTML ou outro formato.`)
           }
 
           const data = await response.json()
@@ -8468,16 +8528,16 @@ window.resetNetflixMovies = () => {
 
           // ===== ENRIQUECER COLE��ES COM G�NEROS DO TMDB =====
           // Estrat�gia: buscar g�neros da COLE��O (n�o dos filmes individuais)
-          // Isso funciona porque as cole��es TMDB t�m g�neros derivados dos filmes
+          // Isso funciona porque as coleções TMDB t�m g�neros derivados dos filmes
           const collectionsToEnrich = collections.slice(0, 200)
 
           Promise.all(
             collectionsToEnrich.map(async (col) => {
               try {
-                // Buscar dados da cole��o no TMDB
+                // Buscar dados da coleção no TMDB
                 const tmdbCollectionData = await getTMDBCollection(col.id)
 
-                // Se a cole��o TMDB tem filmes, pegar g�neros do primeiro
+                // Se a coleção TMDB tem filmes, pegar g�neros do primeiro
                 if (tmdbCollectionData && tmdbCollectionData.parts && tmdbCollectionData.parts.length > 0) {
                   const firstMovie = tmdbCollectionData.parts[0]
 
@@ -8496,7 +8556,7 @@ window.resetNetflixMovies = () => {
                       .filter(name => name)
                       .join(', ')
 
-                    // Adicionar g�neros a TODOS os filmes da cole��o
+                    // Adicionar g�neros a TODOS os filmes da coleção
                     col.movies.forEach(movie => {
                       movie.tmdb_genres = genreNames
                       movie.genre_ids = firstMovie.genre_ids
@@ -8511,7 +8571,7 @@ window.resetNetflixMovies = () => {
             setCollections([...collections]) // Atualizar estado com g�neros
           })
 
-          // Enriquecer primeiras 30 cole��es com overview do TMDB (em background)
+          // Enriquecer primeiras 30 coleções com overview do TMDB (em background)
           const collectionsOverview = collections.slice(0, 30) // Limitar para performance
 
           Promise.all(
@@ -8531,19 +8591,19 @@ window.resetNetflixMovies = () => {
           setCollections(collections)
 
         } catch (err) {
-          // Silenciar erro 404 ou conte�do inv�lido - arquivo collections.json � opcional
+          // Silenciar erro 404 ou conte�do inválido - arquivo collections.json � opcional
           setCollections([])
         } finally {
           setLoadingCollections(false)
         }
       }
 
-      // Fun��o para construir cole��es dinamicamente a partir dos filmes carregados
+      // Função para construir coleções dinamicamente a partir dos filmes carregados
       const loadCollections = async () => {
         setLoadingCollections(true)
 
         try {
-          // Coletar todos os filmes de todas as se��es carregadas
+          // Coletar todos os filmes de todas as seções carregadas
           const allMovies = []
           for(const section of globalState.sectionsMovies) {
             if(section && section.movies && section.movies.length > 0) {
@@ -8572,7 +8632,7 @@ window.resetNetflixMovies = () => {
 
       // ===== NOVO: Setar featuredMovieId automaticamente quando sectionsMovies carrega =====
       useEffect(() => {
-        // Verifica se estamos em uma view de conte�do (n�o em cole��es ou live)
+        // Verifica se estamos em uma view de conte�do (n�o em coleções ou live)
         const isContentView = view && view.startsWith('netflix-')
 
         // S� setar se estamos em view de conte�do e temos filmes carregados
@@ -8586,34 +8646,34 @@ window.resetNetflixMovies = () => {
             if (firstMovieId) {
               window.updateNetflixMoviesState({
                 featuredMovieId: firstMovieId,
-                heroBackdrop: null // Garantir que n�o h� backdrop de cole��o
+                heroBackdrop: null // Garantir que n�o h� backdrop de coleção
               })
             }
           }
         }
       }, [view, globalState.sectionsMovies.length])
 
-      // ===== NOVO: Carregar cole��es automaticamente quando filmes forem carregados =====
-      // Construir cole��es em background assim que tiver filmes suficientes
+      // ===== NOVO: Carregar coleções automaticamente quando filmes forem carregados =====
+      // Construir coleções em background assim que tiver filmes suficientes
       useEffect(() => {
         const totalMovies = globalState.sectionsMovies.reduce((sum, section) => {
           return sum + (section?.movies?.length || 0)
         }, 0)
 
-        // Se tem filmes carregados E ainda n�o tem cole��es E n�o est� carregando
+        // Se tem filmes carregados E ainda n�o tem coleções E n�o est� carregando
         if (totalMovies >= 50 && collections.length === 0 && !loadingCollections) {
           loadCollections()
         }
-      }, [globalState.sectionsMovies.length]) // Disparar quando novas se��es forem adicionadas
+      }, [globalState.sectionsMovies.length]) // Disparar quando novas seções forem adicionadas
 
-      // ===== NOVO: For�ar carregamento de cole��es quando entrar na view collections =====
+      // ===== NOVO: For�ar carregamento de coleções quando entrar na view collections =====
       useEffect(() => {
         if (view === 'collections' && collections.length === 0 && !loadingCollections) {
           const totalMovies = globalState.sectionsMovies.reduce((sum, section) => {
             return sum + (section?.movies?.length || 0)
           }, 0)
 
-          // Se tem pelo menos alguns filmes, tenta carregar cole��es
+          // Se tem pelo menos alguns filmes, tenta carregar coleções
           if (totalMovies > 0) {
             loadCollections()
           } else {
@@ -8650,7 +8710,7 @@ window.resetNetflixMovies = () => {
             window.updateNetflixMoviesState({
               heroBackdrop: {
                 name: firstCollection.name,
-                overview: firstCollection.overview || `Cole��o com ${firstCollection.movies?.length || 0} filmes`,
+                overview: firstCollection.overview || `Coleção com ${firstCollection.movies?.length || 0} filmes`,
                 backdrop: firstCollection.backdrop,
                 poster: firstCollection.poster,
                 backdrop_path: null
@@ -8674,7 +8734,7 @@ window.resetNetflixMovies = () => {
         })
       }
 
-      // ===== NOVO: Ref para rastrear a �ltima categoria e evitar resets desnecess�rios =====
+      // ===== NOVO: Ref para rastrear a Última categoria e evitar resets desnecessários =====
       const lastCategoryIndexRef = useRef(currentCategoryIndex)
 
       // Registrar listener para re-renderizar quando estado global mudar
@@ -8733,7 +8793,7 @@ window.resetNetflixMovies = () => {
             const catsArray = toArray(raw)
 
             if(!Array.isArray(catsArray) || catsArray.length === 0) {
-              throw new Error(`Nenhuma categoria ${categoryType} dispon�vel`)
+              throw new Error(`Nenhuma categoria ${categoryType} disponível`)
             }
 
             categories = catsArray
@@ -8741,7 +8801,7 @@ window.resetNetflixMovies = () => {
             // 2. Filtrar categorias se houver filtro espec�fico
             let selectedCategories = categories
 
-            // Se tem uma categoria espec�fica selecionada pelo usu�rio, usar apenas ela
+            // Se tem uma categoria espec�fica selecionada pelo usuário, usar apenas ela
             if (selectedCategory) {
               const catId = getCatId(selectedCategory)
               selectedCategories = categories.filter(cat => getCatId(cat) === catId)
@@ -8807,11 +8867,11 @@ window.resetNetflixMovies = () => {
             }
 
             if(allSections.length === 0) {
-              throw new Error('Nenhuma categoria com filmes dispon�vel')
+              throw new Error('Nenhuma categoria com filmes disponível')
             }
 
-            // Atualizar estado com todas as se��es
-            // ===== FIX: S�ries usam series_id, filmes usam stream_id =====
+            // Atualizar estado com todas as seções
+            // ===== FIX: Séries usam series_id, filmes usam stream_id =====
             const firstMovie = allSections[0]?.movies?.[0]
             const firstMovieId = firstMovie?.series_id || firstMovie?.stream_id
 
@@ -8821,10 +8881,10 @@ window.resetNetflixMovies = () => {
               totalCategories: selectedCategories.length
             })
 
-            // 4. Carregar �ndice de cole��es pr�-constru�do (instant�neo)
+            // 4. Carregar �ndice de coleções pré-constru�do (instant�neo)
             await loadCollectionsFromJSON(setCollections)
 
-            // ===== OTIMIZADO: Pr�-carregar apenas pr�ximas 3 categorias (lazy loading on-demand) =====
+            // ===== OTIMIZADO: Pré-carregar apenas próximas 3 categorias (lazy loading on-demand) =====
             const PRELOAD_LIMIT = 3 // Reduzido de TODAS para apenas 3
             const totalCats = selectedCategories.length
             const categoriesToPreload = Math.min(PRELOAD_LIMIT, totalCats - 1)
@@ -8878,9 +8938,9 @@ window.resetNetflixMovies = () => {
         }
       }, [currentCategoryIndex]) // ===== CORRIGIDO: Removido globalState.sectionsMovies das depend�ncias =====
 
-      // Navega��o por teclado
+      // Navegação por teclado
       useEffect(() => {
-        // Verificar se est� em qualquer view do NetflixMovies (filmes, s�ries, novelas, etc)
+        // Verificar se est� em qualquer view do NetflixMovies (filmes, séries, novelas, etc)
         const isNetflixView = ['netflix-movies', 'netflix-series', 'netflix-novelas', 'netflix-animes', 'netflix-desenhos', 'netflix-show'].includes(view)
         if(!isNetflixView || globalState.sectionsMovies.length === 0) return
 
@@ -8903,7 +8963,7 @@ window.resetNetflixMovies = () => {
             }
           } else if(e.key === 'ArrowDown'){
             e.preventDefault()
-            // Mudar para pr�xima categoria
+            // Mudar para próxima categoria
             const totalAvailable = globalState.totalCategories || window.__allAvailableCategories?.length || 0
             if (currentCategoryIndex < totalAvailable - 1) {
               const nextIndex = currentCategoryIndex + 1
@@ -9000,7 +9060,7 @@ window.resetNetflixMovies = () => {
         }
       }, [currentCategoryIndex, focusedMovieIdx, view, globalState.sectionsMovies])
 
-      // Carregar filmes de uma categoria (retorna objeto se��o)
+      // Carregar filmes de uma categoria (retorna objeto seção)
       // Carrega TODOS os filmes da categoria de uma vez
       const loadCategoryMovies = async (categoryIndex, categoriesArray) => {
         const cats = categoriesArray
@@ -9011,8 +9071,8 @@ window.resetNetflixMovies = () => {
         }
 
         try {
-          // Buscar APENAS os filmes/s�ries desta categoria (performance otimizada)
-          const contentLabel = isSeriesMode ? 's�ries' : 'filmes'
+          // Buscar APENAS os filmes/séries desta categoria (performance otimizada)
+          const contentLabel = isSeriesMode ? 'séries' : 'filmes'
           const apiAction = isSeriesMode ? 'get_series' : 'get_vod_streams'
 
           const data = await apiCall(apiAction, { category_id: getCatId(cat) })
@@ -9104,11 +9164,11 @@ window.resetNetflixMovies = () => {
 
           // ===== FIX: Validar section ANTES de adicionar (verificar se tem movies) =====
           if(section && section.movies && Array.isArray(section.movies) && section.movies.length > 0) {
-            // Adicionar a nova se��o na posi��o correta (n�o substituir)
+            // Adicionar a nova seção na posição correta (n�o substituir)
             const newSections = [...globalState.sectionsMovies]
             newSections[categoryIndex] = section
 
-            // ===== CORRIGIDO: N�O mudar featuredMovieId em pr�-carregamento =====
+            // ===== CORRIGIDO: N�O mudar featuredMovieId em pré-carregamento =====
             // S� atualizar sectionsMovies, preservar featuredMovieId atual
             window.updateNetflixMoviesState({
               sectionsMovies: newSections
@@ -9169,7 +9229,7 @@ window.resetNetflixMovies = () => {
             return state
           }
 
-          // Scroll din�mico baseado em cards vis�veis (scroll de 1 p�gina por vez)
+          // Scroll din�mico baseado em cards vis�veis (scroll de 1 página por vez)
           const scrollAmount = cardsVisible * cardWidth
           let newValue = currentMargin + (direction === 'left' ? -scrollAmount : scrollAmount)
 
@@ -9278,7 +9338,7 @@ window.resetNetflixMovies = () => {
           }
           lastProcessedIdRef.current = featuredMovieId
 
-          // Buscar filme nas se��es
+          // Buscar filme nas seções
           let foundMovie = null
           for(let section of globalState.sectionsMovies){
             // ===== FIX: Verificar se section existe E tem movies array =====
@@ -9289,14 +9349,14 @@ window.resetNetflixMovies = () => {
           }
 
           if(!foundMovie) {
-            // Tentar buscar nos filmes da cole��o
+            // Tentar buscar nos filmes da coleção
             if(collectionMovies && collectionMovies.length > 0) {
               foundMovie = collectionMovies.find(m => (m.series_id || m.stream_id) === featuredMovieId)
             }
           }
 
           if(foundMovie){
-            // ===== FIX: Usar series_id para s�ries, stream_id para filmes =====
+            // ===== FIX: Usar series_id para séries, stream_id para filmes =====
             const movieId = foundMovie.series_id || foundMovie.stream_id
 
             // Verificar se j� est� no cache GLOBAL
@@ -9346,12 +9406,12 @@ window.resetNetflixMovies = () => {
                   setShowPrevious(false)
                 }, 50)
 
-                // Limpar previousMovie ap�s transi��o completar
+                // Limpar previousMovie ap�s transição completar
                 transitionTimeoutRef.current = setTimeout(() => {
                   setPreviousMovie(null)
                 }, 850) // 50ms + 800ms transition
               } else {
-                // Primeiro filme, sem transi��o
+                // Primeiro filme, sem transição
                 setMovie(cachedMovie)
               }
               })(); // Fechar async IIFE
@@ -9388,7 +9448,7 @@ window.resetNetflixMovies = () => {
                        (url.includes('image.tmdb.org') && !url.includes('/w500/'))
               }
 
-              // Prioridade: backdrops TMDB ? stream_icon (se v�lido) ? poster TMDB
+              // Prioridade: backdrops TMDB ? stream_icon (se válido) ? poster TMDB
               const getValidBackdrop = () => {
                 // 1. Tentar backdrops do TMDB (melhor qualidade)
                 const tmdbBackdrops = [
@@ -9417,7 +9477,7 @@ window.resetNetflixMovies = () => {
                   }
                 }
 
-                // 4. Como �ltimo recurso, usar poster do TMDB
+                // 4. Como Último recurso, usar poster do TMDB
                 if (enrichedMovie.tmdb_poster && isValidImageUrl(enrichedMovie.tmdb_poster)) {
                   return enrichedMovie.tmdb_poster
                 }
@@ -9435,7 +9495,7 @@ window.resetNetflixMovies = () => {
                 rating: enrichedMovie.tmdb_rating ? (enrichedMovie.tmdb_rating * 10).toFixed(0) : '85',
                 releaseDate: enrichedMovie.tmdb_year || enrichedMovie.year || '2024',
                 runtime: enrichedMovie.tmdb_runtime || enrichedMovie.duration || '',
-                overview: enrichedMovie.tmdb_overview || enrichedMovie.plot || enrichedMovie.description || 'Sem descri��o dispon�vel',
+                overview: enrichedMovie.tmdb_overview || enrichedMovie.plot || enrichedMovie.description || 'Sem descrição disponível',
                 genres: enrichedMovie.tmdb_genres || enrichedMovie.genre || 'Filme'
               }
 
@@ -9458,12 +9518,12 @@ window.resetNetflixMovies = () => {
                   setShowPrevious(false)
                 }, 50)
 
-                // Limpar previousMovie ap�s transi��o completar
+                // Limpar previousMovie ap�s transição completar
                 transitionTimeoutRef.current = setTimeout(() => {
                   setPreviousMovie(null)
                 }, 850)
               } else {
-                // Primeiro filme, sem transi��o
+                // Primeiro filme, sem transição
                 setMovie(movieData)
               }
             }
@@ -9479,7 +9539,7 @@ window.resetNetflixMovies = () => {
 
             setLoadingFeaturedTrailer(true)
             try {
-              // Detectar se � s�rie ou filme
+              // Detectar se � série ou filme
               const type = movie.series_id ? 'tv' : 'movie'
               const trailerUrl = await getTMDBTrailer(movie.tmdb_id, type)
               if (trailerUrl) {
@@ -9588,14 +9648,14 @@ window.resetNetflixMovies = () => {
                 background: 'linear-gradient(to top, #111 25%, transparent 60%)'
               }
             },
-              // Content com transi��o suave
+              // Content com transição suave
               e('div', {
                 style: {
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'flex-start',
                   justifyContent: 'flex-start', // Alinha no topo
-                  padding: '60px 40px 0 40px', // Padding m�nimo no topo
+                  padding: '60px 40px 0 40px', // Padding mínimo no topo
                   width: '100%',
                   height: '100%',
                   background: 'linear-gradient(to right, rgba(0,0,0,0.6) 40%, transparent 60%)'
@@ -9617,7 +9677,7 @@ window.resetNetflixMovies = () => {
                   }
                 }, displayMovie.name || displayMovie.title),
 
-                // MovieInfo (rating, year, runtime) - usa dados do TMDB quando dispon�vel
+                // MovieInfo (rating, year, runtime) - usa dados do TMDB quando disponível
                 e('div', {
                   style: {
                     display: 'flex',
@@ -9655,7 +9715,7 @@ window.resetNetflixMovies = () => {
                     : (displayMovie.tmdb_runtime || displayMovie.runtime))
                 ),
 
-                // Overview (descri��o do TMDB � priorizada)
+                // Overview (descrição do TMDB � priorizada)
                 e('p', {
                   style: {
                     width: '650px',
@@ -9755,7 +9815,7 @@ window.resetNetflixMovies = () => {
         return prevProps.featuredMovieId === nextProps.featuredMovieId
       })
 
-      // COMPONENTE: CollectionCard (Card de cole��o para carrossel horizontal)
+      // COMPONENTE: CollectionCard (Card de coleção para carrossel horizontal)
       const CollectionCard = React.memo(({ collection, onClick, sectionId, idx }) => {
         const [isHovered, setIsHovered] = useState(false)
         const isHoveredRef = useRef(false)
@@ -9771,7 +9831,7 @@ window.resetNetflixMovies = () => {
           }
         }, [collection.id])
 
-        // Buscar detalhes completos da cole��o ao passar o mouse (s� se n�o tiver overview)
+        // Buscar detalhes completos da coleção ao passar o mouse (s� se n�o tiver overview)
         useEffect(() => {
           if (isHovered && !hasEnrichedRef.current && !fullCollection?.overview && !isLoading) {
             hasEnrichedRef.current = true
@@ -9962,7 +10022,7 @@ window.resetNetflixMovies = () => {
 
             // ===== NAVEGAR PARA P�GINA DE DETALHES =====
 
-            // Preparar dados enriquecidos para p�gina de detalhes
+            // Preparar dados enriquecidos para página de detalhes
             const contentData = {
               ...enrichedMovie,
               ...movie,
@@ -9971,13 +10031,13 @@ window.resetNetflixMovies = () => {
             }
 
 
-            // Se for s�rie, buscar info adicional da API (epis�dios, temporadas)
+            // Se for série, buscar info adicional da API (episódios, temporadas)
             if (isSeriesMode) {
               try {
                 const seriesId = movie.series_id || movie.stream_id || movie.id
                 const seriesInfo = await apiCall('get_series_info', { series_id: seriesId })
 
-                // Contar epis�dios e temporadas
+                // Contar episódios e temporadas
                 const seasons = seriesInfo.episodes || {}
                 const seasonsCount = Object.keys(seasons).length
                 let episodesCount = 0
@@ -9992,7 +10052,7 @@ window.resetNetflixMovies = () => {
               }
             }
 
-            // Navegar para p�gina de detalhes
+            // Navegar para página de detalhes
             setSelectedContent(contentData)
             setView('serie-details')
           },
@@ -10005,7 +10065,7 @@ window.resetNetflixMovies = () => {
               if (window.updateNetflixMoviesState) {
                 window.updateNetflixMoviesState({
                   featuredMovieId: movieId,
-                  heroBackdrop: null // Limpar backdrop de cole��es ao passar mouse em filme
+                  heroBackdrop: null // Limpar backdrop de coleções ao passar mouse em filme
                 })
               }
             }
@@ -10018,7 +10078,7 @@ window.resetNetflixMovies = () => {
             setIsHovered(false)
           }
         },
-          // Poster ou placeholder (sempre vis�vel, mas escurecido no hover)
+          // Poster ou placeholder (sempre visível, mas escurecido no hover)
           (enrichedMovie.stream_icon || enrichedMovie.cover || enrichedMovie.tmdb_poster)
             ? e('img', {
                 src: enrichedMovie.stream_icon || enrichedMovie.cover || enrichedMovie.tmdb_poster,
@@ -10126,7 +10186,7 @@ window.resetNetflixMovies = () => {
                prevProps.idx === nextProps.idx
       })
 
-      // COMPONENTE: CollectionsGrid (Grade de cole��es)
+      // COMPONENTE: CollectionsGrid (Grade de coleções)
       // COMPONENTE: SectionMovies
       const SectionMovies = ({ name, movies, sectionId, categoryIndex, totalCategories, onNextCategory, onPrevCategory, isCollectionsMode }) => {
         // Prote��o contra movies undefined
@@ -10134,7 +10194,7 @@ window.resetNetflixMovies = () => {
           return null
         }
 
-        // ===== STATE LOCAL apenas para currentMargin (para atualizar bot�es) =====
+        // ===== STATE LOCAL apenas para currentMargin (para atualizar botões) =====
         const [currentMargin, setCurrentMargin] = useState(marginContentRef.current[sectionId] || 0)
         const marginRef = useRef(currentMargin)
         const [visibleCount, setVisibleCount] = useState(Math.min(50, movies.length)) // Carregar 50 filmes inicialmente ou todos se tiver menos
@@ -10162,14 +10222,14 @@ window.resetNetflixMovies = () => {
         const visibleMovies = (movies || []).slice(0, visibleCount)
         const MAX_WIDTH_CONTENT = visibleMovies.length * 280
 
-        // Calcula se os bot�es devem aparecer
+        // Calcula se os botões devem aparecer
         const viewportWidth = window.innerWidth - 80
         const cardWidth = 280 // 260px card + 20px margin
         const totalWidth = visibleMovies.length * cardWidth
         const maxScroll = Math.min(0, -(totalWidth - viewportWidth))
 
         const showLeftButton = currentMargin < 0 // Tem conte�do scrollado para esquerda
-        const showRightButton = true // SEMPRE MOSTRAR (como solicitado pelo usu�rio)
+        const showRightButton = true // SEMPRE MOSTRAR (como solicitado pelo usuário)
 
         // Carregar mais filmes quando chegar perto do fim (com debounce)
         useEffect(() => {
@@ -10319,7 +10379,7 @@ window.resetNetflixMovies = () => {
               border: 0,
               left: 0,
               width: '80px',
-              opacity: currentMargin < 0 ? '0.9' : '0', // S� vis�vel se pode rolar
+              opacity: currentMargin < 0 ? '0.9' : '0', // S� visível se pode rolar
               pointerEvents: currentMargin < 0 ? 'auto' : 'none',
               transition: 'opacity 0.3s ease, background 0.2s ease',
               cursor: 'pointer',
@@ -10334,7 +10394,7 @@ window.resetNetflixMovies = () => {
                 transform: hoveringLeft ? 'scale(1.2)' : 'scale(1)',
                 transition: 'transform 0.2s ease'
               }
-            }, '?')
+            }, '‹')
           ),
 
           // Movies container
@@ -10462,7 +10522,7 @@ window.resetNetflixMovies = () => {
             onClick: (e) => {
               e.stopPropagation() // Evita que o clique propague e cause blur nos cards
 
-              // Vers�o local do handleScrollMovies que usa movies diretamente
+              // Versão local do handleScrollMovies que usa movies diretamente
               setMarginContent(prevState => {
                 const currentMargin = prevState[sectionId] || 0
                 const cardWidth = 280
@@ -10515,7 +10575,7 @@ window.resetNetflixMovies = () => {
               transform: hoveringRight ? 'scale(1.2)' : 'scale(1)',
               transition: 'transform 0.2s ease'
             }
-          }, '�')) : null
+          }, '›')) : null
         )
       }
 
@@ -10576,7 +10636,7 @@ window.resetNetflixMovies = () => {
       }
 
       // Se n�o tem filmes carregados e n�o est� loading nem com erro, mostra tela vazia
-      // EXCETO se estamos em modo collections E j� temos cole��es carregadas
+      // EXCETO se estamos em modo collections E j� temos coleções carregadas
       if(globalState.sectionsMovies.length === 0 && !(view === 'collections' && collections.length > 0)){
         return e('div', {
           style: {
@@ -10609,7 +10669,7 @@ window.resetNetflixMovies = () => {
             width: '100%'
           }
         },
-          // Featured Movie (fundo completo) ou Hero Backdrop (cole��es)
+          // Featured Movie (fundo completo) ou Hero Backdrop (coleções)
           (() => {
             return (globalState.heroBackdrop && !viewingCollectionMovies) ? e('div', {
               key: globalState.heroBackdrop.backdrop || globalState.heroBackdrop.name, // Force re-render quando backdrop mudar
@@ -10631,7 +10691,7 @@ window.resetNetflixMovies = () => {
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 zIndex: 1,
-                // ===== FIX: Transi��o suave para evitar piscar =====
+                // ===== FIX: Transição suave para evitar piscar =====
                 opacity: 1,
                 transition: 'opacity 0.5s ease-in-out, background-image 0.5s ease-in-out',
                 animation: 'fadeIn 0.5s ease-in-out'
@@ -10650,7 +10710,7 @@ window.resetNetflixMovies = () => {
               }
             }),
 
-            // Informa��es do filme
+            // Informações do filme
             e('div', {
               style: {
                 position: 'absolute',
@@ -10703,18 +10763,18 @@ window.resetNetflixMovies = () => {
               paddingBottom: '0px'
             }
           },
-          // MODO 3: Visualizando filmes de uma cole��o
+          // MODO 3: Visualizando filmes de uma coleção
           viewingCollectionMovies && selectedCollectionMovies.length > 0 ? e(SectionMovies, {
             key: 'collection-movies',
             name: '🎬 Filmes da Coleção',
             movies: selectedCollectionMovies,
             sectionId: 'collection-movies',
-            categoryIndex: undefined, // Sem navega��o de categorias
+            categoryIndex: undefined, // Sem navegação de categorias
             totalCategories: 0,
             onNextCategory: () => {},
             onPrevCategory: () => {}
           }) :
-          // MODO 2: Lista de cole��es (carrossel horizontal) - APENAS se view for 'collections'
+          // MODO 2: Lista de coleções (carrossel horizontal) - APENAS se view for 'collections'
           view === 'collections' && loadingCollections ? e('div', {
             style: {
               display: 'flex',
@@ -10747,7 +10807,7 @@ window.resetNetflixMovies = () => {
             )
           ) :
           view === 'collections' && collections.length > 0 ? (() => {
-            // Filtrar cole��es por g�nero TMDB se houver categoria selecionada
+            // Filtrar coleções por g�nero TMDB se houver categoria selecionada
             let filteredCollections = collections
 
             if (selectedCategory) {
@@ -10778,7 +10838,7 @@ window.resetNetflixMovies = () => {
               const searchGenres = genreNames[selectedGenreId] || []
 
               filteredCollections = collections.filter(collection => {
-                // Verificar se algum filme da cole��o tem o g�nero no tmdb_genres (string)
+                // Verificar se algum filme da coleção tem o g�nero no tmdb_genres (string)
                 const hasGenre = collection.movies && collection.movies.some(movie => {
                   if (movie.tmdb_genres) {
                     const movieGenres = movie.tmdb_genres.toLowerCase()
@@ -10820,7 +10880,7 @@ window.resetNetflixMovies = () => {
               style: {
                 fontSize: '48px'
               }
-            }, '??'),
+            }, '📚'),
             e('div', {
               style: {
                 color: '#fff',
@@ -10865,7 +10925,7 @@ window.resetNetflixMovies = () => {
                   setMarginContent({ [nextSection.id]: 0 })
                 }
 
-                // Mudar imediatamente para a pr�xima categoria
+                // Mudar imediatamente para a próxima categoria
                 setCurrentCategoryIndex(nextIndex)
                 setFocusedMovieIdx(0)
 
@@ -10945,9 +11005,9 @@ window.resetNetflixMovies = () => {
       const [favoriteChannels, setFavoriteChannels] = useState([])
       const [focusedItemIdx, setFocusedItemIdx] = useState(0)
 
-      // Decodificar Base64 se necess�rio
+      // Decodificar Base64 se necessário
       const decodeMaybeBase64 = (str) => {
-        if(!str || typeof str !== 'string') return 'Sem t�tulo'
+        if(!str || typeof str !== 'string') return 'Sem título'
         // Se j� parece texto normal, retorna direto
         if(/[\s\u00C0-\u00FF]/.test(str) || !/[A-Za-z0-9+/=]/.test(str)){
           return str
@@ -10985,7 +11045,7 @@ window.resetNetflixMovies = () => {
         return () => window.removeEventListener('favorites-updated', handleFavoritesUpdate)
       }, [])
 
-      // Navega��o por teclado
+      // Navegação por teclado
       useEffect(() => {
         if (view !== 'favorites' || favoriteChannels.length === 0) return
 
@@ -11150,7 +11210,7 @@ window.resetNetflixMovies = () => {
                 },
                   item.stream_icon ? e('img', { src:item.stream_icon, alt:item.name, loading:'lazy', className:'w-full h-32 object-cover rounded mb-3' })
                                     : e('div', { className:'w-full h-32 bg-gradient-to-br from-purple-500 to-blue-500 rounded mb-3 grid place-items-center text-3xl' }, '🎬'),
-                  e('div', { className:'text-white text-sm font-medium truncate' }, item.name || item.title || 'Sem t�tulo')
+                  e('div', { className:'text-white text-sm font-medium truncate' }, item.name || item.title || 'Sem título')
                 )
               }),
               e('div', { key:'hint', className:'col-span-full text-center text-xs text-gray-400 mt-3 py-2' }, '↑ ↓ ← → Navegar | Enter Reproduzir | ESC Voltar')
@@ -11320,7 +11380,7 @@ window.resetNetflixMovies = () => {
               padding: '0',
               lineHeight: 1
             }
-          }, '�')
+          }, '×')
         ),
 
         // Resultados
@@ -11464,13 +11524,13 @@ window.resetNetflixMovies = () => {
               fontSize: '12px',
               borderTop: '1px solid rgba(255,255,255,0.1)'
             }
-          }, '?? Buscando mais resultados...')
+          }, '🔍 Buscando mais resultados...')
         )
       )
     }
 
     // ============================================================
-    // PLAYER HUD - Controles sobre o v�deo
+    // PLAYER HUD - Controles sobre o vídeo
     // ============================================================
     function PlayerHUD({ visible, videoRef, hlsObj, channelInfo, onHide }) {
       const [currentTime, setCurrentTime] = useState(new Date())
@@ -11522,7 +11582,7 @@ window.resetNetflixMovies = () => {
         }
       }, [hlsObj])
 
-      // Atualizar resolu��o atual do v�deo
+      // Atualizar resolução atual do vídeo
       useEffect(() => {
         const video = videoRef?.current
         if (!video) return
@@ -11653,7 +11713,7 @@ window.resetNetflixMovies = () => {
         return null
       }
 
-      const now = channelInfo?.epg?.now || { title: channelInfo?.name || 'Sem informa��o', start: '--:--', end: '--:--', isLive: false }
+      const now = channelInfo?.epg?.now || { title: channelInfo?.name || 'Sem informação', start: '--:--', end: '--:--', isLive: false }
       const next = channelInfo?.epg?.next || null
       const currentHour = currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
 
@@ -11685,14 +11745,14 @@ window.resetNetflixMovies = () => {
               )
             ),
 
-            // Pr�ximo programa
+            // Próximo programa
             next && e('div', { className: 'w-64' },
               e('div', { className: 'text-xs text-gray-400 mb-1' }, 'NEXT'),
               e('h4', { className: 'text-sm font-medium text-white truncate' }, next.title),
               e('span', { className: 'text-xs text-gray-400' }, `${next.start} � ${next.end}`)
             ),
 
-            // Hora e resolu��o
+            // Hora e resolução
             e('div', { className: 'text-right' },
               e('div', { className: 'text-3xl font-bold text-white' }, currentHour),
               e('div', { className: 'text-xs text-gray-400' }, resolution)
@@ -11846,7 +11906,7 @@ window.resetNetflixMovies = () => {
         console.log('[EpisodesList] 🔔 error mudou para:', error)
       }, [error])
 
-      // Buscar informa��es completas da s�rie (temporadas + epis�dios)
+      // Buscar informações completas da série (temporadas + episódios)
       useEffect(() => {
         console.log('[EpisodesList] 🎬 useEffect EXECUTADO')
 
@@ -11855,7 +11915,7 @@ window.resetNetflixMovies = () => {
 
         const fetchSeriesInfo = async () => {
           if (!seriesId) {
-            setError('ID da s�rie n�o dispon�vel')
+            setError('ID da série n�o disponível')
             setLoading(false)
             return
           }
@@ -12068,8 +12128,8 @@ window.resetNetflixMovies = () => {
             setLoading(false)
             console.log('[EpisodesList] 🏁 Loading = false')
           } catch (err) {
-            console.error('[EpisodesList] ? Erro ao carregar s�rie:', seriesId, err)
-            setError('Erro ao carregar epis�dios')
+            console.error('[EpisodesList] ? Erro ao carregar série:', seriesId, err)
+            setError('Erro ao carregar episódios')
             setLoading(false)
           }
         }
@@ -12161,7 +12221,7 @@ window.resetNetflixMovies = () => {
 
       const handleEpisodeClick = (episode) => {
 
-        // Construir URL do epis�dio
+        // Construir URL do episódio
         const ext = episode.container_extension || 'mp4'
         const url = buildURL(cfg.server, [
           'series',
@@ -12194,7 +12254,7 @@ window.resetNetflixMovies = () => {
             color: '#fff',
             fontSize: '24px'
           }
-        }, 'Carregando epis�dios...')
+        }, 'Carregando episódios...')
       }
 
       // Error state
@@ -12301,7 +12361,7 @@ window.resetNetflixMovies = () => {
             marginBottom: '40px'
           }
         },
-          // Bot�o voltar
+          // Botão voltar
           e('button', {
             onClick: () => setView('serie-details'),
             style: {
@@ -12319,7 +12379,7 @@ window.resetNetflixMovies = () => {
             }
           }, '← Voltar'),
 
-          // T�tulo
+          // Título
           e('h1', {
             style: {
               fontSize: '48px',
@@ -12354,7 +12414,7 @@ window.resetNetflixMovies = () => {
             }, seriesData.ageRating || '16+')
           ),
 
-          // Total epis�dios e temporadas
+          // Total episódios e temporadas
           e('div', {
             style: {
               fontSize: '18px',
@@ -12509,7 +12569,7 @@ window.resetNetflixMovies = () => {
             )
           ),
 
-          // COLUNA DIREITA: Epis�dios
+          // COLUNA DIREITA: Episódios
           e('div', {
             className: 'episodes-scroll',
             style: {
@@ -12782,9 +12842,9 @@ window.resetNetflixMovies = () => {
       } = contentData
 
       // Dados processados - PRIORIZAR TMDB
-      const displayTitle = title || name || 'Sem t�tulo'
+      const displayTitle = title || name || 'Sem título'
       const displayYear = tmdb_year || year || '�'
-      const displaySynopsis = tmdb_overview || tmdb_plot || synopsis || plot || 'Sinopse n�o dispon�vel.'
+      const displaySynopsis = tmdb_overview || tmdb_plot || synopsis || plot || 'Sinopse n�o disponível.'
       const displayBackdrop = tmdb_backdrop || backdrop || cover || stream_icon || 'https://via.placeholder.com/1920x1080/1a1a1a/ffffff?text=Sem+Imagem'
       const displayGenres = tmdb_genres || (genre ? genre.split(',').map(g => g.trim()).join(', ') : 'Drama')
       const displayRating = tmdb_rating ? `⭐ ${(tmdb_rating * 10).toFixed(0)}%` : (rating || '—')
@@ -12827,7 +12887,7 @@ window.resetNetflixMovies = () => {
 
           setLoadingTrailer(true)
           try {
-            // Detectar se � s�rie ou filme
+            // Detectar se � série ou filme
             const type = series_id ? 'tv' : 'movie'
             const trailerUrl = await getTMDBTrailer(tmdbId, type)
             if (trailerUrl) {
@@ -12845,12 +12905,12 @@ window.resetNetflixMovies = () => {
 
       // Handlers
       const handleWatch = () => {
-        // TODO: Navegar para player ou mostrar epis�dios
+        // TODO: Navegar para player ou mostrar episódios
         if (series_id) {
-          // � s�rie: mostrar epis�dios
+          // � série: mostrar episódios
           setShowEpisodes(true)
         } else {
-          // � filme: iniciar reprodu��o
+          // � filme: iniciar reprodução
           const id = stream_id || series_id
           const ext = 'mp4'
           const url = buildURL(cfg.server, ['movie', cfg.username, cfg.password, id + '.' + ext])
@@ -12871,7 +12931,7 @@ window.resetNetflixMovies = () => {
             window.open(url, '_blank')
           }
         } else {
-          alert('Trailer n�o dispon�vel')
+          alert('Trailer n�o disponível')
         }
       }
 
@@ -12881,7 +12941,7 @@ window.resetNetflixMovies = () => {
       }
 
       const handleEpisodes = () => {
-        // Navegar para a view de epis�dios
+        // Navegar para a view de episódios
         setView('episodes')
       }
 
@@ -12896,7 +12956,7 @@ window.resetNetflixMovies = () => {
           style: { backgroundImage: `url(${displayBackdrop})` }
         }),
 
-        // Bot�o Voltar
+        // Botão Voltar
         e('button', {
           onClick: () => setView('netflix-series'),
           style: {
@@ -12948,7 +13008,7 @@ window.resetNetflixMovies = () => {
           // Sinopse
           e('p', { className: 'serie-detail-synopsis' }, displaySynopsis),
 
-          // Bot�es de a��o
+          // Botões de a��o
           e('div', { className: 'serie-detail-actions' },
             e('button', {
               className: 'serie-detail-btn serie-detail-btn-watch',
@@ -12957,7 +13017,7 @@ window.resetNetflixMovies = () => {
               '▶️ Assistir'
             ),
 
-            // Sempre mostrar bot�o de trailer (busca do TMDB se necess�rio)
+            // Sempre mostrar botão de trailer (busca do TMDB se necessário)
             e('button', {
               className: 'serie-detail-btn serie-detail-btn-trailer',
               onClick: handleTrailer,
@@ -12978,7 +13038,7 @@ window.resetNetflixMovies = () => {
             )
           ),
 
-          // Bot�o Epis�dios (apenas para s�ries)
+          // Botão Episódios (apenas para séries)
           series_id && e('button', {
             className: 'serie-detail-btn serie-detail-btn-episodes',
             onClick: handleEpisodes
@@ -12986,7 +13046,7 @@ window.resetNetflixMovies = () => {
             '📋 Episódios e mais'
           ),
 
-          // Se��o Elenco
+          // Seção Elenco
           displayCast.length > 0 && e('div', { className: 'serie-detail-cast-section' },
             e('h2', null, 'Elenco'),
 
@@ -13050,7 +13110,7 @@ window.resetNetflixMovies = () => {
       },[hlsObj])
 
       // ?? FULLSCREEN AUTOM�TICO DESABILITADO
-      // Agora o usu�rio controla quando quer fullscreen (bot�o F ou duplo clique)
+      // Agora o usuário controla quando quer fullscreen (botão F ou duplo clique)
       /*
       useEffect(() => {
         const enterFullscreen = async () => {
@@ -13074,7 +13134,7 @@ window.resetNetflixMovies = () => {
           }
         }
 
-        // Delay para garantir que o v�deo est� carregado
+        // Delay para garantir que o vídeo est� carregado
         setTimeout(enterFullscreen, 300)
       }, [current])
       */
@@ -13206,7 +13266,7 @@ window.resetNetflixMovies = () => {
             },
             className:'text-white hover:text-purple-400 flex items-center gap-2'
           }, '← Voltar'),
-          e('h2', { className:'text-white font-semibold truncate max-w-[60vw]' }, current?.name || 'Reprodu��o'),
+          e('h2', { className:'text-white font-semibold truncate max-w-[60vw]' }, current?.name || 'Reprodução'),
           e('div', { className:'w-10' })
         ),
         e('div', { id: 'player-container', className:'flex-1 grid place-items-center p-4 relative' },
@@ -13240,7 +13300,7 @@ window.resetNetflixMovies = () => {
         }
       }, [])
 
-      // Fun��o de conex�o
+      // Função de conexão
       const handleConnect = () => {
         // Atualizar cfg com os valores locais
         setCfg(v => ({...v, username: localUsername, password: localPassword}))
@@ -13319,7 +13379,7 @@ window.resetNetflixMovies = () => {
           padding: '20px'
         }
       },
-        // Bot�o fechar (X)
+        // Botão fechar (X)
         e('button', {
           onClick: (ev) => {
             ev.stopPropagation()
@@ -13386,7 +13446,7 @@ window.resetNetflixMovies = () => {
       }, toast)
     }
 
-    // ===== Bot�o de Fullscreen =====
+    // ===== Botão de Fullscreen =====
     function FullscreenButton(){
       const [isFullscreen, setIsFullscreen] = useState(false)
 
@@ -13409,7 +13469,7 @@ window.resetNetflixMovies = () => {
         }
       }, [])
 
-      // Usando emoji para �cones (sem depend�ncia de bibliotecas externas)
+      // Usando emoji para ícones (sem depend�ncia de bibliotecas externas)
 
       const toggleFullscreen = async () => {
         try {
@@ -13454,11 +13514,11 @@ window.resetNetflixMovies = () => {
         },
         title: isFullscreen ? 'Sair da tela cheia (ESC)' : 'Tela cheia (F11)'
       },
-        // �cone usando emoji
+        // ícone usando emoji
         e('span', {
           className: 'text-white transition-colors group-hover:text-purple-400',
           style: { fontSize: '20px' }
-        }, isFullscreen ? '??' : '?')
+        }, isFullscreen ? '⬜' : '⛶')
       )
     }
 
@@ -13543,7 +13603,7 @@ window.resetNetflixMovies = () => {
         setView: setView
       }),
 
-      // Barra de categorias de filmes e s�ries
+      // Barra de categorias de filmes e séries
       showCategoryBar && e(CategoryBar, { vodCats, seriesCats, view, setView, selectedCat, setSelectedCat, collections }),
 
       e('div', {
@@ -13557,7 +13617,7 @@ window.resetNetflixMovies = () => {
         content,
         e(TrailerModal),
         e(Toast),
-        // Indicador de navega��o num�rica (canal digitado)
+        // Indicador de navegação num�rica (canal digitado)
         channelInput && e('div', { className: 'tv-channel-input' },
           e('div', { style: { fontSize: '24px', color: '#a855f7', marginBottom: '10px' } }, 'Canal'),
           channelInput
@@ -13595,7 +13655,7 @@ window.resetNetflixMovies = () => {
   const root = ReactDOM.createRoot(document.getElementById('app'))
   root.render(e(App))
 
-  // Header agora est� vis�vel - c�digo de remo��o removido
+  // Header agora est� visível - código de remo��o removido
 
   // ===== Pequenos testes =====
   ;(function runTests(){
@@ -13624,7 +13684,7 @@ window.resetNetflixMovies = () => {
       assert('toArray(null) => []', Array.isArray(toArray(null)) && toArray(null).length===0)
       assert('getCatId CategoryID/categoryid', getCatId({CategoryID:7})===7 && getCatId({categoryid:8})===8)
       assert('maskUrlCredentials mascara path credenciais', !(/\/live\/[\w-]+\/[\w-]+\//.test(maskUrlCredentials('http://x/live/u/p/999.m3u8'))))
-      assert('formatEPGTime inv�lido => "--:--"', formatEPGTime('abc')==='--:--' && formatEPGTime(null)==='--:--')
+      assert('formatEPGTime inválido => "--:--"', formatEPGTime('abc')==='--:--' && formatEPGTime(null)==='--:--')
       assert('getCatId null => null', getCatId(null)===null)
       // Novo: contagem de categorias
       const tmp={}; ['1','2','1'].forEach(id=> tmp[id]=(tmp[id]||0)+1)
