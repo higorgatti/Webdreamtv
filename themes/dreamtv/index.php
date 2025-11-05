@@ -50,31 +50,17 @@ header("Expires: 0");
         Object.freeze(console);
         Object.seal(console);
 
-        // Detectar abertura de DevTools e limpar página
-        let devtoolsOpen = false;
-        const threshold = 160;
-
-        setInterval(() => {
-          if (window.outerHeight - window.innerHeight > threshold ||
-              window.outerWidth - window.innerWidth > threshold) {
-            if (!devtoolsOpen) {
-              devtoolsOpen = true;
-              // Limpar console mesmo bloqueado
-              if (typeof console._clear !== 'undefined') {
-                console._clear();
-              }
-            }
-          } else {
-            devtoolsOpen = false;
-          }
-        }, 500);
-
-        // Prevenir debugger
-        setInterval(() => {
-          (function() {
+        // Bloquear clique direito e atalhos de teclado para DevTools
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+          // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+          if (e.keyCode === 123 ||
+              (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) ||
+              (e.ctrlKey && e.keyCode === 85)) {
+            e.preventDefault();
             return false;
-          }['constructor']('debugger')());
-        }, 50);
+          }
+        });
       }
     })();
   </script>
