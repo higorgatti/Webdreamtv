@@ -28,6 +28,57 @@ header("Expires: 0");
   <meta http-equiv="Expires" content="0" />
   <!-- VERSÃO: SÉRIE FIX v3.0 - CACHE BUSTED 2025-11-02 18:10:00 -->
   <script>
+    // ===== BLOQUEIO DE CONSOLE (APENAS EM PRODUÇÃO) =====
+    (function() {
+      // Detectar se está em produção (VPS)
+      const isProduction = window.location.hostname !== 'localhost' &&
+                          window.location.hostname !== '127.0.0.1' &&
+                          !window.location.hostname.includes('local');
+
+      if (isProduction) {
+        // Sobrescrever TODOS os métodos do console
+        const noop = function() {};
+        const methods = ['log', 'debug', 'info', 'warn', 'error', 'table', 'trace', 'dir', 'dirxml', 'group', 'groupCollapsed', 'groupEnd', 'clear', 'count', 'countReset', 'assert', 'profile', 'profileEnd', 'time', 'timeLog', 'timeEnd', 'timeStamp'];
+
+        methods.forEach(method => {
+          if (console[method]) {
+            console[method] = noop;
+          }
+        });
+
+        // Bloquear criação de novos consoles
+        Object.freeze(console);
+        Object.seal(console);
+
+        // Detectar abertura de DevTools e limpar página
+        let devtoolsOpen = false;
+        const threshold = 160;
+
+        setInterval(() => {
+          if (window.outerHeight - window.innerHeight > threshold ||
+              window.outerWidth - window.innerWidth > threshold) {
+            if (!devtoolsOpen) {
+              devtoolsOpen = true;
+              // Limpar console mesmo bloqueado
+              if (typeof console._clear !== 'undefined') {
+                console._clear();
+              }
+            }
+          } else {
+            devtoolsOpen = false;
+          }
+        }, 500);
+
+        // Prevenir debugger
+        setInterval(() => {
+          (function() {
+            return false;
+          }['constructor']('debugger')());
+        }, 50);
+      }
+    })();
+  </script>
+  <script>
     // ===== CACHE-BUST AGRESSIVO VIA URL =====
     (function() {
       const url = new URL(window.location.href);
