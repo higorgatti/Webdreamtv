@@ -4197,7 +4197,6 @@ header("Expires: 0");
 
     // Wrapper para logar todas as mudan�as de view
     const setView = (newView) => {
-      console.trace('[setView] Stack trace:')
       // Salvar a view atual como previousView ANTES de ir para o player
       if(newView === 'player' && view !== 'player') {
         setPreviousView(view)
