@@ -250,10 +250,12 @@ header("Referrer-Policy: strict-origin-when-cross-origin"); // Controla informa�
   <script>
     // ===== PROTEÇÃO ANTI-TAMPERING (APENAS EM PRODUÇÃO) =====
     (function() {
+      // TEMPORARIAMENTE DESABILITADO PARA DEBUG
       // Detectar se está em produção (VPS)
-      const isProduction = window.location.hostname !== 'localhost' &&
-                          window.location.hostname !== '127.0.0.1' &&
-                          !window.location.hostname.includes('local');
+      const isProduction = false; // DESABILITADO TEMPORARIAMENTE
+      // const isProduction = window.location.hostname !== 'localhost' &&
+      //                     window.location.hostname !== '127.0.0.1' &&
+      //                     !window.location.hostname.includes('local');
 
       if (isProduction) {
         // Variáveis de controle
