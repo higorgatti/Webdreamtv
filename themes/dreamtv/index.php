@@ -13471,10 +13471,6 @@ window.resetNetflixMovies = () => {
       if(!showTrailerModal || !trailerUrl) return null
 
       return e('div', {
-        onClick: () => {
-          setShowTrailerModal(false)
-          setTrailerUrl(null)
-        },
         style: {
           position: 'fixed',
           top: 0,
