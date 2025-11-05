@@ -248,6 +248,222 @@ header("Referrer-Policy: strict-origin-when-cross-origin"); // Controla informa�
     })();
   </script>
   <script>
+    // ===== PROTEÇÃO ANTI-TAMPERING (APENAS EM PRODUÇÃO) =====
+    (function() {
+      // Detectar se está em produção (VPS)
+      const isProduction = window.location.hostname !== 'localhost' &&
+                          window.location.hostname !== '127.0.0.1' &&
+                          !window.location.hostname.includes('local');
+
+      if (isProduction) {
+        // Variáveis de controle
+        let tamperingDetected = false;
+        let devToolsOpen = false;
+        let reloadAttempts = 0;
+        const MAX_RELOAD_ATTEMPTS = 3;
+
+        // 1. DETECÇÃO AVANÇADA DE DEVTOOLS ABERTO
+        const devtoolsDetector = {
+          isOpen: false,
+          orientation: null,
+
+          check: function() {
+            const widthThreshold = window.outerWidth - window.innerWidth > 160;
+            const heightThreshold = window.outerHeight - window.innerHeight > 160;
+            const orientation = widthThreshold ? 'vertical' : 'horizontal';
+
+            if (!(heightThreshold && widthThreshold) &&
+                ((window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized) || widthThreshold || heightThreshold)) {
+              if (!this.isOpen || this.orientation !== orientation) {
+                this.isOpen = true;
+                this.orientation = orientation;
+                this.onOpen();
+              }
+            } else {
+              if (this.isOpen) {
+                this.isOpen = false;
+                this.onClose();
+              }
+            }
+          },
+
+          onOpen: function() {
+            devToolsOpen = true;
+            handleTampering('DevTools detectado como aberto');
+          },
+
+          onClose: function() {
+            devToolsOpen = false;
+          }
+        };
+
+        // 2. VERIFICAÇÃO DE INTEGRIDADE DE FUNÇÕES CRÍTICAS
+        const originalFunctions = {
+          fetch: window.fetch,
+          XMLHttpRequest: window.XMLHttpRequest,
+          addEventListener: EventTarget.prototype.addEventListener,
+          querySelector: Document.prototype.querySelector,
+          getElementById: Document.prototype.getElementById
+        };
+
+        function checkFunctionIntegrity() {
+          if (window.fetch !== originalFunctions.fetch) {
+            handleTampering('função fetch foi modificada');
+            return false;
+          }
+          if (window.XMLHttpRequest !== originalFunctions.XMLHttpRequest) {
+            handleTampering('XMLHttpRequest foi modificado');
+            return false;
+          }
+          if (EventTarget.prototype.addEventListener !== originalFunctions.addEventListener) {
+            handleTampering('addEventListener foi modificado');
+            return false;
+          }
+          return true;
+        }
+
+        // 3. DETECÇÃO DE EXTENSÕES DO NAVEGADOR QUE ALTERAM A PÁGINA
+        function detectExtensions() {
+          // Detectar elementos injetados por extensões comuns
+          const suspiciousElements = [
+            '[id*="extension"]',
+            '[class*="extension"]',
+            '[id*="plugin"]',
+            '[class*="adblock"]',
+            '[class*="userscript"]'
+          ];
+
+          for (const selector of suspiciousElements) {
+            const elements = document.querySelectorAll(selector);
+            if (elements.length > 0) {
+              // Não bloquear por extensões, apenas logar
+              // handleTampering('Extensão do navegador detectada');
+              break;
+            }
+          }
+        }
+
+        // 4. DETECÇÃO DE MODIFICAÇÕES NO DOM CRÍTICO
+        let criticalElementsHash = null;
+
+        function hashCriticalElements() {
+          // Hash simples baseado em elementos críticos
+          const scripts = document.querySelectorAll('script').length;
+          const styles = document.querySelectorAll('style, link[rel="stylesheet"]').length;
+          const metas = document.querySelectorAll('meta').length;
+
+          return `${scripts}-${styles}-${metas}`;
+        }
+
+        function checkDOMIntegrity() {
+          const currentHash = hashCriticalElements();
+
+          if (criticalElementsHash === null) {
+            criticalElementsHash = currentHash;
+          } else if (currentHash !== criticalElementsHash) {
+            // DOM foi modificado (scripts/styles adicionados ou removidos)
+            // handleTampering('DOM crítico foi modificado');
+            // Atualizar hash para evitar loops
+            criticalElementsHash = currentHash;
+          }
+        }
+
+        // 5. AÇÕES AO DETECTAR TAMPERING
+        function handleTampering(reason) {
+          if (tamperingDetected) return; // Evitar múltiplos triggers
+
+          tamperingDetected = true;
+
+          // Registrar tentativa
+          reloadAttempts++;
+
+          // Ação 1: Limpar localStorage (pode ter código malicioso)
+          try {
+            // Salvar apenas configurações essenciais
+            const config = localStorage.getItem('xtream_config');
+            const tmdbKey = localStorage.getItem('tmdb_api_key');
+            localStorage.clear();
+            if (config) localStorage.setItem('xtream_config', config);
+            if (tmdbKey) localStorage.setItem('tmdb_api_key', tmdbKey);
+          } catch (e) {}
+
+          // Ação 2: Recarregar página se não excedeu tentativas
+          if (reloadAttempts < MAX_RELOAD_ATTEMPTS) {
+            setTimeout(() => {
+              window.location.reload(true);
+            }, 1000);
+          } else {
+            // Ação 3: Bloquear completamente após muitas tentativas
+            document.body.innerHTML = `
+              <div style="display: flex; align-items: center; justify-content: center;
+                          height: 100vh; background: #000; color: #fff;
+                          font-family: Arial; text-align: center; padding: 20px;">
+                <div>
+                  <h1 style="color: #ff0000; margin-bottom: 20px;">⚠️ ACESSO BLOQUEADO</h1>
+                  <p style="font-size: 18px;">Atividade suspeita detectada.</p>
+                  <p style="margin-top: 20px; color: #999;">Motivo: ${reason}</p>
+                  <p style="margin-top: 30px;">
+                    <a href="/" style="color: #fff; background: #a855f7; padding: 15px 30px;
+                               text-decoration: none; border-radius: 5px; display: inline-block;">
+                      Recarregar
+                    </a>
+                  </p>
+                </div>
+              </div>
+            `;
+          }
+        }
+
+        // 6. MONITORAMENTO CONTÍNUO
+        // Verificar DevTools a cada 1 segundo
+        setInterval(() => {
+          devtoolsDetector.check();
+        }, 1000);
+
+        // Verificar integridade de funções a cada 2 segundos
+        setInterval(() => {
+          checkFunctionIntegrity();
+        }, 2000);
+
+        // Verificar extensões a cada 5 segundos
+        setInterval(() => {
+          detectExtensions();
+        }, 5000);
+
+        // Verificar DOM a cada 3 segundos
+        setInterval(() => {
+          checkDOMIntegrity();
+        }, 3000);
+
+        // Observer para detectar modificações no head e body
+        const observer = new MutationObserver((mutations) => {
+          for (const mutation of mutations) {
+            // Detectar adição de scripts externos suspeitos
+            if (mutation.type === 'childList') {
+              mutation.addedNodes.forEach(node => {
+                if (node.nodeName === 'SCRIPT' && node.src && !node.src.includes(window.location.hostname)) {
+                  // Script externo adicionado dinamicamente
+                  // handleTampering('Script externo injetado: ' + node.src);
+                }
+              });
+            }
+          }
+        });
+
+        // Observar mudanças no head e body
+        window.addEventListener('DOMContentLoaded', () => {
+          observer.observe(document.head, { childList: true, subtree: true });
+          observer.observe(document.body, { childList: true, subtree: false });
+        });
+
+        // 7. PROTEÇÃO CONTRA REDEFINIÇÃO DE FUNÇÕES NATIVAS
+        Object.freeze(Object.prototype);
+        Object.freeze(Array.prototype);
+        Object.freeze(Function.prototype);
+      }
+    })();
+  </script>
+  <script>
     // ===== CACHE-BUST AGRESSIVO VIA URL =====
     (function() {
       const url = new URL(window.location.href);
