@@ -65,6 +65,105 @@ header("Expires: 0");
     })();
   </script>
   <script>
+    // ===== PROTEÇÃO CONTRA CÓPIA DE CONTEÚDO (APENAS EM PRODUÇÃO) =====
+    (function() {
+      // Detectar se está em produção (VPS)
+      const isProduction = window.location.hostname !== 'localhost' &&
+                          window.location.hostname !== '127.0.0.1' &&
+                          !window.location.hostname.includes('local');
+
+      if (isProduction) {
+        // 1. BLOQUEAR SELEÇÃO DE TEXTO
+        document.addEventListener('selectstart', e => {
+          e.preventDefault();
+          return false;
+        });
+
+        // Bloquear via CSS também
+        const style = document.createElement('style');
+        style.textContent = `
+          * {
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            -webkit-touch-callout: none !important;
+          }
+        `;
+        document.head.appendChild(style);
+
+        // 2. BLOQUEAR ARRASTAR IMAGENS E ELEMENTOS
+        document.addEventListener('dragstart', e => {
+          e.preventDefault();
+          return false;
+        });
+
+        // 3. BLOQUEAR COPIAR/COLAR E ATALHOS
+        document.addEventListener('copy', e => {
+          e.preventDefault();
+          return false;
+        });
+
+        document.addEventListener('cut', e => {
+          e.preventDefault();
+          return false;
+        });
+
+        document.addEventListener('paste', e => {
+          e.preventDefault();
+          return false;
+        });
+
+        // Bloquear Ctrl+C, Ctrl+X, Ctrl+V, Ctrl+A
+        document.addEventListener('keydown', e => {
+          if (e.ctrlKey && (e.keyCode === 67 || e.keyCode === 88 || e.keyCode === 86 || e.keyCode === 65)) {
+            e.preventDefault();
+            return false;
+          }
+        });
+
+        // 4. PROTEÇÃO CONTRA PRINT SCREEN (PARCIAL)
+        // Detectar quando usuário tenta print screen e cobrir tela
+        document.addEventListener('keyup', e => {
+          // Print Screen (44), ou combinação com Ctrl/Alt/Shift
+          if (e.keyCode === 44 || e.keyCode === 42) {
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+              document.body.style.opacity = '1';
+            }, 100);
+          }
+        });
+
+        // Detectar quando janela perde foco (possível PrtScn)
+        let hidden, visibilityChange;
+        if (typeof document.hidden !== 'undefined') {
+          hidden = 'hidden';
+          visibilityChange = 'visibilitychange';
+        }
+
+        document.addEventListener(visibilityChange, () => {
+          if (document[hidden]) {
+            document.body.style.opacity = '0';
+          } else {
+            setTimeout(() => {
+              document.body.style.opacity = '1';
+            }, 100);
+          }
+        });
+
+        // 5. BLOQUEAR FERRAMENTAS DE INSPEÇÃO DE ELEMENTOS
+        // Já bloqueado no código anterior, mas reforçar aqui
+        document.addEventListener('keydown', e => {
+          // Ctrl+Shift+C (inspect element)
+          if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
+            e.preventDefault();
+            return false;
+          }
+        });
+      }
+    })();
+  </script>
+  <script>
     // ===== CACHE-BUST AGRESSIVO VIA URL =====
     (function() {
       const url = new URL(window.location.href);
