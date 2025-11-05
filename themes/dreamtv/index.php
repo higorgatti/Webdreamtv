@@ -15,6 +15,16 @@ header("Content-Type: text/html; charset=UTF-8");
 header("Cache-Control: no-cache, no-store, must-revalidate, max-age=0");
 header("Pragma: no-cache");
 header("Expires: 0");
+
+// ===== PROTEÇÃO ANTI-FRAME / CLICKJACKING =====
+// Impede que o site seja carregado em iframes de outros domínios
+header("X-Frame-Options: SAMEORIGIN"); // Permite apenas iframes do mesmo domínio
+header("Content-Security-Policy: frame-ancestors 'self'"); // CSP moderno - apenas mesmo domínio
+
+// Headers de segurança adicionais
+header("X-Content-Type-Options: nosniff"); // Previne MIME sniffing
+header("X-XSS-Protection: 1; mode=block"); // Proteção XSS (legacy, mas ainda útil)
+header("Referrer-Policy: strict-origin-when-cross-origin"); // Controla informações de referrer
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -161,6 +171,80 @@ header("Expires: 0");
           }
         });
       }
+    })();
+  </script>
+  <script>
+    // ===== PROTEÇÃO ANTI-FRAME / IFRAME (FRAMEBUSTING) =====
+    (function() {
+      // 1. Verificar se está sendo carregado em iframe
+      if (window.self !== window.top) {
+        // Detectou que está em iframe!
+
+        // Método 1: Tentar quebrar o iframe (framebusting)
+        try {
+          window.top.location = window.self.location;
+        } catch (e) {
+          // Se não conseguir quebrar (cross-origin), tentar outras técnicas
+        }
+
+        // Método 2: Limpar completamente a página se estiver em iframe
+        document.body.innerHTML = '';
+
+        // Método 3: Criar overlay de aviso (caso os métodos acima falhem)
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: #000;
+          color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 24px;
+          z-index: 999999;
+          font-family: Arial, sans-serif;
+          text-align: center;
+          padding: 20px;
+        `;
+        overlay.innerHTML = `
+          <div>
+            <h1 style="color: #ff0000; margin-bottom: 20px;">⚠️ ACESSO NEGADO</h1>
+            <p>Este conteúdo não pode ser exibido em frames.</p>
+            <p style="margin-top: 20px;">
+              <a href="${window.location.href}" target="_blank"
+                 style="color: #fff; background: #a855f7; padding: 15px 30px;
+                        text-decoration: none; border-radius: 5px; display: inline-block;">
+                Abrir em nova janela
+              </a>
+            </p>
+          </div>
+        `;
+        document.body.appendChild(overlay);
+
+        // Método 4: Redirecionar após timeout
+        setTimeout(() => {
+          try {
+            window.top.location = window.self.location;
+          } catch (e) {
+            // Bloquear completamente
+            window.location = 'about:blank';
+          }
+        }, 1000);
+      }
+
+      // 2. Monitorar continuamente se foi colocado em iframe dinamicamente
+      setInterval(() => {
+        if (window.self !== window.top) {
+          try {
+            window.top.location = window.self.location;
+          } catch (e) {
+            window.location = 'about:blank';
+          }
+        }
+      }, 1000);
     })();
   </script>
   <script>
