@@ -3241,7 +3241,12 @@ header("Expires: 0");
         e('a', {
           onClick: () => {
             if (window.updateNetflixMoviesState) {
-              window.updateNetflixMoviesState({ showCollectionsView: false, heroBackdrop: null })
+              window.updateNetflixMoviesState({
+                showCollectionsView: false,
+                heroBackdrop: null,
+                viewingCollectionMovies: false,
+                selectedCollectionMovies: []
+              })
             }
             setView('netflix-movies')
           },
@@ -3258,7 +3263,12 @@ header("Expires: 0");
         e('a', {
           onClick: () => {
             if (window.updateNetflixMoviesState) {
-              window.updateNetflixMoviesState({ showCollectionsView: false, heroBackdrop: null })
+              window.updateNetflixMoviesState({
+                showCollectionsView: false,
+                heroBackdrop: null,
+                viewingCollectionMovies: false,
+                selectedCollectionMovies: []
+              })
             }
             setView('netflix-series')
           },
@@ -3275,7 +3285,12 @@ header("Expires: 0");
         e('a', {
           onClick: () => {
             if (window.updateNetflixMoviesState) {
-              window.updateNetflixMoviesState({ showCollectionsView: false, heroBackdrop: null })
+              window.updateNetflixMoviesState({
+                showCollectionsView: false,
+                heroBackdrop: null,
+                viewingCollectionMovies: false,
+                selectedCollectionMovies: []
+              })
             }
             setView('netflix-novelas')
           },
@@ -3292,7 +3307,12 @@ header("Expires: 0");
         e('a', {
           onClick: () => {
             if (window.updateNetflixMoviesState) {
-              window.updateNetflixMoviesState({ showCollectionsView: false, heroBackdrop: null })
+              window.updateNetflixMoviesState({
+                showCollectionsView: false,
+                heroBackdrop: null,
+                viewingCollectionMovies: false,
+                selectedCollectionMovies: []
+              })
             }
             setView('netflix-animes')
           },
@@ -3309,7 +3329,12 @@ header("Expires: 0");
         e('a', {
           onClick: () => {
             if (window.updateNetflixMoviesState) {
-              window.updateNetflixMoviesState({ showCollectionsView: false, heroBackdrop: null })
+              window.updateNetflixMoviesState({
+                showCollectionsView: false,
+                heroBackdrop: null,
+                viewingCollectionMovies: false,
+                selectedCollectionMovies: []
+              })
             }
             setView('netflix-desenhos')
           },
@@ -5329,6 +5354,22 @@ header("Expires: 0");
 
     // reset da flag ao sair da view
     useEffect(()=>{ if(view!=='live-categories') autoOpenLiveRef.current = false }, [view])
+
+    // Cleanup de estados de coleções ao sair da view collections
+    useEffect(() => {
+      if (view !== 'collections' && window.updateNetflixMoviesState) {
+        const globalState = window.__netflixMoviesState || {}
+
+        // Só limpar se estava visualizando uma coleção
+        if (globalState.viewingCollectionMovies || globalState.selectedCollectionMovies?.length > 0) {
+          window.updateNetflixMoviesState({
+            viewingCollectionMovies: false,
+            selectedCollectionMovies: [],
+            heroBackdrop: null
+          })
+        }
+      }
+    }, [view])
 
     useEffect(()=>{ // autoload se j� tiver config
       if(cfg.server && cfg.username && cfg.password){
