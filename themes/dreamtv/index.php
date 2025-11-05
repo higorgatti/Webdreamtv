@@ -289,7 +289,8 @@ header("Referrer-Policy: strict-origin-when-cross-origin"); // Controla informa√
 
           onOpen: function() {
             devToolsOpen = true;
-            handleTampering('DevTools detectado como aberto');
+            // N√£o chamar handleTampering para DevTools - pode causar falsos positivos
+            // handleTampering('DevTools detectado como aberto');
           },
 
           onClose: function() {
